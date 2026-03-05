@@ -266,14 +266,23 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 16px;
+<<<<<<< HEAD
     background: color-mix(in srgb, var(--card-color) 15%, transparent);
+=======
+    background: linear-gradient(135deg, var(--card-color) 0%, var(--card-color) 100%);
+    opacity: 0.1;
+>>>>>>> 53ee976 (create base project)
     color: var(--card-color);
 }
 
 .stat-icon svg {
     width: 28px;
     height: 28px;
+<<<<<<< HEAD
     opacity: 1;
+=======
+    opacity: 10;
+>>>>>>> 53ee976 (create base project)
 }
 
 .stat-content h3 {
