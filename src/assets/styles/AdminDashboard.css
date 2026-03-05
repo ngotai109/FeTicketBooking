@@ -266,15 +266,14 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 16px;
-    background: linear-gradient(135deg, var(--card-color) 0%, var(--card-color) 100%);
-    opacity: 0.1;
+    background: color-mix(in srgb, var(--card-color) 15%, transparent);
     color: var(--card-color);
 }
 
 .stat-icon svg {
     width: 28px;
     height: 28px;
-    opacity: 10;
+    opacity: 1;
 }
 
 .stat-content h3 {
