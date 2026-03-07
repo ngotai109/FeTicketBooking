@@ -89,9 +89,9 @@ const Login = () => {
             localStorage.setItem('isAuthenticated', 'true');
             localStorage.setItem('token', data.token);
             localStorage.setItem('userEmail', formData.email);
-            toast.success('Đăng nhập thành công');
+            toast.success('Đăng nhập thành công')
             setTimeout(() => {
-                navigate('/admin');
+                navigate('/admin')
             }, 3000);
         } catch (error) {
             toast.error('Đăng nhập thất bại');
@@ -104,20 +104,6 @@ const Login = () => {
     return (
         <div className="login-container">
             {/* Animated background blobs */}
-            <div className="login-background">
-                <div className="shape shape-1" />
-                <div className="shape shape-2" />
-                <div className="shape shape-3" />
-                <div className="shape shape-4" />
-            </div>
-
-            {/* Decorative puzzle tiles */}
-            <div className="puzzle-deco">
-                <div className="puzzle-tile pt-red" />
-                <div className="puzzle-tile pt-green" />
-                <div className="puzzle-tile pt-blue" />
-                <div className="puzzle-tile pt-yellow" />
-            </div>
 
             <div className="login-card">
                 {/* Header with logo */}
@@ -139,22 +125,13 @@ const Login = () => {
                     {/* Email */}
                     <div className="form-group">
                         <label>Email</label>
-                        <div className="input-wrapper">
-                            {/* Email icon */}
-                            <svg className="input-icon" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                                <polyline points="22,6 12,13 2,6" />
-                            </svg>
-                            <input
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                placeholder="admin@donghuongsonglam.vn"
-                                className={errors.email ? 'error' : ''}
-                            />
-                        </div>
+                        <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className={errors.email ? 'error' : ''}
+                        />
                         {errors.email && (
                             <span className="error-message">{errors.email}</span>
                         )}
@@ -163,22 +140,13 @@ const Login = () => {
                     {/* Password */}
                     <div className="form-group">
                         <label>Mật khẩu</label>
-                        <div className="input-wrapper">
-                            {/* Lock icon */}
-                            <svg className="input-icon" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                            </svg>
-                            <input
-                                type="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                placeholder="••••••••"
-                                className={errors.password ? 'error' : ''}
-                            />
-                        </div>
+                        <input
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            className={errors.password ? 'error' : ''}
+                        />
                         {errors.password && (
                             <span className="error-message">{errors.password}</span>
                         )}
@@ -189,22 +157,7 @@ const Login = () => {
                         className="login-button"
                         disabled={isLoading}
                     >
-                        {isLoading ? (
-                            <>
-                                <div className="spinner" />
-                                Đang đăng nhập...
-                            </>
-                        ) : (
-                            <>
-                                Đăng nhập
-                                {/* Arrow icon */}
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <line x1="5" y1="12" x2="19" y2="12" />
-                                    <polyline points="12 5 19 12 12 19" />
-                                </svg>
-                            </>
-                        )}
+                        {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                     </button>
                 </form>
 
