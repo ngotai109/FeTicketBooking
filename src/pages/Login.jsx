@@ -103,10 +103,7 @@ const Login = () => {
 
     return (
         <div className="login-container">
-            {/* Animated background blobs */}
-
             <div className="login-card">
-                {/* Header with logo */}
                 <div className="login-header">
                     <div className="logo-container">
                         <img src={logo} alt="Đồng Hương Sông Lam" className="logo-img" />
@@ -114,15 +111,12 @@ const Login = () => {
                     <h1>Quản Trị Viên</h1>
                     <p>Đăng nhập để truy cập trang quản trị</p>
                 </div>
-
                 <form onSubmit={handleSubmit} className="login-form">
                     {generalError && (
                         <div className="general-error">
                             {generalError}
                         </div>
                     )}
-
-                    {/* Email */}
                     <div className="form-group">
                         <label>Email</label>
                         <input
@@ -136,8 +130,6 @@ const Login = () => {
                             <span className="error-message">{errors.email}</span>
                         )}
                     </div>
-
-                    {/* Password */}
                     <div className="form-group">
                         <label>Mật khẩu</label>
                         <input
@@ -151,7 +143,6 @@ const Login = () => {
                             <span className="error-message">{errors.password}</span>
                         )}
                     </div>
-
                     <button
                         type="submit"
                         className="login-button"
@@ -160,11 +151,9 @@ const Login = () => {
                         {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                     </button>
                 </form>
-
                 <div className="login-divider">
                     <span>Đồng Hương Sông Lam &copy; {new Date().getFullYear()}</span>
                 </div>
-
                 <p className="login-footer-note">Ân cần – Thân thiện</p>
             </div>
         </div>
