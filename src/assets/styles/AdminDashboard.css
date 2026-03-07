@@ -266,31 +266,14 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 16px;
-<<<<<<< HEAD
-<<<<<<< HEAD
     background: color-mix(in srgb, var(--card-color) 15%, transparent);
-=======
-    background: linear-gradient(135deg, var(--card-color) 0%, var(--card-color) 100%);
-    opacity: 0.1;
->>>>>>> 53ee976 (create base project)
-=======
-    background: color-mix(in srgb, var(--card-color) 15%, transparent);
->>>>>>> c5a7c98 (fix/icon on dashboardAdmin)
     color: var(--card-color);
 }
 
 .stat-icon svg {
     width: 28px;
     height: 28px;
-<<<<<<< HEAD
-<<<<<<< HEAD
     opacity: 1;
-=======
-    opacity: 10;
->>>>>>> 53ee976 (create base project)
-=======
-    opacity: 1;
->>>>>>> c5a7c98 (fix/icon on dashboardAdmin)
 }
 
 .stat-content h3 {

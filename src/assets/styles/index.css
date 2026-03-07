@@ -19,11 +19,8 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
-<<<<<<< HEAD
-=======
 }
 
 #root {
   min-height: 100vh;
->>>>>>> 53ee976 (create base project)
 }
