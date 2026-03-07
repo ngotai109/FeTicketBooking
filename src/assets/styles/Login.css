@@ -96,18 +96,6 @@
   animation: slideUp 0.65s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Colourful top border on card */
-.login-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  border-radius: 28px 28px 0 0;
-  background: linear-gradient(90deg, #C0392B 0%, #F5C518 33%, #27AE60 66%, #1A6FBF 100%);
-}
-
 @keyframes slideUp {
   from {
     opacity: 0;
