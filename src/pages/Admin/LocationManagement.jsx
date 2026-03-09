@@ -18,8 +18,9 @@ const LocationManagement = () => {
     const fetchLocations = async () => {
         try {
             setLoading(true);
-            const data = await locationService.getLocations();
-            setLocations(data);
+            const response = await locationService.getLocations();
+            const locationData = response.data?.data || response.data || [];
+            setLocations(Array.isArray(locationData) ? locationData : []);
         } catch (error) {
             toast.error('Không thể tải danh sách địa điểm');
         } finally {

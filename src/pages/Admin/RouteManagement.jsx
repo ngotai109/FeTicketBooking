@@ -24,12 +24,14 @@ const RouteManagement = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [routesData, locationsData] = await Promise.all([
+            const [routesResponse, locationsResponse] = await Promise.all([
                 routeService.getRoutes(),
                 locationService.getLocations()
             ]);
-            setRoutes(routesData);
-            setLocations(locationsData);
+            const rData = routesResponse.data?.data || routesResponse.data || [];
+            const lData = locationsResponse.data?.data || locationsResponse.data || [];
+            setRoutes(Array.isArray(rData) ? rData : []);
+            setLocations(Array.isArray(lData) ? lData : []);
         } catch (error) {
             toast.error('Không thể tải dữ liệu');
         } finally {
