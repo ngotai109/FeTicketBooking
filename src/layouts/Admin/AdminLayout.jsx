@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import ConfirmationModal from '../../components/Common/ConfirmationModal';
 import '../../assets/styles/AdminDashboard.css';
+import logo from '../../assets/images/logo.webp';
 
 const AdminLayout = () => {
     const navigate = useNavigate();
@@ -33,13 +34,10 @@ const AdminLayout = () => {
             <aside className="sidebar">
                 <div className="sidebar-header">
                     <div className="sidebar-logo">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                        <img src={logo} alt="Đồng Hương Sông Lam Logo" className="sidebar-logo-img" />
                     </div>
-                    <h2>Admin Panel</h2>
+                    <h2>Đồng Hương Sông Lam</h2>
+                    <p className="sidebar-subtitle">Hệ thống quản trị</p>
                 </div>
 
                 <nav className="sidebar-nav">
