@@ -17,17 +17,12 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(16px);
-  background: linear-gradient(
-    to right,
-    rgba(15, 23, 42, 0.9),
-    rgba(30, 64, 175, 0.9)
-  );
-  transition: box-shadow 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .user-header.scrolled {
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.35);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
   transform: translateY(0);
 }
 
@@ -64,14 +59,14 @@ body {
 }
 
 .user-logo-title {
-  font-weight: 700;
-  color: #f9fafb;
-  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  font-size: 20px;
+  text-transform: uppercase;
 }
 
 .user-logo-subtitle {
-  font-size: 12px;
-  color: #e5e7eb;
+  display: none;
 }
 
 .user-nav {
@@ -82,24 +77,96 @@ body {
 
 .user-nav-link {
   position: relative;
-  padding: 6px 10px;
-  border-radius: 999px;
-  color: #e5e7eb;
-  font-size: 14px;
+  padding: 8px 12px;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
   text-decoration: none;
-  transition: color 0.2s ease, background-color 0.2s ease, transform 0.1s ease;
+  text-transform: capitalize;
+  transition: opacity 0.2s ease;
 }
 
 .user-nav-link:hover {
-  color: #ffffff;
-  background-color: rgba(248, 250, 252, 0.12);
-  transform: translateY(-1px);
+  opacity: 0.8;
 }
 
 .user-nav-link.active {
-  color: #0f172a;
-  background: linear-gradient(135deg, #f97316, #facc15);
-  box-shadow: 0 6px 14px rgba(248, 113, 113, 0.4);
+  color: #ffffff;
+}
+
+.user-nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid #ffffff;
+}
+
+.nav-dropdown {
+  position: relative;
+  display: inline-block;
+  height: 100%;
+  /* Đảm bảo .nav-dropdown chiếm đủ chiều cao khối bố / padding */
+}
+
+.nav-dropdown>a {
+  display: block;
+  /* Giúp vùng hover ăn liền */
+}
+
+.nav-dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 10px;
+  /* Bù đắp cho khoảng đệm padding-bottom của thẻ header */
+  background-color: #ffffff;
+  min-width: 220px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 8px 0;
+  z-index: 200;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+/* Tạo một vùng đệm tàng hình để nối liền chuột giữa header và menu */
+.nav-dropdown-content::before {
+  content: "";
+  position: absolute;
+  top: -15px;
+  left: 0;
+  width: 100%;
+  height: 15px;
+  background: transparent;
+}
+
+.nav-dropdown-content a {
+  color: #374151;
+  padding: 12px 20px;
+  text-decoration: none;
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-dropdown-content a:hover {
+  background-color: #f3f4f6;
+  color: #2563eb;
+}
+
+.nav-dropdown:hover .nav-dropdown-content {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .user-actions {
@@ -149,26 +216,44 @@ body {
 }
 
 .user-hero-background {
-  height: 180px;
-  background: radial-gradient(circle at left, rgba(56, 189, 248, 0.45), transparent 60%),
-    radial-gradient(circle at right, rgba(248, 113, 22, 0.55), transparent 55%),
-    linear-gradient(135deg, #020617, #0f172a);
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background: #fdf220;
+  /* Matching the yellow from the banner edges */
+  display: flex;
+  justify-content: center;
+  /* Fixed height removed so it can scale with the image aspect ratio naturally */
+}
+
+.hero-banner-img {
+  width: 100%;
+  max-width: 1920px;
+  height: auto;
+  aspect-ratio: 16 / 5;
+  /* Approx aspect ratio to avoid layout shift and ensure visibility */
+  object-fit: contain;
+  object-position: center top;
 }
 
 .user-main {
   flex: 1;
-  margin-top: -140px;
-  padding: 0 16px 40px;
+  margin-top: -30px;
+  /* Nhô lên khoảng 1cm */
+  position: relative;
+  z-index: 10;
+  padding: 0 16px 20px;
 }
 
 .user-main-inner {
   max-width: 1100px;
   margin: 0 auto;
-  background-color: rgba(248, 250, 252, 0.96);
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
-  border: 1px solid rgba(148, 163, 184, 0.4);
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 16px 24px;
+  /* Giảm padding để ô tìm kiếm gọn lại */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .user-footer {
@@ -288,4 +373,3 @@ body {
     gap: 16px;
   }
 }
-

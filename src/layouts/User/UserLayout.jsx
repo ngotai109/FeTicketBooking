@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import '../../assets/styles/UserLayout.css';
 import logo from '../../assets/images/logo.webp';
+import bg1 from '../../assets/images/bg1.webp';
 
 const UserLayout = () => {
     const navigate = useNavigate();
@@ -38,7 +39,6 @@ const UserLayout = () => {
                         <img src={logo} alt="Đồng Hương Sông Lam" className="user-logo-img" />
                         <div className="user-logo-text">
                             <span className="user-logo-title">Đồng Hương Sông Lam</span>
-                            <span className="user-logo-subtitle">Đặt vé xe khách văn minh</span>
                         </div>
                     </div>
 
@@ -52,21 +52,55 @@ const UserLayout = () => {
                         >
                             Trang chủ
                         </NavLink>
+                        <div className="nav-dropdown">
+                            <NavLink
+                                to="/about"
+                                className={({ isActive }) =>
+                                    `user-nav-link ${isActive ? 'active' : ''}`
+                                }
+                            >
+                                Giới thiệu ▾
+                            </NavLink>
+                            <div className="nav-dropdown-content">
+                                <NavLink to="/about/history">Hệ thống văn phòng</NavLink>
+                            </div>
+                        </div>
+                        <div className="nav-dropdown">
+                            <NavLink
+                                to="/services"
+                                className={({ isActive }) =>
+                                    `user-nav-link ${isActive ? 'active' : ''}`
+                                }
+                            >
+                                Dịch vụ ▾
+                            </NavLink>
+                            <div className="nav-dropdown-content">
+                                <NavLink to="/services/transport">Vận tải hành khách</NavLink>
+                                <NavLink to="/services/cargo">Giao nhận hàng hóa</NavLink>
+                                <NavLink to="/services/rental">Thuê xe hợp đồng</NavLink>
+                            </div>
+                        </div>
+                        <div className="nav-dropdown">
+                            <NavLink
+                                to="/lookup"
+                                className={({ isActive }) =>
+                                    `user-nav-link ${isActive ? 'active' : ''}`
+                                }
+                            >
+                                Tra cứu ▾
+                            </NavLink>
+                            <div className="nav-dropdown-content">
+                                <NavLink to="/lookup/ticket">Tra cứu vé xe</NavLink>
+                                <NavLink to="/lookup/schedule">Lịch trình chạy</NavLink>
+                            </div>
+                        </div>
                         <NavLink
-                            to="/routes"
+                            to="/news"
                             className={({ isActive }) =>
                                 `user-nav-link ${isActive ? 'active' : ''}`
                             }
                         >
-                            Tuyến đường
-                        </NavLink>
-                        <NavLink
-                            to="/booking"
-                            className={({ isActive }) =>
-                                `user-nav-link ${isActive ? 'active' : ''}`
-                            }
-                        >
-                            Đặt vé
+                            Tin tức
                         </NavLink>
                         <NavLink
                             to="/contact"
@@ -77,25 +111,16 @@ const UserLayout = () => {
                             Liên hệ
                         </NavLink>
                     </nav>
-
-                    <div className="user-actions">
-                        {userEmail ? (
-                            <button className="user-auth-btn logged-in" onClick={handleAuthClick}>
-                                <span className="user-auth-name">
-                                    {userEmail.split('@')[0]}
-                                </span>
-                                <span className="user-auth-label">Tài khoản</span>
-                            </button>
-                        ) : (
-                            <button className="user-auth-btn" onClick={handleAuthClick}>
-                                <span className="user-auth-label">Đăng nhập / Đăng ký</span>
-                            </button>
-                        )}
-                    </div>
                 </div>
             </header>
 
-            <div className="user-hero-background" />
+            <div className="user-hero-background">
+                <img
+                    src={bg1}
+                    alt="Banner Tân Kim Chi - Đà Nẵng"
+                    className="hero-banner-img active"
+                />
+            </div>
 
             <main className="user-main">
                 <div className="user-main-inner">
