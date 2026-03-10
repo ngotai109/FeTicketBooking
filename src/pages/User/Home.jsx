@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../assets/styles/Home.css';
+import bg3 from '../../assets/images/bg3.jpg';
+
+const LocationIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="location-icon">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+        <circle cx="12" cy="10" r="3"></circle>
+    </svg>
+);
 
 const Home = () => {
     const [departure, setDeparture] = useState('');
@@ -23,10 +31,10 @@ const Home = () => {
             <div className="search-widget">
                 <div className="search-form">
                     <div className="input-group">
-                        <label>Nơi đi</label>
+                        <label><LocationIcon />Điểm khởi hành</label>
                         <input
                             type="text"
-                            placeholder="Nhập nơi đi"
+                            placeholder="Nhập điểm khởi hành"
                             value={departure}
                             onChange={(e) => setDeparture(e.target.value)}
                         />
@@ -37,10 +45,10 @@ const Home = () => {
                     </button>
 
                     <div className="input-group">
-                        <label>Nơi đến</label>
+                        <label><LocationIcon /> Điểm đến</label>
                         <input
                             type="text"
-                            placeholder="Nhập nơi đến"
+                            placeholder="Nhập điểm đến"
                             value={destination}
                             onChange={(e) => setDestination(e.target.value)}
                         />
@@ -97,6 +105,67 @@ const Home = () => {
                     </div>
                 </div>
             </div>
+
+            {/* About Section */}
+            <section className="home-about-section">
+                <div className="about-content">
+                    <div className="about-text">
+                        <div className="about-header">
+                            <h2>Giới thiệu về <strong>Đồng Hương Sông Lam</strong></h2>
+                        </div>
+                        <p className="about-desc">
+                            Đồng Hương Sông Lam – thương hiệu vận tải số 1 trên tuyến Nghệ An – Hà Nội – Nội Bài – Phú Thọ .
+                            Với đội ngũ tài xế chuyên nghiệp cùng hệ thống xe limousine cabin, giường nằm hiện đại bậc nhất tại Việt Nam.
+                            Tân Kim Chi sẽ mang đến sự sang trọng, tiện nghi và an toàn cho hành khách.
+                        </p>
+
+                        <div className="office-system">
+                            <h3>Hệ thống văn phòng</h3>
+
+                            <div className="office-group">
+                                <div className="city-title">
+                                    <span className="city-icon"><LocationIcon /></span> Tại Hà Nội
+                                </div>
+                                <div className="office-list">
+                                    <div className="office-item">
+                                        <span className="item-icon">🏢</span> VP Mỗ Lao:364 P.Nguyễn Văn Lộc, Khu đô thị Mỗ Lao, Hà Đông
+                                    </div>
+                                    <div className="office-item">
+                                        <span className="item-icon">🏢</span> VP Trần Vỹ:160 P.Trần Vỹ, Mai Dịch, Cầu Giấy
+                                    </div>
+                                    <div className="office-item">
+                                        <span className="item-icon">🏢</span> VP Giải Phóng : 769 Giải Phóng, Hoàng Mai
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="office-group">
+                                <div className="city-title">
+                                    <span className="city-icon"><LocationIcon /></span> Tại Nghệ An
+                                </div>
+                                <div className="office-list">
+                                    <div className="office-item">
+                                        <span className="item-icon">🏢</span> Bến xe Nước Ngầm: Số 1 Ngọc Hồi, Hoàng Liệt, Hoàng Mai
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="hotline-box">
+                                <div className="hotline-title">📞 Hotline</div>
+                                <div className="hotline-number">
+                                    <span>🔍</span> Đặt vé: 1900.51.51
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="about-image-container">
+                        <img src={bg3} alt="Giới thiệu Tân Kim Chi" className="about-main-image" />
+                        <div className="contact-footer-info">
+                            LIÊN HỆ ĐẶT VÉ: <strong>1900 5151</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     );
 };

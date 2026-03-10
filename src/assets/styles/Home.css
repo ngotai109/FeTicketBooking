@@ -6,6 +6,8 @@
     background: #ffffff;
     border-radius: 20px;
     padding: 20px 24px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .search-form {
@@ -34,11 +36,17 @@
 }
 
 .input-group label {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 14px;
     font-weight: 600;
     color: #6b7280;
     margin-bottom: 8px;
+}
+
+.location-icon {
+    color: #9ca3af;
 }
 
 .input-group input {
@@ -171,30 +179,257 @@
     margin-top: 15px;
 }
 
+/* About Section Styles */
+.home-about-section {
+    padding: 20px 0 60px;
+    background-color: transparent;
+}
+
+.about-content {
+    display: flex;
+    gap: 40px;
+    align-items: stretch;
+    margin-top: 20px;
+}
+
+.about-text {
+    flex: 1;
+}
+
+.about-header {
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.dot-line {
+    font-size: 24px;
+    font-weight: bold;
+    color: #facc15;
+    letter-spacing: 2px;
+    position: relative;
+    top: -5px;
+}
+
+.about-header h2 {
+    font-size: 28px;
+    color: #374151;
+    margin: 0;
+    font-weight: 500;
+}
+
+.about-header h2 strong {
+    font-weight: 800;
+    color: #1e3a8a; /* Deep Blue branding */
+}
+
+.about-desc {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #4b5563;
+    margin-bottom: 30px;
+}
+
+.about-desc strong {
+    color: #1e3a8a; /* Deep Blue branding in text */
+}
+
+.office-system h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 20px;
+}
+
+.office-group {
+    margin-bottom: 15px;
+}
+
+.city-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.city-icon {
+    color: #f97316;
+}
+
+.office-list {
+    padding-left: 28px;
+}
+
+.office-item {
+    font-size: 14px;
+    color: #4b5563;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.item-icon {
+    font-size: 14px;
+    color: #f97316;
+    opacity: 0.8;
+}
+
+.hotline-box {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px dashed #d1d5db;
+}
+
+.hotline-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 8px;
+}
+
+.hotline-number {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    color: #f97316; /* Highlight color */
+    font-weight: 700;
+}
+
+.hotline-number span {
+    color: #f97316;
+    font-size: 16px;
+}
+
+.about-image-container {
+    flex: 0 0 50%;
+    /* take half the section width */
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.about-main-image {
+    width: 100%; /* fill its container (now 50% wide) */
+    height: auto; /* keep proper aspect ratio */
+    display: block;
+    object-fit: cover;
+    /* Cắt bớt phần dư thừa để không làm méo/mờ ảnh mà vẫn vừa vặn */
+    object-position: center center;
+    /* Nội dung ảnh ra chính giữa */
+    border-radius: 12px;
+}
+
+.contact-footer-info {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    font-size: 13px;
+    color: #fff;
+    font-weight: 500;
+    text-transform: uppercase;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.contact-footer-info strong {
+    color: #facc15; /* Yellow/Gold to pop on dark overlay */
+    font-size: 18px;
+}
+
+@media (max-width: 992px) {
+    .search-form {
+        flex-wrap: wrap;
+    }
+
+    .input-group,
+    .date-group {
+        flex: 1 1 calc(50% - 10px);
+    }
+
+    .search-button {
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .swap-button {
+        margin-top: 0;
+        align-self: flex-end;
+        margin-bottom: 5px;
+    }
+
+    .about-content {
+        flex-direction: column;
+    }
+
+    .about-image-container {
+        width: 100%;
+        max-width: 500px;
+        align-self: center;
+    }
+}
+
 @media (max-width: 768px) {
+    .search-widget {
+        padding: 16px;
+    }
+
+    .booking-steps {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .step-item {
+        flex: 1 1 45%;
+        margin-bottom: 10px;
+    }
+
+    .step-arrow {
+        display: none;
+        /* Hide arrows on smaller screens for cleaner look */
+    }
+}
+
+@media (max-width: 576px) {
     .search-form {
         flex-direction: column;
         align-items: stretch;
     }
 
+    .input-group,
+    .date-group {
+        flex: 1 1 100%;
+    }
+
     .swap-button {
         align-self: center;
-        margin: -10px 0;
+        margin: -5px 0;
         z-index: 2;
+        transform: rotate(90deg);
+    }
+
+    .swap-button:hover {
+        transform: rotate(270deg);
     }
 
     .search-button {
-        margin-top: 20px;
+        margin-top: 15px;
     }
 
-    .booking-steps {
-        flex-direction: column;
-        align-items: center;
-        gap: 30px;
+    .step-item {
+        flex: 1 1 100%;
     }
 
-    .step-arrow {
-        transform: rotate(90deg);
-        margin: -10px 0;
+    .home-about-section {
+        padding: 40px 0;
+    }
+
+    .about-header h2 {
+        font-size: 22px;
     }
 }

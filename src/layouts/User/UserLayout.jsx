@@ -7,8 +7,7 @@ import bg1 from '../../assets/images/bg1.webp';
 const UserLayout = () => {
     const navigate = useNavigate();
     const [isScrolled, setIsScrolled] = useState(false);
-
-    const userEmail = localStorage.getItem('userEmail');
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -19,16 +18,17 @@ const UserLayout = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const handleLogoClick = () => {
-        navigate('/');
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
     };
 
-    const handleAuthClick = () => {
-        if (userEmail) {
-            navigate('/profile');
-        } else {
-            navigate('/login');
-        }
+    const closeMenu = () => {
+        setIsMenuOpen(false);
+    };
+
+    const handleLogoClick = () => {
+        navigate('/');
+        closeMenu(); // Close menu on logo click
     };
 
     return (
@@ -42,13 +42,23 @@ const UserLayout = () => {
                         </div>
                     </div>
 
-                    <nav className="user-nav">
+                    <button
+                        className={`mobile-menu-btn ${isMenuOpen ? 'open' : ''}`}
+                        onClick={toggleMenu}
+                    >
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+
+                    <nav className={`user-nav ${isMenuOpen ? 'active' : ''}`}>
                         <NavLink
-                            to="/"
+                            to="/home"
                             end
                             className={({ isActive }) =>
                                 `user-nav-link ${isActive ? 'active' : ''}`
                             }
+                            onClick={closeMenu}
                         >
                             Trang chủ
                         </NavLink>
@@ -58,11 +68,12 @@ const UserLayout = () => {
                                 className={({ isActive }) =>
                                     `user-nav-link ${isActive ? 'active' : ''}`
                                 }
+                                onClick={closeMenu}
                             >
                                 Giới thiệu ▾
                             </NavLink>
                             <div className="nav-dropdown-content">
-                                <NavLink to="/about/history">Hệ thống văn phòng</NavLink>
+                                <NavLink to="/about/history" onClick={closeMenu}>Hệ thống văn phòng</NavLink>
                             </div>
                         </div>
                         <div className="nav-dropdown">
@@ -71,13 +82,14 @@ const UserLayout = () => {
                                 className={({ isActive }) =>
                                     `user-nav-link ${isActive ? 'active' : ''}`
                                 }
+                                onClick={closeMenu}
                             >
                                 Dịch vụ ▾
                             </NavLink>
                             <div className="nav-dropdown-content">
-                                <NavLink to="/services/transport">Vận tải hành khách</NavLink>
-                                <NavLink to="/services/cargo">Giao nhận hàng hóa</NavLink>
-                                <NavLink to="/services/rental">Thuê xe hợp đồng</NavLink>
+                                <NavLink to="/services/transport" onClick={closeMenu}>Vận tải hành khách</NavLink>
+                                <NavLink to="/services/cargo" onClick={closeMenu}>Giao nhận hàng hóa</NavLink>
+                                <NavLink to="/services/rental" onClick={closeMenu}>Thuê xe hợp đồng</NavLink>
                             </div>
                         </div>
                         <div className="nav-dropdown">
@@ -86,12 +98,13 @@ const UserLayout = () => {
                                 className={({ isActive }) =>
                                     `user-nav-link ${isActive ? 'active' : ''}`
                                 }
+                                onClick={closeMenu}
                             >
                                 Tra cứu ▾
                             </NavLink>
                             <div className="nav-dropdown-content">
-                                <NavLink to="/lookup/ticket">Tra cứu vé xe</NavLink>
-                                <NavLink to="/lookup/schedule">Lịch trình chạy</NavLink>
+                                <NavLink to="/lookup/ticket" onClick={closeMenu}>Tra cứu vé xe</NavLink>
+                                <NavLink to="/lookup/schedule" onClick={closeMenu}>Lịch trình chạy</NavLink>
                             </div>
                         </div>
                         <NavLink
@@ -99,6 +112,7 @@ const UserLayout = () => {
                             className={({ isActive }) =>
                                 `user-nav-link ${isActive ? 'active' : ''}`
                             }
+                            onClick={closeMenu}
                         >
                             Tin tức
                         </NavLink>
@@ -107,10 +121,14 @@ const UserLayout = () => {
                             className={({ isActive }) =>
                                 `user-nav-link ${isActive ? 'active' : ''}`
                             }
+                            onClick={closeMenu}
                         >
                             Liên hệ
                         </NavLink>
                     </nav>
+
+                    {/* Overlay for mobile menu */}
+                    {isMenuOpen && <div className="mobile-overlay" onClick={closeMenu}></div>}
                 </div>
             </header>
 

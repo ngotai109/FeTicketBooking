@@ -16,7 +16,7 @@ export default function AppRoutes() {
       <Route path="/home" element={<UserLayout />}>
         <Route index element={<Home />} />
       </Route>
-      {/* <Route
+      <Route
         path="/admin"
         element={
           <ProtectedRoute>
@@ -27,7 +27,7 @@ export default function AppRoutes() {
         <Route index element={<AdminDashboard />} />
         <Route path="routes" element={<RouteManagement />} />
         <Route path="locations" element={<LocationManagement />} />
-      </Route> */}
+      </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
