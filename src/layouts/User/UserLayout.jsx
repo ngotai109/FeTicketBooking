@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+
 import '../../assets/styles/UserLayout.css';
 import logo from '../../assets/images/logo.webp';
 import bg1 from '../../assets/images/bg1.webp';
 
 const UserLayout = () => {
+    const location = useLocation();
     const navigate = useNavigate();
+
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -64,7 +67,7 @@ const UserLayout = () => {
                         </NavLink>
                         <div className="nav-dropdown">
                             <NavLink
-                                to="/about"
+                                to="/home/about-us"
                                 className={({ isActive }) =>
                                     `user-nav-link ${isActive ? 'active' : ''}`
                                 }
@@ -73,7 +76,8 @@ const UserLayout = () => {
                                 Giới thiệu ▾
                             </NavLink>
                             <div className="nav-dropdown-content">
-                                <NavLink to="/about/history" onClick={closeMenu}>Hệ thống văn phòng</NavLink>
+                                <NavLink to="/home/about-us" onClick={closeMenu}>Về chúng tôi</NavLink>
+                                <NavLink to="/home/office-system" onClick={closeMenu}>Hệ thống văn phòng</NavLink>
                             </div>
                         </div>
                         <div className="nav-dropdown">
@@ -132,13 +136,16 @@ const UserLayout = () => {
                 </div>
             </header>
 
-            <div className="user-hero-background">
-                <img
-                    src={bg1}
-                    alt="Banner Tân Kim Chi - Đà Nẵng"
-                    className="hero-banner-img active"
-                />
-            </div>
+            {location.pathname === '/home' && (
+                <div className="user-hero-background">
+                    <img
+                        src={bg1}
+                        alt="Banner Tân Kim Chi - Đà Nẵng"
+                        className="hero-banner-img active"
+                    />
+                </div>
+            )}
+
 
             <main className="user-main">
                 <div className="user-main-inner">
@@ -172,6 +179,19 @@ const UserLayout = () => {
                     <span>© {new Date().getFullYear()} Đồng Hương Sông Lam. All rights reserved.</span>
                 </div>
             </footer>
+
+            {/* Global Floating Social Buttons */}
+            <div className="floating-social">
+                <a href="https://www.facebook.com/share/1CJ5fqhUdL/" target="_blank" rel="noreferrer" className="social-btn facebook" title="Facebook">
+                    <i className="fab fa-facebook-f"></i>
+                </a>
+                <a href="https://zalo.me" target="_blank" rel="noreferrer" className="social-btn zalo" title="Zalo">
+                    <span className="zalo-text">Zalo</span>
+                </a>
+                <a href="tel:0123456789" className="social-btn phone" title="Gọi ngay">
+                    <i className="fas fa-phone"></i>
+                </a>
+            </div>
         </div>
     );
 };

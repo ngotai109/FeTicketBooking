@@ -8,6 +8,10 @@ import LocationManagement from "../pages/Admin/LocationManagement";
 import ProtectedRoute from "./ProtectedRoute";
 import UserLayout from "../layouts/User/UserLayout";
 import Home from "../pages/User/Home";
+import Booking from "../pages/User/Booking";
+import AboutUs from "../pages/User/AboutUs";
+import OfficeSystem from "../pages/User/OfficeSystem";
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -15,6 +19,9 @@ export default function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/home" element={<UserLayout />}>
         <Route index element={<Home />} />
+        <Route path="booking" element={<Booking />} />
+        <Route path="about-us" element={<AboutUs />} />
+        <Route path="office-system" element={<OfficeSystem />} />
       </Route>
       <Route
         path="/admin"

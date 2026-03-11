@@ -1,0 +1,321 @@
+/* src/assets/styles/AboutPages.css */
+.about-page.minimal {
+    padding: 60px 0;
+    background-color: #ffffff;
+    min-height: 100vh;
+    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Force parent background to be white when this page is displayed */
+:root:has(.about-page.minimal) .user-layout,
+:root:has(.about-page.minimal) .user-main {
+    background: #ffffff !important;
+}
+
+.about-page.minimal .page-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.about-page.minimal .page-header h1 {
+    font-size: 2.5rem;
+    color: #000;
+    font-weight: 700;
+    margin: 0;
+    background: none;
+    -webkit-text-fill-color: initial;
+}
+
+.about-page.minimal .content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    line-height: 1.8;
+    text-align: justify;
+    padding: 0 10px;
+}
+
+.about-page.minimal section {
+    margin-bottom: 40px;
+}
+
+.about-page.minimal .main-subtitle {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #222;
+}
+
+.about-page.minimal .group-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #000;
+    position: relative;
+}
+
+.about-page.minimal .sub-description {
+    margin-bottom: 15px;
+}
+
+.about-page.minimal .vehicle-type {
+    margin-bottom: 25px;
+}
+
+.about-page.minimal h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.about-page.minimal ul {
+    list-style: none;
+    padding-left: 20px;
+}
+
+.about-page.minimal ul li {
+    position: relative;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.about-page.minimal ul li::before {
+    content: "◇";
+    position: absolute;
+    left: -20px;
+    color: #777;
+}
+
+.about-page.minimal .office-details-list {
+    margin-top: 10px;
+}
+
+.about-page.minimal .office-details-list li::before {
+    content: "📍";
+    left: -25px;
+}
+
+.about-page.minimal .office-details-list li:nth-child(2)::before {
+    content: "📞";
+}
+
+.about-page.minimal .office-details-list li:nth-child(3)::before {
+    content: "✉️";
+}
+
+.about-page.minimal .reason-list li::before {
+    content: "✔";
+    color: #2e7d32;
+}
+
+.about-page.minimal .footer-closing {
+    border-top: 1px solid #eee;
+    padding-top: 30px;
+    margin-top: 50px;
+    font-style: italic;
+    color: #666;
+    text-align: center;
+}
+
+/* Floating Social Buttons */
+.floating-social {
+    position: fixed;
+    left: 20px;
+    bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 1000;
+}
+
+.social-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease;
+}
+
+.social-btn:hover {
+    transform: scale(1.1);
+}
+
+.social-btn.facebook {
+    background-color: #1877F2;
+}
+
+.social-btn.zalo {
+    background-color: #0084FF;
+    font-size: 0.8rem;
+}
+
+.social-btn.phone {
+    background-color: #4CAF50;
+}
+
+/* Office System Interactive Layout */
+.office-layout-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    height: 700px;
+    background: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+
+.office-sidebar {
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #eee;
+}
+
+.sidebar-intro {
+    padding: 20px;
+    background: #fdfdfd;
+    border-bottom: 1px solid #eee;
+}
+
+.office-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.office-item-card {
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.office-item-card:hover {
+    background: #f5f7fb;
+}
+
+.office-item-card.active {
+    background: #eff6ff;
+    border-color: #2563eb;
+}
+
+.office-item-header .city-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #2563eb;
+    text-transform: uppercase;
+}
+
+.office-item-header h3 {
+    font-size: 1.1rem;
+    margin: 5px 0 10px;
+    color: #000;
+}
+
+.office-item-body p {
+    font-size: 0.9rem;
+    margin: 4px 0;
+    color: #555;
+    text-align: left;
+}
+
+.office-item-actions {
+    margin-top: 12px;
+}
+
+.view-map-link {
+    font-size: 0.85rem;
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: underline;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.office-item-card.active .view-map-link {
+    color: #1d4ed8;
+}
+
+.office-map-view {
+    flex: 1;
+    position: relative;
+    background: #eee;
+}
+
+.map-wrapper {
+    width: 100%;
+    height: 100%;
+}
+
+.map-info-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.map-info-overlay h3 {
+    margin: 0 0 5px;
+    font-size: 1.2rem;
+}
+
+.map-info-overlay p {
+    margin: 0 0 15px;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.directions-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.directions-btn:hover {
+    background: #1d4ed8;
+}
+
+.footer-closing-minimal {
+    text-align: center;
+    padding: 40px 20px;
+    color: #777;
+    font-style: italic;
+}
+
+@media (max-width: 1024px) {
+    .office-layout-container {
+        flex-direction: column;
+        height: auto;
+    }
+    .office-sidebar {
+        width: 100%;
+        height: 400px;
+    }
+    .office-map-view {
+        height: 500px;
+    }
+}

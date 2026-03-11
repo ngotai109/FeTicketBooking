@@ -1,6 +1,29 @@
 .home-container {
-    width: 100%;
+    width: 100vw;
+    /* Force viewport width */
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
 }
+
+/* Hero & Search Section - Overlap on Layout Banner */
+.hero-search-section {
+    width: 100%;
+    margin-top: -80px; 
+    position: relative;
+    z-index: 20;
+    padding: 0 0 40px;
+}
+
+/* Container riêng cho Search để rộng bằng Banner */
+.hero-search-section .container {
+    max-width: 1300px;
+}
+
+
+
 
 .search-widget {
     background: #ffffff;
@@ -9,6 +32,7 @@
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
+
 
 .search-form {
     display: flex;
@@ -49,15 +73,93 @@
     color: #9ca3af;
 }
 
-.input-group input {
+/* Custom Select Styles */
+.custom-select-wrapper {
+    position: relative;
+    cursor: pointer;
+}
+
+.custom-select-display {
+    width: 100%;
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    padding: 6px 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 16px;
+    padding-right: 24px;
+    min-height: 31px;
+}
+
+.custom-select-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    margin-top: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    list-style: none;
+    padding: 8px 0;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.custom-select-list li {
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #4b5563;
+    transition: all 0.2s;
+}
+
+.custom-select-list li:hover {
+    background-color: #f3f4f6;
+    color: #ef4444;
+    padding-left: 25px;
+}
+
+.custom-select-list li.active {
+    background-color: #fee2e2;
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.custom-select-list::-webkit-scrollbar {
+    width: 5px;
+}
+.custom-select-list::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 10px;
+}
+
+/* Date Input Styling */
+.input-group input[type="date"] {
     width: 100%;
     border: none;
-    font-size: 18px;
-    font-weight: 500;
+    font-size: 15px;
+    font-weight: 600;
     color: #111827;
     outline: none;
     background: transparent;
-    padding: 4px 0;
+    padding: 6px 0;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.input-group input[type="date"]::-webkit-calendar-picker-indicator {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /%3E%3C/svg%3E");
+    background-size: 18px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.input-group input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    filter: brightness(0.8);
 }
 
 .input-group input::placeholder {
@@ -147,7 +249,7 @@
 .step-icon {
     width: 45px;
     height: 45px;
-    background: #fdf6b2;
+    background: #FDF220;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -221,7 +323,8 @@
 
 .about-header h2 strong {
     font-weight: 800;
-    color: #1e3a8a; /* Deep Blue branding */
+    color: #1e3a8a;
+    /* Deep Blue branding */
 }
 
 .about-desc {
@@ -232,7 +335,8 @@
 }
 
 .about-desc strong {
-    color: #1e3a8a; /* Deep Blue branding in text */
+    color: #1e3a8a;
+    /* Deep Blue branding in text */
 }
 
 .office-system h3 {
@@ -297,7 +401,8 @@
     align-items: center;
     gap: 10px;
     font-size: 16px;
-    color: #f97316; /* Highlight color */
+    color: #f97316;
+    /* Highlight color */
     font-weight: 700;
 }
 
@@ -315,8 +420,10 @@
 }
 
 .about-main-image {
-    width: 100%; /* fill its container (now 50% wide) */
-    height: auto; /* keep proper aspect ratio */
+    width: 100%;
+    /* fill its container (now 50% wide) */
+    height: auto;
+    /* keep proper aspect ratio */
     display: block;
     object-fit: cover;
     /* Cắt bớt phần dư thừa để không làm méo/mờ ảnh mà vẫn vừa vặn */
@@ -337,7 +444,8 @@
 }
 
 .contact-footer-info strong {
-    color: #facc15; /* Yellow/Gold to pop on dark overlay */
+    color: #facc15;
+    /* Yellow/Gold to pop on dark overlay */
     font-size: 18px;
 }
 
@@ -431,5 +539,180 @@
 
     .about-header h2 {
         font-size: 22px;
+    }
+}
+
+
+
+
+/* Popular Routes Section Styles - Left Aligned and Gray Background */
+.popular-routes-section {
+    padding: 60px 0;
+    width: 100%;
+    background-color: #f8fafc;
+    /* Very light gray/blue background */
+    border-top: 1px solid #f1f5f9;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 35px;
+    justify-content: flex-start;
+    /* Ensure left alignment */
+}
+
+.dot-line-yellow {
+    font-size: 20px;
+    font-weight: 800;
+    color: #f59e0b;
+    /* Yellow/Orange */
+    letter-spacing: -2px;
+}
+
+.section-header h2 {
+    font-size: 26px;
+    color: #1f2937;
+    margin: 0;
+    font-weight: 500;
+}
+
+.section-header h2 strong {
+    font-weight: 800;
+    color: #111827;
+}
+
+.routes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.route-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #f1f5f9;
+}
+
+/* (rest of the card styles from before) */
+
+.route-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.route-image {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+}
+
+.route-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.route-card:hover .route-image img {
+    transform: scale(1.05);
+}
+
+.route-info {
+    padding: 18px;
+}
+
+.route-type {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vip-tag {
+    background: #fffbeb;
+    color: #d97706;
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid #fde68a;
+}
+
+.route-points {
+    margin-bottom: 20px;
+}
+
+.point-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.point-icon.yellow {
+    color: #facc15;
+    font-size: 22px;
+}
+
+.route-connector {
+    padding-left: 2px;
+    color: #94a3b8;
+    font-size: 14px;
+    margin: 2px 0;
+}
+
+.route-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 15px;
+}
+
+.route-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: #e11d48;
+}
+
+.book-now-btn {
+    background: #facc15;
+    color: #000;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.book-now-btn:hover {
+    background: #eab308;
+    transform: scale(1.05);
+}
+
+/* About Section Background - White */
+.home-about-section {
+    padding: 80px 0;
+    background-color: #ffffff;
+    width: 100%;
+}
+
+@media (max-width: 1240px) {
+
+    .popular-routes-section,
+    .home-about-section {
+        padding-left: 20px;
+        padding-right: 20px;
     }
 }

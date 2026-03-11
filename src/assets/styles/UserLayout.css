@@ -9,8 +9,16 @@ body {
   display: flex;
   flex-direction: column;
   background: radial-gradient(circle at top left, #e0f3ff 0, transparent 60%),
-    radial-gradient(circle at top right, #ffe9f0 0, transparent 55%),
+    radial-gradient(circle at top right, #e0f3ff 0, transparent 55%),
     #f5f7fb;
+}
+
+/* Global Container Utility */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
 }
 
 .user-header {
@@ -274,12 +282,11 @@ body {
 
 .user-main {
   flex: 1;
-  margin-top: -30px;
-  /* Nhô lên khoảng 1cm */
   position: relative;
   z-index: 10;
   padding: 0 16px 20px;
 }
+
 
 .user-main-inner {
   max-width: 1200px;
@@ -440,5 +447,98 @@ body {
 @media (max-width: 576px) {
   .user-logo-title {
     font-size: 16px;
+  }
+}
+
+/* Global Floating Social Buttons */
+.floating-social {
+  position: fixed;
+  left: 30px;
+  bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 1000;
+}
+
+.social-btn {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.social-btn::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+.social-btn.phone {
+  background-color: #2ecc71;
+  animation: vibrate 0.5s infinite;
+}
+
+@keyframes vibrate {
+  0% { transform: rotate(0); }
+  25% { transform: rotate(15deg); }
+  50% { transform: rotate(0); }
+  75% { transform: rotate(-15deg); }
+  100% { transform: rotate(0); }
+}
+
+.social-btn.facebook {
+  background-color: #1877f2;
+}
+
+.social-btn.facebook::before {
+  background-color: #1877f2;
+}
+
+.social-btn.zalo {
+  background-color: #0084ff;
+}
+
+.social-btn.zalo::before {
+  background-color: #0084ff;
+}
+
+.social-btn.phone::before {
+  background-color: #2ecc71;
+}
+
+.zalo-text {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.social-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .floating-social {
+    left: 15px;
+    bottom: 50px;
   }
 }
