@@ -116,7 +116,7 @@ const Home = () => {
                         <p className="about-desc">
                             Đồng Hương Sông Lam – thương hiệu vận tải số 1 trên tuyến Nghệ An – Hà Nội – Nội Bài – Phú Thọ .
                             Với đội ngũ tài xế chuyên nghiệp cùng hệ thống xe limousine cabin, giường nằm hiện đại bậc nhất tại Việt Nam.
-                            Tân Kim Chi sẽ mang đến sự sang trọng, tiện nghi và an toàn cho hành khách.
+                            Đồng Hương Sông Lam sẽ mang đến sự sang trọng, tiện nghi và an toàn cho hành khách.
                         </p>
 
                         <div className="office-system">
