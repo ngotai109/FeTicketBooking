@@ -98,7 +98,7 @@ const UserLayout = () => {
                         </div>
                         <div className="nav-dropdown">
                             <NavLink
-                                to="/lookup"
+                                to="/home/lookup"
                                 className={({ isActive }) =>
                                     `user-nav-link ${isActive ? 'active' : ''}`
                                 }
@@ -107,7 +107,7 @@ const UserLayout = () => {
                                 Tra cứu ▾
                             </NavLink>
                             <div className="nav-dropdown-content">
-                                <NavLink to="/lookup/ticket" onClick={closeMenu}>Tra cứu vé xe</NavLink>
+                                <NavLink to="/home/lookup/ticket" onClick={closeMenu}>Tra cứu vé xe</NavLink>
                                 <NavLink to="/lookup/schedule" onClick={closeMenu}>Lịch trình chạy</NavLink>
                             </div>
                         </div>

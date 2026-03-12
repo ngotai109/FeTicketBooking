@@ -1,16 +1,14 @@
 body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-color: #f5f7fb;
+  background-color: #ffffff;
 }
 
 .user-layout {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: radial-gradient(circle at top left, #e0f3ff 0, transparent 60%),
-    radial-gradient(circle at top right, #e0f3ff 0, transparent 55%),
-    #f5f7fb;
+  background: #ffffff;
 }
 
 /* Global Container Utility */
