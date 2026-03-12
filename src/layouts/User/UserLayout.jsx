@@ -67,7 +67,7 @@ const UserLayout = () => {
                         </NavLink>
                         <div className="nav-dropdown">
                             <NavLink
-                                to="/home/about-us"
+                                to="/about"
                                 className={({ isActive }) =>
                                     `user-nav-link ${isActive ? 'active' : ''}`
                                 }
@@ -76,8 +76,8 @@ const UserLayout = () => {
                                 Giới thiệu ▾
                             </NavLink>
                             <div className="nav-dropdown-content">
-                                <NavLink to="/home/about-us" onClick={closeMenu}>Về chúng tôi</NavLink>
-                                <NavLink to="/home/office-system" onClick={closeMenu}>Hệ thống văn phòng</NavLink>
+                                <NavLink to="/about/our" onClick={closeMenu}>Về chúng tôi</NavLink>
+                                <NavLink to="/about/history" onClick={closeMenu}>Hệ thống văn phòng</NavLink>
                             </div>
                         </div>
                         <div className="nav-dropdown">
@@ -91,14 +91,13 @@ const UserLayout = () => {
                                 Dịch vụ ▾
                             </NavLink>
                             <div className="nav-dropdown-content">
-                                <NavLink to="/services/transport" onClick={closeMenu}>Vận tải hành khách</NavLink>
-                                <NavLink to="/services/cargo" onClick={closeMenu}>Giao nhận hàng hóa</NavLink>
-                                <NavLink to="/services/rental" onClick={closeMenu}>Thuê xe hợp đồng</NavLink>
+                                <NavLink to="/services/transport" onClick={closeMenu}>Dịch vụ vận tải hành khách</NavLink>
+                                <NavLink to="/services/cargo" onClick={closeMenu}>Dịch vụ vận tải hàng hóa</NavLink>
                             </div>
                         </div>
                         <div className="nav-dropdown">
                             <NavLink
-                                to="/home/lookup"
+                                to="/lookup"
                                 className={({ isActive }) =>
                                     `user-nav-link ${isActive ? 'active' : ''}`
                                 }
@@ -107,7 +106,7 @@ const UserLayout = () => {
                                 Tra cứu ▾
                             </NavLink>
                             <div className="nav-dropdown-content">
-                                <NavLink to="/home/lookup/ticket" onClick={closeMenu}>Tra cứu vé xe</NavLink>
+                                <NavLink to="/lookup/ticket" onClick={closeMenu}>Tra cứu vé xe</NavLink>
                                 <NavLink to="/lookup/schedule" onClick={closeMenu}>Lịch trình chạy</NavLink>
                             </div>
                         </div>
@@ -179,19 +178,6 @@ const UserLayout = () => {
                     <span>© {new Date().getFullYear()} Đồng Hương Sông Lam. All rights reserved.</span>
                 </div>
             </footer>
-
-            {/* Global Floating Social Buttons */}
-            <div className="floating-social">
-                <a href="https://www.facebook.com/share/1CJ5fqhUdL/" target="_blank" rel="noreferrer" className="social-btn facebook" title="Facebook">
-                    <i className="fab fa-facebook-f"></i>
-                </a>
-                <a href="https://zalo.me" target="_blank" rel="noreferrer" className="social-btn zalo" title="Zalo">
-                    <span className="zalo-text">Zalo</span>
-                </a>
-                <a href="tel:0123456789" className="social-btn phone" title="Gọi ngay">
-                    <i className="fas fa-phone"></i>
-                </a>
-            </div>
         </div>
     );
 };
