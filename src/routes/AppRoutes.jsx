@@ -14,6 +14,8 @@ import OfficeSystem from "../pages/User/OfficeSystem";
 import TicketLookup from "../pages/User/TicketLookup";
 import CargoTransport from "../pages/User/CargoTransport";
 import PassengerTransport from "../pages/User/PassengerTransport";
+import News from "../pages/User/News";
+import Contact from "../pages/User/Contact";
 
 export default function AppRoutes() {
   return (
@@ -28,6 +30,8 @@ export default function AppRoutes() {
         <Route path="lookup/ticket" element={<TicketLookup />} />
         <Route path="services/cargo" element={<CargoTransport />} />
         <Route path="services/transport" element={<PassengerTransport />} />
+        <Route path="news" element={<News />} />
+        <Route path="contact" element={<Contact />} />
       </Route>
       <Route
         path="/admin"

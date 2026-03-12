@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 
 import '../../assets/styles/UserLayout.css';
@@ -11,6 +11,80 @@ const UserLayout = () => {
 
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // ── Chatbot widget state ──────────────────────────────────
+    const [chatOpen, setChatOpen] = useState(false);
+    const [chatMessages, setChatMessages] = useState([
+        {
+            id: 1,
+            role: 'bot',
+            text: 'Xin chào! 👋 Tôi là trợ lý ảo của Đồng Hương Sông Lam. Tôi có thể giúp bạn đặt vé, tra lịch xe, hoặc giải đáp thắc mắc. Bạn cần hỗ trợ gì?',
+            time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        },
+    ]);
+    const [chatInput, setChatInput] = useState('');
+    const [chatLoading, setChatLoading] = useState(false);
+    const chatBodyRef = useRef(null);
+    const chatWidgetRef = useRef(null);
+
+    const quickReplies = ['Đặt vé xe', 'Xem lịch trình', 'Giá vé', 'Liên hệ hotline'];
+
+    // Scroll to bottom whenever messages change
+    useEffect(() => {
+        if (chatBodyRef.current) {
+            chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+        }
+    }, [chatMessages]);
+
+    const sendMessage = (text) => {
+        const msg = text || chatInput.trim();
+        if (!msg) return;
+        const userMsg = {
+            id: Date.now(),
+            role: 'user',
+            text: msg,
+            time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        };
+        setChatMessages(prev => [...prev, userMsg]);
+        setChatInput('');
+        setChatLoading(true);
+
+        // ──────────────────────────────────────────────────────
+        // TODO: TÍCH HỢP CHATBOT API TẠI ĐÂY
+        // Gọi API chatbot (Dialogflow, OpenAI, Rasa, v.v.)
+        // và thay thế đoạn setTimeout bên dưới bằng response thật.
+        // Ví dụ:
+        //   const res = await fetch('/api/chatbot', { method:'POST', body: JSON.stringify({ message: msg }) });
+        //   const data = await res.json();
+        //   setChatMessages(prev => [...prev, { id: Date.now(), role:'bot', text: data.reply, time: '...' }]);
+        // ──────────────────────────────────────────────────────
+        setTimeout(() => {
+            const botReply = {
+                id: Date.now() + 1,
+                role: 'bot',
+                text: 'Cảm ơn bạn đã nhắn tin! Chúng tôi sẽ phản hồi sớm. Hoặc liên hệ hotline: 📞 0969 037 123 để được hỗ trợ ngay.',
+                time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+            };
+            setChatMessages(prev => [...prev, botReply]);
+            setChatLoading(false);
+        }, 900);
+    };
+
+    const handleChatKey = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    };
+
+    // Click outside to close chatbot
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (chatOpen && chatWidgetRef.current && !chatWidgetRef.current.contains(e.target)) {
+                setChatOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [chatOpen]);
+    // ─────────────────────────────────────────────────────────
 
     useEffect(() => {
         const handleScroll = () => {
@@ -152,7 +226,7 @@ const UserLayout = () => {
                 </div>
             </main>
 
-            {/* Floating Social Contact Buttons */}
+            {/* ── Floating Social Buttons ─────────────────────── */}
             <div className="floating-social">
                 <a
                     href="tel:1900xxxx"
@@ -184,6 +258,107 @@ const UserLayout = () => {
                         <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.908 1.438 5.504 3.686 7.21V22l3.37-1.85A11.3 11.3 0 0 0 12 20.486c5.523 0 10-4.144 10-9.243C22 6.145 17.523 2 12 2zm1.05 12.45-2.55-2.72-4.98 2.72 5.48-5.82 2.61 2.72 4.92-2.72-5.48 5.82z"/>
                     </svg>
                 </a>
+            </div>
+
+            {/* ── Chatbot Widget ───────────────────────────────── */}
+            <div className="chatbot-widget" ref={chatWidgetRef}>
+                {/* Toggle Button */}
+                <button
+                    className={`chatbot-toggle-btn ${chatOpen ? 'open' : ''}`}
+                    onClick={() => setChatOpen(!chatOpen)}
+                    title={chatOpen ? 'Đóng chat' : 'Trợ lý tư vấn'}
+                    aria-label="Chatbot"
+                >
+                    {chatOpen ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    ) : (
+                        <img src={logo} alt="Chatbot" className="chatbot-logo" />
+                    )}
+                    {!chatOpen && <span className="chatbot-badge">1</span>}
+                </button>
+
+                {/* Chat Panel */}
+                {chatOpen && (
+                    <div className="chatbot-panel" role="dialog" aria-label="Hỗ trợ trực tuyến">
+                        {/* Header */}
+                        <div className="chatbot-header">
+                            <img src={logo} alt="Logo" className="chatbot-header-logo" />
+                            <div className="chatbot-header-info">
+                                <span className="chatbot-header-name">Đồng Hương Sông Lam</span>
+                                <span className="chatbot-header-status">
+                                    <span className="chatbot-online-dot"></span> Trực tuyến
+                                </span>
+                            </div>
+                            <button
+                                className="chatbot-close-btn"
+                                onClick={() => setChatOpen(false)}
+                                aria-label="Đóng"
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Messages */}
+                        <div className="chatbot-body" ref={chatBodyRef}>
+                            {chatMessages.map((msg) => (
+                                <div key={msg.id} className={`chatbot-msg chatbot-msg--${msg.role}`}>
+                                    {msg.role === 'bot' && (
+                                        <img src={logo} alt="bot" className="chatbot-msg-avatar" />
+                                    )}
+                                    <div className="chatbot-msg-bubble">
+                                        <p>{msg.text}</p>
+                                        <span className="chatbot-msg-time">{msg.time}</span>
+                                    </div>
+                                </div>
+                            ))}
+                            {chatLoading && (
+                                <div className="chatbot-msg chatbot-msg--bot">
+                                    <img src={logo} alt="bot" className="chatbot-msg-avatar" />
+                                    <div className="chatbot-msg-bubble chatbot-typing">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Quick Replies */}
+                        <div className="chatbot-quick-replies">
+                            {quickReplies.map((q) => (
+                                <button key={q} className="chatbot-quick-btn" onClick={() => sendMessage(q)}>{q}</button>
+                            ))}
+                        </div>
+
+                        {/* Input */}
+                        <div className="chatbot-footer">
+                            <textarea
+                                className="chatbot-input"
+                                rows={1}
+                                placeholder="Nhập tin nhắn..."
+                                value={chatInput}
+                                onChange={(e) => setChatInput(e.target.value)}
+                                onKeyDown={handleChatKey}
+                                aria-label="Nhập tin nhắn"
+                            />
+                            <button
+                                className="chatbot-send-btn"
+                                onClick={() => sendMessage()}
+                                disabled={!chatInput.trim() || chatLoading}
+                                aria-label="Gửi"
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13"/>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <footer className="user-footer">
