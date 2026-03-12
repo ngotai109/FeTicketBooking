@@ -33,7 +33,7 @@ const Home = () => {
 
     const handleSearch = () => {
         // Navigate to booking page with search params
-        navigate('/home/booking', {
+        navigate('/booking', {
             state: { departure, destination, date }
         });
     };

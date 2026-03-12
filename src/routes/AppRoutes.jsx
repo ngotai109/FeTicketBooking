@@ -16,13 +16,13 @@ import TicketLookup from "../pages/User/TicketLookup";
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/home" element={<UserLayout />}>
-        <Route index element={<Home />} />
+      <Route path="/" element={<UserLayout />}>
+        <Route index element={<Navigate to="/home" replace />} />
+        <Route path="home" element={<Home />} />
         <Route path="booking" element={<Booking />} />
-        <Route path="about-us" element={<AboutUs />} />
-        <Route path="office-system" element={<OfficeSystem />} />
+        <Route path="about/our" element={<AboutUs />} />
+        <Route path="about/history" element={<OfficeSystem />} />
         <Route path="lookup/ticket" element={<TicketLookup />} />
       </Route>
       <Route
