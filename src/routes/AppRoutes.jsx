@@ -12,6 +12,7 @@ import Booking from "../pages/User/Booking";
 import AboutUs from "../pages/User/AboutUs";
 import OfficeSystem from "../pages/User/OfficeSystem";
 import TicketLookup from "../pages/User/TicketLookup";
+import CargoTransport from "../pages/User/CargoTransport";
 
 export default function AppRoutes() {
   return (
@@ -24,6 +25,7 @@ export default function AppRoutes() {
         <Route path="about/our" element={<AboutUs />} />
         <Route path="about/history" element={<OfficeSystem />} />
         <Route path="lookup/ticket" element={<TicketLookup />} />
+        <Route path="services/cargo" element={<CargoTransport />} />
       </Route>
       <Route
         path="/admin"
