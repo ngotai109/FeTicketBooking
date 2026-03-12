@@ -107,8 +107,10 @@ body {
   /* Đảm bảo .nav-dropdown chiếm đủ chiều cao khối bố / padding */
 }
 
-.nav-dropdown>a {
+.nav-dropdown>a,
+.nav-dropdown>span {
   display: block;
+  cursor: pointer;
   /* Giúp vùng hover ăn liền */
 }
 

@@ -140,45 +140,36 @@ const UserLayout = () => {
                             Trang chủ
                         </NavLink>
                         <div className="nav-dropdown">
-                            <NavLink
-                                to="/about"
-                                className={({ isActive }) =>
-                                    `user-nav-link ${isActive ? 'active' : ''}`
-                                }
-                                onClick={closeMenu}
+                            <span
+                                className={`user-nav-link ${location.pathname.startsWith('/about') ? 'active' : ''}`}
+                                role="button"
                             >
                                 Giới thiệu ▾
-                            </NavLink>
+                            </span>
                             <div className="nav-dropdown-content">
                                 <NavLink to="/about/our" onClick={closeMenu}>Về chúng tôi</NavLink>
                                 <NavLink to="/about/history" onClick={closeMenu}>Hệ thống văn phòng</NavLink>
                             </div>
                         </div>
                         <div className="nav-dropdown">
-                            <NavLink
-                                to="/services"
-                                className={({ isActive }) =>
-                                    `user-nav-link ${isActive ? 'active' : ''}`
-                                }
-                                onClick={closeMenu}
+                            <span
+                                className={`user-nav-link ${location.pathname.startsWith('/services') ? 'active' : ''}`}
+                                role="button"
                             >
                                 Dịch vụ ▾
-                            </NavLink>
+                            </span>
                             <div className="nav-dropdown-content">
                                 <NavLink to="/services/transport" onClick={closeMenu}>Dịch vụ vận tải hành khách</NavLink>
                                 <NavLink to="/services/cargo" onClick={closeMenu}>Dịch vụ vận tải hàng hóa</NavLink>
                             </div>
                         </div>
                         <div className="nav-dropdown">
-                            <NavLink
-                                to="/lookup"
-                                className={({ isActive }) =>
-                                    `user-nav-link ${isActive ? 'active' : ''}`
-                                }
-                                onClick={closeMenu}
+                            <span
+                                className={`user-nav-link ${location.pathname.startsWith('/lookup') ? 'active' : ''}`}
+                                role="button"
                             >
                                 Tra cứu ▾
-                            </NavLink>
+                            </span>
                             <div className="nav-dropdown-content">
                                 <NavLink to="/lookup/ticket" onClick={closeMenu}>Tra cứu vé xe</NavLink>
                                 <NavLink to="/lookup/schedule" onClick={closeMenu}>Lịch trình chạy</NavLink>

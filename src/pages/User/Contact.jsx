@@ -257,7 +257,7 @@ const Contact = () => {
                             rel="noopener noreferrer"
                             className="social-link facebook"
                         >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
                             Facebook
                         </a>
                         <a href="tel:0969037123" className="social-link zalo">
@@ -292,7 +292,7 @@ const Contact = () => {
                 <div className="contact-map-wrap">
                     <iframe
                         title="Bản đồ Đồng Hương Sông Lam - Văn phòng Mỗ Lao"
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.0987063505497!2d105.77247677507776!3d21.031241080618834!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab4e61cfbe01%3A0x5a58f4f41e33c6f0!2zMzY0IFAuTmd1eeG7hW4gVsSDbiBM4buZYywgTOG6rWMgTmluaCwgSMOgIMSQw7RuZywgSMOgIE7hu5lpLCBWaeG7h3QgTmFt!5e0!3m2!1svi!2s!4v1709876543210!5m2!1svi!2s"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3725.2758101119107!2d105.77767581143205!3d20.981578389315526!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31345395ed2ba787%3A0xa4201d5678492f0d!2zQ8O0bmcgVHkgWMOieSBE4buxbmcgVsOgIEThu4tjaCBW4bulIFbhuq1uIFThuqNpIMSQ4buTbmcgSMawxqFuZyBTw7RuZyBMYW0!5e0!3m2!1svi!2s!4v1773307430848!5m2!1svi!2s"
                         allowFullScreen
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
