@@ -79,12 +79,12 @@
     color: #ffffff;
     margin: 0 0 20px;
     line-height: 1.1;
-    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .cargo-hero-content p {
     font-size: 1.15rem;
-    color: rgba(255,255,255,0.8);
+    color: rgba(255, 255, 255, 0.8);
     margin: 0 0 36px;
     line-height: 1.7;
 }
@@ -188,7 +188,7 @@
     height: 420px;
     object-fit: cover;
     border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
     transition: transform 0.4s ease;
 }
 
@@ -213,7 +213,7 @@
     height: 420px;
     object-fit: cover;
     border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
     transition: transform 0.4s ease;
 }
 
@@ -306,7 +306,7 @@
     background: #fff;
     border-radius: 20px;
     padding: 36px 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     border: 1px solid #f1f5f9;
     transition: all 0.3s ease;
     text-align: center;
@@ -422,7 +422,7 @@
     background: #fff;
     border-radius: 28px;
     overflow: hidden;
-    box-shadow: 0 10px 50px rgba(0,0,0,0.08);
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.08);
 }
 
 .cargo-pricing-left {
@@ -440,7 +440,7 @@
 
 .cargo-pricing-left p {
     font-size: 0.95rem;
-    color: rgba(255,255,255,0.75);
+    color: rgba(255, 255, 255, 0.75);
     line-height: 1.8;
     margin-bottom: 28px;
 }
@@ -456,7 +456,7 @@
     align-items: center;
     gap: 12px;
     font-size: 0.95rem;
-    color: rgba(255,255,255,0.85);
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .price-highlight-item strong {
@@ -526,12 +526,15 @@
     .cargo-services-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+
     .cargo-process-steps {
         grid-template-columns: repeat(2, 1fr);
     }
+
     .cargo-process-steps::before {
         display: none;
     }
+
     .cargo-pricing-card {
         grid-template-columns: 1fr;
     }
@@ -541,35 +544,44 @@
     .cargo-hero-content h1 {
         font-size: 2.2rem;
     }
+
     .cargo-container {
         gap: 60px;
         padding: 40px 16px 60px;
     }
+
     .cargo-intro-section,
     .cargo-fleet-section {
         grid-template-columns: 1fr;
         gap: 32px;
     }
+
     .cargo-fleet-section {
         direction: ltr;
     }
+
     .cargo-intro-image img,
     .cargo-fleet-image img {
         height: 300px;
     }
+
     .cargo-services-grid {
         grid-template-columns: 1fr;
     }
+
     .cargo-process-section {
         padding: 40px 20px;
     }
+
     .cargo-process-steps {
         grid-template-columns: 1fr;
     }
+
     .cargo-pricing-left,
     .cargo-pricing-right {
         padding: 36px 24px;
     }
+
     .cargo-intro-stats {
         gap: 20px;
     }

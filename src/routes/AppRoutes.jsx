@@ -13,6 +13,7 @@ import AboutUs from "../pages/User/AboutUs";
 import OfficeSystem from "../pages/User/OfficeSystem";
 import TicketLookup from "../pages/User/TicketLookup";
 import CargoTransport from "../pages/User/CargoTransport";
+import PassengerTransport from "../pages/User/PassengerTransport";
 
 export default function AppRoutes() {
   return (
@@ -26,6 +27,7 @@ export default function AppRoutes() {
         <Route path="about/history" element={<OfficeSystem />} />
         <Route path="lookup/ticket" element={<TicketLookup />} />
         <Route path="services/cargo" element={<CargoTransport />} />
+        <Route path="services/transport" element={<PassengerTransport />} />
       </Route>
       <Route
         path="/admin"
