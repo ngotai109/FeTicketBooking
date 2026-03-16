@@ -49,35 +49,27 @@ const OfficeSystem = () => {
             mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3779.23456789!2d105.7123456!3d18.8123456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3139cxxxxxxxxxxx%3A0xxxxxxxxxxxxxxx!2zQsOgbmggTWluaCwgQ-G7r2EgTMOyLCBOZ2jhu4UgQW4sIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1773281100000!5m2!1svi!2s"
         }
     ];
-
     const [selectedCity, setSelectedCity] = useState("Hà Nội");
     const filteredOffices = offices.filter(office => office.city === selectedCity);
     const [activeOffice, setActiveOffice] = useState(filteredOffices[0]);
     const mapRef = React.useRef(null);
-
     const handleCityChange = (city) => {
         setSelectedCity(city);
         const newFiltered = offices.filter(office => office.city === city);
         setActiveOffice(newFiltered[0]);
     };
-
-
     const handleOfficeClick = (office) => {
         setActiveOffice(office);
-        // On mobile/tablet, scroll to map when an office is selected
         if (window.innerWidth <= 1024) {
             mapRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
     };
-
     return (
         <div className="about-page minimal office-system-page">
             <div className="page-header">
                 <h1>Hệ Thống Văn Phòng</h1>
             </div>
-
             <div className="office-layout-container">
-                {/* Left Side: Office List */}
                 <div className="office-sidebar">
                     <div className="sidebar-intro">
                         <div className="city-toggle-container">
@@ -118,8 +110,6 @@ const OfficeSystem = () => {
                         ))}
                     </div>
                 </div>
-
-                {/* Right Side: Interactive Map */}
                 <div className="office-map-view" ref={mapRef}>
                     <div className="map-wrapper">
                         <iframe
@@ -147,9 +137,8 @@ const OfficeSystem = () => {
                     </div>
                 </div>
             </div>
-
             <div className="footer-closing-minimal">
-                <p>Mọi thắc mắc quý khách vui lòng liên hệ hotline 1900 xxxx để được hỗ trợ nhanh nhất.</p>
+                <p>Mọi thắc mắc quý khách vui lòng liên hệ hotline 1900 3088 để được hỗ trợ nhanh nhất.</p>
             </div>
         </div>
     );

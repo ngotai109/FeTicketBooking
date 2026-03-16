@@ -32,13 +32,14 @@ export default function AppRoutes() {
         <Route path="services/transport" element={<PassengerTransport />} />
         <Route path="news" element={<News />} />
         <Route path="contact" element={<Contact />} />
+        {/* <Route path ="admin" element={ <AdminLayout />}/> */}
       </Route>
       <Route
         path="/admin"
         element={
-          <ProtectedRoute>
-            <AdminLayout />
-          </ProtectedRoute>
+          // <ProtectedRoute>
+          <AdminLayout />
+          /* </ProtectedRoute> */
         }
       >
         <Route index element={<AdminDashboard />} />
