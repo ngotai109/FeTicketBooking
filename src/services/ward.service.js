@@ -28,7 +28,7 @@ const wardService = {
     },
 
     toggleActive: async (id) => {
-        return await api.put(`/Ward/toggle-active/${id}`);
+        return await api.put(`/Ward/${id}/toggle-active`);
     }
 };
 

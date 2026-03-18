@@ -86,13 +86,22 @@
     background-color: #cbd5e0;
 }
 
-.modal-btn.confirm {
+.modal-btn.confirm.dangerous {
     background-color: #e53e3e;
     color: white;
 }
 
-.modal-btn.confirm:hover {
+.modal-btn.confirm.dangerous:hover {
     background-color: #c53030;
+}
+
+.modal-btn.confirm.success {
+    background-color: #38a169;
+    color: white;
+}
+
+.modal-btn.confirm.success:hover {
+    background-color: #2f855a;
 }
 
 @keyframes fadeIn {

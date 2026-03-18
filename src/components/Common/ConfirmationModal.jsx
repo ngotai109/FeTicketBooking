@@ -1,7 +1,7 @@
 import React from 'react';
 import './ConfirmationModal.css';
 
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Xác nhận', cancelText = 'Hủy' }) => {
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Xác nhận', cancelText = 'Hủy', isLoading = false, isDangerous = false }) => {
     if (!isOpen) return null;
     return (
         <div className="modal-overlay">
@@ -14,8 +14,14 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirm
                     <p>{message}</p>
                 </div>
                 <div className="modal-footer">
-                    <button className="modal-btn cancel" onClick={onClose}>{cancelText}</button>
-                    <button className="modal-btn confirm" onClick={onConfirm}>{confirmText}</button>
+                    <button className="modal-btn cancel" onClick={onClose} disabled={isLoading}>{cancelText}</button>
+                    <button
+                        className={`modal-btn confirm ${isDangerous ? 'dangerous' : 'success'}`}
+                        onClick={onConfirm}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Đang xử lý...' : confirmText}
+                    </button>
                 </div>
             </div>
         </div>

@@ -11,6 +11,7 @@ const ProvinceManagement = () => {
     const [currentProvince, setCurrentProvince] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [isToggling, setIsToggling] = useState(false);
 
     useEffect(() => {
         fetchProvinces();
@@ -37,12 +38,15 @@ const ProvinceManagement = () => {
 
     const handleToggleActiveConfirm = async () => {
         try {
+            setIsToggling(true);
             await provinceService.toggleActive(currentProvince.provinceId);
             toast.success(`${currentProvince.isActive ? 'Khóa' : 'Mở khóa'} tỉnh thành thành công`);
-            fetchProvinces();
+            await fetchProvinces();
             setIsToggleModalOpen(false);
         } catch (error) {
             toast.error('Lỗi khi thay đổi trạng thái');
+        } finally {
+            setIsToggling(false);
         }
     };
 
@@ -169,9 +173,9 @@ const ProvinceManagement = () => {
                                                     cursor: 'pointer',
                                                     fontWeight: '600',
                                                     fontSize: '12px',
-                                                    padding: '3px 10px',
+                                                    padding: '4px 12px',
                                                     borderRadius: '6px',
-                                                    minWidth: '85px',
+                                                    minWidth: '90px',
                                                     transition: 'all 0.2s'
                                                 }}
                                                 onMouseOver={(e) => {
@@ -200,6 +204,8 @@ const ProvinceManagement = () => {
                 message={`Bạn có chắc chắn muốn ${currentProvince?.isActive ? 'khóa' : 'mở khóa'} tỉnh "${currentProvince?.provinceName}" không?`}
                 confirmText={currentProvince?.isActive ? 'Khóa' : 'Mở khóa'}
                 cancelText="Hủy"
+                isLoading={isToggling}
+                isDangerous={currentProvince?.isActive}
             />
         </div>
     );

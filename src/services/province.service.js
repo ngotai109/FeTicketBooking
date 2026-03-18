@@ -24,7 +24,7 @@ const provinceService = {
     },
 
     toggleActive: async (id) => {
-        return await api.put(`/Province/toggle-active/${id}`);
+        return await api.put(`/Province/${id}/toggle-active`);
     }
 };
 

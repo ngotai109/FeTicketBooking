@@ -14,6 +14,7 @@ const WardManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterProvinceId, setFilterProvinceId] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [isToggling, setIsToggling] = useState(false);
 
     useEffect(() => {
         fetchProvinces();
@@ -51,12 +52,15 @@ const WardManagement = () => {
 
     const handleToggleActiveConfirm = async () => {
         try {
+            setIsToggling(true);
             await wardService.toggleActive(currentWard.wardId);
             toast.success(`${currentWard.isActive ? 'Khóa' : 'Mở khóa'} phường xã thành công`);
-            fetchWards();
+            await fetchWards();
             setIsToggleModalOpen(false);
         } catch (error) {
             toast.error('Lỗi khi thay đổi trạng thái');
+        } finally {
+            setIsToggling(false);
         }
     };
 
@@ -201,10 +205,16 @@ const WardManagement = () => {
                                                     background: 'none',
                                                     cursor: 'pointer',
                                                     fontWeight: '600',
-                                                    fontSize: '12px',
-                                                    padding: '3px 10px',
+                                                    padding: '4px 12px',
                                                     borderRadius: '6px',
-                                                    minWidth: '85px'
+                                                    minWidth: '90px',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                                onMouseOver={(e) => {
+                                                    e.currentTarget.style.backgroundColor = ward.isActive ? '#fff5f5' : '#e6fffa';
+                                                }}
+                                                onMouseOut={(e) => {
+                                                    e.currentTarget.style.backgroundColor = 'transparent';
                                                 }}
                                             >
                                                 {ward.isActive ? 'Khóa' : 'Mở khóa'}
@@ -226,6 +236,8 @@ const WardManagement = () => {
                 message={`Bạn có chắc chắn muốn ${currentWard?.isActive ? 'khóa' : 'mở khóa'} phường xã "${currentWard?.wardName}" không?`}
                 confirmText={currentWard?.isActive ? 'Khóa' : 'Mở khóa'}
                 cancelText="Hủy"
+                isLoading={isToggling}
+                isDangerous={currentWard?.isActive}
             />
         </div>
     );
