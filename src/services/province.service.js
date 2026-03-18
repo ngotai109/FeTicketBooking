@@ -2,29 +2,29 @@ import api from './api';
 
 const provinceService = {
     getAllProvinces: async () => {
-        return await api.get('/Province/all');
+        return await api.get('Province/all');
     },
     getAllProvincesActive: async () => {
-        return await api.get('Provinces')
+        return await api.get('Province/active');
     },
     getProvinceById: async (id) => {
-        return await api.get(`/Province/${id}`);
+        return await api.get(`Province/${id}`);
     },
 
     createProvince: async (data) => {
-        return await api.post('/Province', data);
+        return await api.post('Province', data);
     },
 
     updateProvince: async (id, data) => {
-        return await api.put(`/Province/${id}`, data);
+        return await api.put(`Province/${id}`, data);
     },
 
     deleteProvince: async (id) => {
-        return await api.delete(`/Province/${id}`);
+        return await api.delete(`Province/${id}`);
     },
 
     toggleActive: async (id) => {
-        return await api.put(`/Province/${id}/toggle-active`);
+        return await api.put(`Province/${id}/toggle-active`);
     }
 };
 
