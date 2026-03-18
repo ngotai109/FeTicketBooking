@@ -10,6 +10,7 @@ const AdminLayout = () => {
     const [isRoutesMenuOpen, setIsRoutesMenuOpen] = useState(false);
     const [isVehiclesMenuOpen, setIsVehiclesMenuOpen] = useState(false);
     const [isLocationsMenuOpen, setIsLocationsMenuOpen] = useState(false);
+    const [isOfficesMenuOpen, setIsOfficesMenuOpen] = useState(false);
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
     const handleLogoutClick = () => {
@@ -153,6 +154,39 @@ const AdminLayout = () => {
                             </a>
                             <a href="/admin/wards" className="nav-item submenu-item">
                                 <span style={{ marginLeft: '32px', fontSize: '14px' }}>Quản lý Xã</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div className={`nav-group ${isOfficesMenuOpen ? 'open' : ''}`}>
+                        <div
+                            className="nav-item nav-item-header"
+                            onClick={() => setIsOfficesMenuOpen(!isOfficesMenuOpen)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 21H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M3 7V21H21V7L12 3L3 7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M9 21V12H15V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            <span>Hệ thống văn phòng</span>
+                            <svg
+                                className="chevron-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                style={{ marginLeft: 'auto', width: '16px', height: '16px', transition: 'transform 0.3s ease', transform: isOfficesMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                            >
+                                <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </div>
+                        <div className="submenu" style={{
+                            maxHeight: isOfficesMenuOpen ? '200px' : '0',
+                            overflow: 'hidden',
+                            transition: 'max-height 0.3s ease'
+                        }}>
+                            <a href="/admin/offices" className="nav-item submenu-item">
+                                <span style={{ marginLeft: '32px', fontSize: '14px' }}>Quản lý văn phòng</span>
                             </a>
                         </div>
                     </div>
