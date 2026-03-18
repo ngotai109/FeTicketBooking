@@ -18,7 +18,7 @@ const locationService = {
     },
 
     deleteLocation: async (id) => {
-        return await apiService.remove(`/Location/${id}`);
+        return await apiService.delete(`/Location/${id}`);
     }
 };
 

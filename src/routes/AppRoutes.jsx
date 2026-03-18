@@ -4,7 +4,8 @@ import Login from "../pages/Login";
 import AdminDashboard from "../pages/AdminDashboard";
 import AdminLayout from "../layouts/Admin/AdminLayout";
 import RouteManagement from "../pages/Admin/RouteManagement";
-import LocationManagement from "../pages/Admin/LocationManagement";
+import ProvinceManagement from "../pages/Admin/ProvinceManagement";
+import WardManagement from "../pages/Admin/WardManagement";
 import ProtectedRoute from "./ProtectedRoute";
 import UserLayout from "../layouts/User/UserLayout";
 import Home from "../pages/User/Home";
@@ -44,7 +45,8 @@ export default function AppRoutes() {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="routes" element={<RouteManagement />} />
-        <Route path="locations" element={<LocationManagement />} />
+        <Route path="provinces" element={<ProvinceManagement />} />
+        <Route path="wards" element={<WardManagement />} />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

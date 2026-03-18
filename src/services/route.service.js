@@ -18,7 +18,7 @@ const routeService = {
     },
 
     deleteRoute: async (id) => {
-        return await apiService.remove(`/Route/${id}`);
+        return await apiService.delete(`/Route/${id}`);
     }
 };
 
