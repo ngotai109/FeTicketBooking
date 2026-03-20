@@ -1,9 +1,6 @@
 .booking-page {
     background-color: #f4f7f9;
-    height: calc(100vh - 72px);
-    /* Chiều cao còn lại sau Header */
-    overflow: hidden;
-    /* Không cho trang cuộn tổng thể */
+    min-height: calc(100vh - 72px);
     display: flex;
     flex-direction: column;
 }
@@ -303,11 +300,6 @@
 
 /* Results Section */
 .results-list-section {
-    height: 100%;
-    overflow-y: auto;
-    /* Chỉ cho phép khu vực này cuộn */
-    padding-right: 10px;
-    /* Tránh thanh cuộn đè lên nội dung */
     padding-bottom: 80px;
 }
 

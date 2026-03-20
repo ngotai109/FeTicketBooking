@@ -14,6 +14,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import UserLayout from "../layouts/User/UserLayout";
 import Home from "../pages/User/Home";
 import Booking from "../pages/User/Booking";
+import Checkout from "../pages/User/Checkout";
+import VNPayMock from "../pages/User/VNPayMock";
 import AboutUs from "../pages/User/AboutUs";
 import OfficeSystem from "../pages/User/OfficeSystem";
 import TicketLookup from "../pages/User/TicketLookup";
@@ -30,6 +32,8 @@ export default function AppRoutes() {
         <Route index element={<Navigate to="/home" replace />} />
         <Route path="home" element={<Home />} />
         <Route path="booking" element={<Booking />} />
+        <Route path="checkout" element={<Checkout />} />
+        <Route path="payment/vnpay" element={<VNPayMock />} />
         <Route path="about/our" element={<AboutUs />} />
         <Route path="about/history" element={<OfficeSystem />} />
         <Route path="lookup/ticket" element={<TicketLookup />} />
