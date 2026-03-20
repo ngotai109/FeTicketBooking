@@ -5,9 +5,19 @@ const CustomSelect = ({ options, value, onChange, placeholder, style, minWidth =
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef(null);
 
-    // Tìm label tương ứng với value
-    const selectedOption = options.find(opt => opt.value === value);
-    const label = selectedOption ? selectedOption.label : (placeholder || 'Chọn...');
+    // Tìm label tương ứng với value (hỗ trợ cả lồng nhau)
+    const findLabel = (opts, val) => {
+        for (const opt of opts) {
+            if (opt.value === val) return opt.label;
+            if (opt.type === 'group' && opt.items) {
+                const found = findLabel(opt.items, val);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+
+    const label = findLabel(options, value) || (placeholder || 'Chọn...');
 
     // Đóng khi click ra ngoài
     useEffect(() => {
@@ -46,15 +56,34 @@ const CustomSelect = ({ options, value, onChange, placeholder, style, minWidth =
             {isOpen && (
                 <div className="custom-select-dropdown">
                     <div className="custom-select-options">
-                        {options.map((option, index) => (
-                            <div 
-                                key={index} 
-                                className={`custom-select-option ${option.value === value ? 'selected' : ''}`}
-                                onClick={() => handleSelect(option)}
-                            >
-                                {option.label}
-                            </div>
-                        ))}
+                        {options.map((option, index) => {
+                            if (option.type === 'group') {
+                                return (
+                                    <div key={index} className="custom-select-group">
+                                        <div className="custom-select-group-title">{option.label}</div>
+                                        {option.items.map((subOpt, subIndex) => (
+                                            <div 
+                                                key={`${index}-${subIndex}`} 
+                                                className={`custom-select-option ${subOpt.value === value ? 'selected' : ''}`}
+                                                onClick={() => handleSelect(subOpt)}
+                                                style={{ paddingLeft: '24px' }}
+                                            >
+                                                {subOpt.label}
+                                            </div>
+                                        ))}
+                                    </div>
+                                );
+                            }
+                            return (
+                                <div 
+                                    key={index} 
+                                    className={`custom-select-option ${option.value === value ? 'selected' : ''}`}
+                                    onClick={() => handleSelect(option)}
+                                >
+                                    {option.label}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             )}

@@ -18,6 +18,7 @@ const OfficeManagement = () => {
     const [currentOffice, setCurrentOffice] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [filterProvince, setFilterProvince] = useState('all');
     const [isToggling, setIsToggling] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -27,7 +28,9 @@ const OfficeManagement = () => {
         phoneNumber: '',
         provinceId: '',
         wardId: '',
-        isActive: true
+        isActive: true,
+        wardName: '',
+        provinceName: ''
     });
 
     useEffect(() => {
@@ -41,12 +44,12 @@ const OfficeManagement = () => {
             const response = await officeService.getAllOffices();
             console.log('API Response (Offices):', response.data);
             const data = response.data?.data || response.data || [];
-            
+
             // Log structure to help verify field names
             if (data.length > 0) {
                 console.log('Sample Office Object:', data[0]);
             }
-            
+
             setOffices(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Full Error Details:', error);
@@ -70,8 +73,8 @@ const OfficeManagement = () => {
             const response = await provinceService.getAllProvinces();
             const data = response.data?.data || response.data || [];
             if (Array.isArray(data)) {
-                // Chỉ lấy những tỉnh đang hoạt động nếu muốn, hoặc lấy tất cả
-                setProvinces(data.filter(p => p.isActive)); 
+                // Lấy tất cả tỉnh để đảm bảo dữ liệu cũ vẫn hiển thị đúng trong combo box
+                setProvinces(data);
             } else {
                 setProvinces([]);
             }
@@ -92,13 +95,23 @@ const OfficeManagement = () => {
 
 
 
+    const getProvinceName = (id) => {
+        const province = provinces.find(p => p.provinceId === parseInt(id));
+        return province ? province.provinceName : '';
+    };
+
+    const getWardName = (id) => {
+        const ward = allWards.find(w => w.wardId === parseInt(id));
+        return ward ? ward.wardName : '';
+    };
+
     const handleProvinceChange = (e) => {
         const provinceId = e.target.value;
         setFormData({ ...formData, provinceId, wardId: '' });
-        
+
         if (provinceId) {
             // Lọc xã phường từ danh sách cache theo provinceId
-            const filteredWards = allWards.filter(w => 
+            const filteredWards = allWards.filter(w =>
                 w.provinceId === parseInt(provinceId) && w.isActive
             );
             setWards(filteredWards);
@@ -111,18 +124,41 @@ const OfficeManagement = () => {
         if (office) {
             setIsEditing(true);
             setCurrentOffice(office);
-            const filteredWards = allWards.filter(w => 
-                w.provinceId === parseInt(office.provinceId) && w.isActive
-            );
-            setWards(filteredWards);
-            
+
+            // Xử lý dữ liệu ban đầu
+            let currentProvinceId = office.provinceId;
+            let currentWardId = office.wardId;
+
+            // Tìm provinceId từ wardId trong danh sách allWards nếu office.provinceId trống
+            if (!currentProvinceId && currentWardId && allWards.length > 0) {
+                const foundWard = allWards.find(w => w.wardId === parseInt(currentWardId));
+                if (foundWard) {
+                    currentProvinceId = foundWard.provinceId;
+                }
+            } else if (!currentProvinceId && office.ward?.provinceId) {
+                currentProvinceId = office.ward.provinceId;
+            }
+
+            // Cập nhật danh sách wards theo provinceId tìm được
+            // Bao gồm cả ward hiện tại dù nó có đang bị khóa (isActive = false)
+            if (currentProvinceId) {
+                const filteredWards = allWards.filter(w =>
+                    w.provinceId === parseInt(currentProvinceId) && (w.isActive || w.wardId === parseInt(currentWardId))
+                );
+                setWards(filteredWards);
+            } else {
+                setWards([]);
+            }
+
             setFormData({
                 officeName: office.officeName,
                 address: office.address,
                 phoneNumber: office.phoneNumber || office.phone || '',
-                provinceId: office.provinceId || '',
-                wardId: office.wardId || '',
-                isActive: office.isActive
+                provinceId: currentProvinceId || '',
+                wardId: currentWardId || '',
+                isActive: office.isActive,
+                wardName: getWardName(currentWardId),
+                provinceName: getProvinceName(currentProvinceId)
             });
         } else {
             setIsEditing(false);
@@ -133,7 +169,9 @@ const OfficeManagement = () => {
                 phoneNumber: '',
                 provinceId: '',
                 wardId: '',
-                isActive: true
+                isActive: true,
+                wardName: '',
+                provinceName: ''
             });
             setWards([]);
         }
@@ -195,12 +233,25 @@ const OfficeManagement = () => {
     const filteredOffices = offices.filter(o => {
         const name = o.officeName || '';
         const address = o.address || '';
-        const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                             address.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = filterStatus === 'all' || 
-            (filterStatus === 'active' && o.isActive) || 
+        const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            address.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = filterStatus === 'all' ||
+            (filterStatus === 'active' && o.isActive) ||
             (filterStatus === 'inactive' && !o.isActive);
-        return matchesSearch && matchesStatus;
+
+        // Tìm provinceId của văn phòng (từ data hoặc từ wardId trong cache)
+        let officeProvinceId = o.provinceId;
+        if (!officeProvinceId && o.wardId) {
+            const ward = allWards.find(w => w.wardId === o.wardId);
+            officeProvinceId = ward?.provinceId;
+        } else if (!officeProvinceId && o.ward?.provinceId) {
+            officeProvinceId = o.ward.provinceId;
+        }
+
+        const matchesProvince = filterProvince === 'all' ||
+            parseInt(officeProvinceId) === parseInt(filterProvince);
+
+        return matchesSearch && matchesStatus && matchesProvince;
     });
 
     return (
@@ -210,8 +261,8 @@ const OfficeManagement = () => {
                     <h1 style={{ fontSize: '18px', marginBottom: '1px' }}>Quản lý Văn phòng</h1>
                     <p className="header-time" style={{ fontSize: '11px', opacity: 0.8 }}>Quản lý danh sách các văn phòng đại diện trong hệ thống</p>
                 </div>
-                <button 
-                    className="add-button" 
+                <button
+                    className="add-button"
                     onClick={() => handleOpenFormModal()}
                     style={{
                         background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)',
@@ -237,10 +288,10 @@ const OfficeManagement = () => {
             </header>
 
             <div className="content-card" style={{ background: 'white', padding: '16px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                <div style={{ 
-                    display: 'flex', 
-                    gap: '12px', 
-                    marginBottom: '16px', 
+                <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    marginBottom: '16px',
                     flexWrap: 'wrap',
                     alignItems: 'center',
                     background: '#f8fafc',
@@ -253,10 +304,10 @@ const OfficeManagement = () => {
                             placeholder="Tìm kiếm văn phòng, địa chỉ..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ 
-                                padding: '6px 12px 6px 32px', 
-                                borderRadius: '6px', 
-                                border: '1px solid #e2e8f0', 
+                            style={{
+                                padding: '6px 12px 6px 32px',
+                                borderRadius: '6px',
+                                border: '1px solid #e2e8f0',
                                 width: '100%',
                                 outline: 'none',
                                 fontSize: '12px'
@@ -266,6 +317,18 @@ const OfficeManagement = () => {
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                         </span>
                     </div>
+
+                    <CustomSelect
+                        value={filterProvince}
+                        onChange={(val) => setFilterProvince(val)}
+                        options={[
+                            { value: 'all', label: 'Tất cả tỉnh thành' },
+                            ...provinces.map(p => ({
+                                value: p.provinceId.toString(),
+                                label: p.provinceName
+                            }))
+                        ]}
+                    />
 
                     <CustomSelect
                         value={filterStatus}
@@ -308,7 +371,13 @@ const OfficeManagement = () => {
                                     <tr key={office.officeId} style={{ borderBottom: '1px solid #f7fafc', transition: 'background 0.2s', fontSize: '12px' }}>
                                         <td style={{ padding: '8px 12px' }}>{office.officeId}</td>
                                         <td style={{ padding: '8px 12px', fontWeight: '600', color: '#2d3748' }}>{office.officeName}</td>
-                                        <td style={{ padding: '8px 12px', color: '#4a5568' }}>{office.address}</td>
+                                        <td style={{ padding: '8px 12px', color: '#4a5568' }}>
+                                            {office.address}
+                                            {office.wardName && office.provinceName ? 
+                                                `, ${office.wardName}, ${office.provinceName}` : 
+                                                (getWardName(office.wardId) ? `, ${getWardName(office.wardId)}, ${getProvinceName(office.provinceId || allWards.find(w => w.wardId === office.wardId)?.provinceId)}` : '')
+                                            }
+                                        </td>
                                         <td style={{ padding: '8px 12px', color: '#4a5568' }}>{office.phoneNumber || office.phone}</td>
                                         <td style={{ padding: '8px 12px' }}>
                                             <span style={{
@@ -401,8 +470,8 @@ const OfficeManagement = () => {
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
                     backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
                 }}>
-                    <div style={{ 
-                        background: 'white', padding: '32px', borderRadius: '16px', 
+                    <div style={{
+                        background: 'white', padding: '32px', borderRadius: '16px',
                         width: '550px', maxHeight: '95vh', overflowY: 'auto',
                         boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
                     }}>
@@ -441,6 +510,11 @@ const OfficeManagement = () => {
                                         style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '14px' }}
                                         placeholder="Vd: Số 20, đường Phạm Hùng..."
                                     />
+                                    {(formData.wardId || formData.provinceId) && (
+                                        <div style={{ marginTop: '8px', fontSize: '12px', color: '#718096', fontStyle: 'italic' }}>
+                                            Địa chỉ đầy đủ: {formData.address}{formData.wardId ? `, ${getWardName(formData.wardId)}` : ''}{formData.provinceId ? `, ${getProvinceName(formData.provinceId)}` : ''}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div>

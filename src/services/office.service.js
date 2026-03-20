@@ -4,7 +4,7 @@ const officeService = {
     getAllOffices: async () => {
         return await api.get('Office');
     },
-    
+
     getOfficeById: async (id) => {
         return await api.get(`Office/${id}`);
     },
@@ -22,7 +22,7 @@ const officeService = {
     },
 
     toggleActive: async (id) => {
-        return await api.put(`Office/${id}/toggle-active`);
+        return await api.patch(`Office/${id}/toggle-active`);
     }
 };
 
