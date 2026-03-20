@@ -11,6 +11,7 @@ const AdminLayout = () => {
     const [isVehiclesMenuOpen, setIsVehiclesMenuOpen] = useState(false);
     const [isLocationsMenuOpen, setIsLocationsMenuOpen] = useState(false);
     const [isOfficesMenuOpen, setIsOfficesMenuOpen] = useState(false);
+    const [isOperationsMenuOpen, setIsOperationsMenuOpen] = useState(false);
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
     const handleLogoutClick = () => {
@@ -49,13 +50,39 @@ const AdminLayout = () => {
                         </svg>
                         <span>Dashboard</span>
                     </a>
-                    <a href="#bookings" className="nav-item">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15M9 5C9 6.10457 9.89543 7 11 7H13C14.1046 7 15 6.10457 15 5M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <span>Đặt vé</span>
-                    </a>
-
+                    <div className={`nav-group ${isOperationsMenuOpen ? 'open' : ''}`}>
+                        <div
+                            className="nav-item nav-item-header"
+                            onClick={() => setIsOperationsMenuOpen(!isOperationsMenuOpen)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            <span>Điều hành Vận tải</span>
+                            <svg
+                                className="chevron-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                style={{ marginLeft: 'auto', width: '16px', height: '16px', transition: 'transform 0.3s ease', transform: isOperationsMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                            >
+                                <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </div>
+                        <div className="submenu" style={{
+                            maxHeight: isOperationsMenuOpen ? '200px' : '0',
+                            overflow: 'hidden',
+                            transition: 'max-height 0.3s ease'
+                        }}>
+                            <a href="/admin/schedules" className="nav-item submenu-item">
+                                <span style={{ marginLeft: '32px', fontSize: '14px' }}>Lịch trình & Lên chuyến</span>
+                            </a>
+                            <a href="/admin/trips" className="nav-item submenu-item">
+                                <span style={{ marginLeft: '32px', fontSize: '14px' }}>Theo dõi Điều hành xe</span>
+                            </a>
+                        </div>
+                    </div>
                     <div className={`nav-group ${isVehiclesMenuOpen ? 'open' : ''}`}>
                         <div
                             className="nav-item nav-item-header"
@@ -85,10 +112,10 @@ const AdminLayout = () => {
                             overflow: 'hidden',
                             transition: 'max-height 0.3s ease'
                         }}>
-                            <a href="#vehicles-management" className="nav-item submenu-item">
-                                <span style={{ marginLeft: '32px', fontSize: '14px' }}>Quản lý phương tiện</span>
-                            </a>
-                        </div>
+                             <a href="/admin/vehicles" className="nav-item submenu-item">
+                                 <span style={{ marginLeft: '32px', fontSize: '14px' }}>Quản lý xe</span>
+                             </a>
+                         </div>
                     </div>
 
                     <div className={`nav-group ${isRoutesMenuOpen ? 'open' : ''}`}>

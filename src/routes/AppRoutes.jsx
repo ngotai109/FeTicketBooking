@@ -7,6 +7,9 @@ import RouteManagement from "../pages/Admin/RouteManagement";
 import ProvinceManagement from "../pages/Admin/ProvinceManagement";
 import WardManagement from "../pages/Admin/WardManagement";
 import OfficeManagement from "../pages/Admin/OfficeManagement";
+import BusManagement from "../pages/Admin/BusManagement";
+import ScheduleManagement from "../pages/Admin/ScheduleManagement";
+import TripMonitoring from "../pages/Admin/TripMonitoring";
 import ProtectedRoute from "./ProtectedRoute";
 import UserLayout from "../layouts/User/UserLayout";
 import Home from "../pages/User/Home";
@@ -49,6 +52,9 @@ export default function AppRoutes() {
         <Route path="provinces" element={<ProvinceManagement />} />
         <Route path="wards" element={<WardManagement />} />
         <Route path="offices" element={<OfficeManagement />} />
+        <Route path="vehicles" element={<BusManagement />} />
+        <Route path="schedules" element={<ScheduleManagement />} />
+        <Route path="trips" element={<TripMonitoring />} />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
