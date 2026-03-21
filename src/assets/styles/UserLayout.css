@@ -746,6 +746,7 @@ body {
   font-size: 13.5px;
   line-height: 1.55;
   position: relative;
+  white-space: pre-wrap;
 }
 .chatbot-msg-bubble p { margin: 0 0 4px; }
 .chatbot-msg-bubble .chatbot-msg-time {

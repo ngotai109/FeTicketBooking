@@ -4,6 +4,7 @@ import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import '../../assets/styles/UserLayout.css';
 import logo from '../../assets/images/logo.webp';
 import bg1 from '../../assets/images/bg1.webp';
+import chatService from '../../services/chat.service';
 
 const UserLayout = () => {
     const location = useLocation();
@@ -36,7 +37,7 @@ const UserLayout = () => {
         }
     }, [chatMessages]);
 
-    const sendMessage = (text) => {
+    const sendMessage = async (text) => {
         const msg = text || chatInput.trim();
         if (!msg) return;
         const userMsg = {
@@ -45,29 +46,39 @@ const UserLayout = () => {
             text: msg,
             time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
         };
-        setChatMessages(prev => [...prev, userMsg]);
+        const updatedMessages = [...chatMessages, userMsg];
+        setChatMessages(updatedMessages);
         setChatInput('');
         setChatLoading(true);
 
-        // ──────────────────────────────────────────────────────
-        // TODO: TÍCH HỢP CHATBOT API TẠI ĐÂY
-        // Gọi API chatbot (Dialogflow, OpenAI, Rasa, v.v.)
-        // và thay thế đoạn setTimeout bên dưới bằng response thật.
-        // Ví dụ:
-        //   const res = await fetch('/api/chatbot', { method:'POST', body: JSON.stringify({ message: msg }) });
-        //   const data = await res.json();
-        //   setChatMessages(prev => [...prev, { id: Date.now(), role:'bot', text: data.reply, time: '...' }]);
-        // ──────────────────────────────────────────────────────
-        setTimeout(() => {
+        try {
+            // Chuẩn bị lịch sử chat để gửi lên BE
+            const history = updatedMessages.map(m => ({
+                role: m.role === 'bot' ? 'assistant' : 'user',
+                content: m.text
+            }));
+
+            const response = await chatService.askChatbot(history);
+
             const botReply = {
                 id: Date.now() + 1,
                 role: 'bot',
-                text: 'Cảm ơn bạn đã nhắn tin! Chúng tôi sẽ phản hồi sớm. Hoặc liên hệ hotline: 📞 0969 037 123 để được hỗ trợ ngay.',
+                text: response.reply || 'Cảm ơn bạn đã nhắn tin! Chúng tôi sẽ phản hồi sớm.',
                 time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
             };
             setChatMessages(prev => [...prev, botReply]);
+        } catch (error) {
+            console.error('Error sending message to chatbot:', error);
+            const errorReply = {
+                id: Date.now() + 1,
+                role: 'bot',
+                text: 'Xin lỗi, hiện tại tôi đang gặp sự cố kết nối. Vui lòng thử lại sau hoặc liên hệ hotline: 📞 0969 037 123. Xin lỗi bạn!',
+                time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+            };
+            setChatMessages(prev => [...prev, errorReply]);
+        } finally {
             setChatLoading(false);
-        }, 900);
+        }
     };
 
     const handleChatKey = (e) => {
