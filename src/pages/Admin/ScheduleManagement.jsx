@@ -15,6 +15,19 @@ const ScheduleManagement = () => {
     const [genDates, setGenDates] = useState({ fromDate: '', toDate: '' });
     const [isGenerating, setIsGenerating] = useState(false);
 
+    // Modal states for CRUD
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [selectedScheduleId, setSelectedScheduleId] = useState(null);
+    const [formData, setFormData] = useState({
+        routeId: '',
+        defaultBusId: '',
+        departureTime: '',
+        arrivalTime: '',
+        defaultTicketPrice: '',
+        isActive: true
+    });
+
     useEffect(() => {
         fetchInitialData();
     }, []);
@@ -77,6 +90,69 @@ const ScheduleManagement = () => {
         }
     };
 
+    const handleOpenModal = (schedule = null) => {
+        if (schedule) {
+            setIsEditMode(true);
+            setSelectedScheduleId(schedule.scheduleId || schedule.ScheduleId);
+            setFormData({
+                routeId: schedule.routeId || schedule.RouteId || '',
+                defaultBusId: schedule.defaultBusId || schedule.DefaultBusId || '',
+                departureTime: schedule.departureTime || schedule.DepartureTime || '',
+                arrivalTime: schedule.arrivalTime || schedule.ArrivalTime || '',
+                defaultTicketPrice: schedule.defaultTicketPrice || schedule.DefaultTicketPrice || '',
+                isActive: schedule.isActive !== undefined ? schedule.isActive : true
+            });
+        } else {
+            setIsEditMode(false);
+            setSelectedScheduleId(null);
+            setFormData({
+                routeId: '',
+                defaultBusId: '',
+                departureTime: '',
+                arrivalTime: '',
+                defaultTicketPrice: '',
+                isActive: true
+            });
+        }
+        setIsModalOpen(true);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const dataToSubmit = {
+                ...formData,
+                routeId: parseInt(formData.routeId),
+                defaultBusId: parseInt(formData.defaultBusId),
+                defaultTicketPrice: parseFloat(formData.defaultTicketPrice)
+            };
+
+            if (isEditMode) {
+                await scheduleService.updateSchedule(selectedScheduleId, dataToSubmit);
+                toast.success('Cập nhật lịch trình thành công!');
+            } else {
+                await scheduleService.createSchedule(dataToSubmit);
+                toast.success('Thêm lịch trình thành công!');
+            }
+            setIsModalOpen(false);
+            fetchSchedules(); // Refresh the list
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại!');
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm('Bạn có chắc chắn muốn xóa lịch trình này?')) {
+            try {
+                await scheduleService.deleteSchedule(id);
+                toast.success('Xóa lịch trình thành công!');
+                fetchSchedules();
+            } catch (error) {
+                toast.error(error.response?.data?.message || 'Có lỗi khi xóa lịch trình');
+            }
+        }
+    };
+
     const getRouteName = (routeId) => {
         // Find in mock or real routes
         const r = routes.find(r => (r.routeId || r.RouteId) === routeId);
@@ -113,7 +189,7 @@ const ScheduleManagement = () => {
             <div className="content-card" style={{ background: 'white', padding: '16px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                     <h2 style={{ fontSize: '15px', color: '#2d3748' }}>Danh sách Lịch Cố Định (Schedules)</h2>
-                    <button style={{ background: '#ebf8ff', color: '#3182ce', border: '1px solid #bee3f8', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
+                    <button onClick={() => handleOpenModal()} style={{ background: '#ebf8ff', color: '#3182ce', border: '1px solid #bee3f8', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
                         + Thêm Lịch (Khung Giờ)
                     </button>
                 </div>
@@ -144,7 +220,8 @@ const ScheduleManagement = () => {
                                         <td style={{ padding: '10px 12px', color: '#e53e3e', fontWeight: '700' }}>{s.arrivalTime}</td>
                                         <td style={{ padding: '10px 12px', fontWeight: '600' }}>{s.defaultTicketPrice?.toLocaleString()} đ</td>
                                         <td style={{ padding: '10px 12px', textAlign: 'right' }}>
-                                            <button style={{ color: '#4a5568', background: 'white', border: '1px solid #e2e8f0', cursor: 'pointer', fontWeight: '600', fontSize: '11px', padding: '4px 8px', borderRadius: '6px' }}>Sửa</button>
+                                            <button onClick={() => handleOpenModal(s)} style={{ color: '#4a5568', background: 'white', border: '1px solid #e2e8f0', cursor: 'pointer', fontWeight: '600', fontSize: '11px', padding: '4px 8px', borderRadius: '6px', marginRight: '5px' }}>Sửa</button>
+                                            <button onClick={() => handleDelete(s.scheduleId || s.ScheduleId)} style={{ color: '#e53e3e', background: 'white', border: '1px solid #fc8181', cursor: 'pointer', fontWeight: '600', fontSize: '11px', padding: '4px 8px', borderRadius: '6px' }}>Xóa</button>
                                         </td>
                                     </tr>
                                 ))
@@ -156,6 +233,69 @@ const ScheduleManagement = () => {
                     </table>
                 </div>
             </div>
+
+            {/* Modal Add/Edit Schedule */}
+            {isModalOpen && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                    <div style={{ background: 'white', padding: '30px', borderRadius: '16px', width: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
+                        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#2b6cb0' }}>
+                                {isEditMode ? 'Cập Nhật Lịch Trình' : 'Thêm Lịch Trình Mới'}
+                            </h2>
+                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>✕</button>
+                        </div>
+                        
+                        <form onSubmit={handleSubmit}>
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', fontWeight: '600' }}>Tuyến đường:</label>
+                                <select required value={formData.routeId} onChange={(e) => setFormData({...formData, routeId: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: 'white' }}>
+                                    <option value="">-- Chọn tuyến đường --</option>
+                                    {routes.map(r => (
+                                        <option key={r.routeId || r.RouteId} value={r.routeId || r.RouteId}>
+                                            {r.routeName || r.RouteName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', fontWeight: '600' }}>Xe mặc định:</label>
+                                <select required value={formData.defaultBusId} onChange={(e) => setFormData({...formData, defaultBusId: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: 'white' }}>
+                                    <option value="">-- Chọn xe --</option>
+                                    {buses.map(b => (
+                                        <option key={b.busId || b.BusId} value={b.busId || b.BusId}>
+                                            {b.plateNumber || b.PlateNumber || b.licensePlate} ({b.totalSeats || b.TotalSeats || b.capacity} chỗ - {b.busType || b.BusType})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
+                                <div style={{ flex: 1 }}>
+                                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', fontWeight: '600' }}>Giờ xuất bến:</label>
+                                    <input type="time" required value={formData.departureTime} onChange={(e) => setFormData({...formData, departureTime: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', fontWeight: '600' }}>Giờ đến (dự kiến):</label>
+                                    <input type="time" required value={formData.arrivalTime} onChange={(e) => setFormData({...formData, arrivalTime: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', fontWeight: '600' }}>Giá vé mặc định (VNĐ):</label>
+                                <input type="number" required min="0" value={formData.defaultTicketPrice} onChange={(e) => setFormData({...formData, defaultTicketPrice: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }} placeholder="VD: 200000" />
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '25px' }}>
+                                <button type="button" onClick={() => setIsModalOpen(false)} style={{ padding: '8px 16px', borderRadius: '8px', background: 'white', border: '1px solid #e2e8f0', fontWeight: '600', cursor: 'pointer' }}>Hủy</button>
+                                <button type="submit" style={{ padding: '8px 16px', borderRadius: '8px', background: '#3182ce', color: 'white', border: 'none', fontWeight: '600', cursor: 'pointer' }}>
+                                    {isEditMode ? 'Lưu Thay Đổi' : 'Thêm Mới'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* Modal Auto-Generate Trips */}
             {isGeneratorOpen && (
