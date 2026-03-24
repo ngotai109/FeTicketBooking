@@ -394,10 +394,10 @@
 }
 
 .bus-type {
-    font-size: 14px;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 12px;
 }
 
 .trip-timeline {
@@ -415,20 +415,20 @@
 }
 
 .time {
-    font-size: 18px;
-    font-weight: 700;
-    color: #111827;
-    min-width: 55px;
+    font-size: 19px;
+    font-weight: 600;
+    color: #0f172a;
+    min-width: 60px;
 }
 
 .dot {
-    color: #9ca3af;
-    font-size: 20px;
+    color: #cbd5e1;
+    font-size: 18px;
 }
 
 .point {
-    font-size: 14px;
-    color: #4b5563;
+    font-size: 14.5px;
+    color: #475569;
 }
 
 .duration-line {
@@ -457,9 +457,9 @@
 }
 
 .price-value {
-    font-size: 18px;
-    font-weight: 800;
-    color: #e11d48;
+    font-size: 20px;
+    font-weight: 700;
+    color: #2563eb; /* Chuyển sang màu xanh branding để chuyên nghiệp hơn, hoặc giữ đỏ nếu bạn muốn */
 }
 
 .seat-status {
@@ -468,21 +468,23 @@
 }
 
 .select-seat-btn {
-    background: #facc15;
-    color: #000;
+    background: #ffed00; /* Vàng tươi chanh rực rỡ */
+    color: #1a1a1a;
     border: none;
-    padding: 10px 0;
-    border-radius: 6px;
-    font-weight: 800;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 700;
     font-size: 14px;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(250, 204, 21, 0.3);
-    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(255, 237, 0, 0.3);
+    transition: all 0.2s ease;
+    text-transform: none;
 }
 
 .select-seat-btn:hover {
-    background: #eab308;
+    background: #fff200;
     transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(255, 237, 0, 0.45);
 }
 
 /* No Results State */
