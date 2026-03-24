@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import wardService from '../../services/ward.service';
 import provinceService from '../../services/province.service';
 import { toast } from 'react-toastify';
-import ConfirmationModal from '../../components/Common/ConfirmationModal';
-import CustomSelect from '../../components/Common/CustomSelect';
+import { ConfirmationModal, CustomSelect } from '../../components/Common';
+import { handleApiResponse } from '../../utils/common';
+
+
 
 const WardManagement = () => {
     const [wards, setWards] = useState([]);
@@ -24,8 +26,8 @@ const WardManagement = () => {
     const fetchProvinces = async () => {
         try {
             const response = await provinceService.getAllProvinces();
-            const data = response.data?.data || response.data || [];
-            setProvinces(Array.isArray(data) ? data : []);
+            setProvinces(handleApiResponse(response));
+
         } catch (error) {
             console.error('Lỗi khi tải danh sách tỉnh');
         }
@@ -35,8 +37,8 @@ const WardManagement = () => {
         try {
             setLoading(true);
             const response = await wardService.getAllWards();
-            const data = response.data?.data || response.data || [];
-            setWards(Array.isArray(data) ? data : []);
+            setWards(handleApiResponse(response));
+
         } catch (error) {
             toast.error('Không thể tải danh sách phường xã');
             setWards([]);
@@ -79,49 +81,23 @@ const WardManagement = () => {
     });
 
     return (
-        <div className="location-management">
-            <header className="dashboard-header" style={{ marginBottom: '10px', paddingBottom: '6px', borderBottomWidth: '1px' }}>
-                <div className="header-left">
-                    <h1 style={{ fontSize: '18px', marginBottom: '1px' }}>Quản lý Phường xã</h1>
-                    <p className="header-time" style={{ fontSize: '11px', opacity: 0.8 }}>Bật/tắt trạng thái hoạt động của các phường xã, điểm đón trả</p>
+        <div className="admin-page-container">
+            <header className="admin-header">
+                <div className="admin-header-title">
+                    <h1>Quản lý Phường xã</h1>
+                    <p className="admin-header-subtitle">Bật/tắt trạng thái hoạt động của các phường xã, điểm đón trả</p>
                 </div>
             </header>
 
-            <div className="content-card" style={{ background: 'white', padding: '16px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                <div style={{ 
-                    display: 'flex', 
-                    gap: '12px', 
-                    marginBottom: '16px', 
-                    flexWrap: 'wrap',
-                    alignItems: 'center',
-                    background: '#f8fafc',
-                    padding: '12px',
-                    borderRadius: '10px'
-                }}>
+            <div className="admin-card">
+                <div className="admin-toolbar">
                     <div className="search-box" style={{ flex: '1', minWidth: '200px', position: 'relative' }}>
                         <input
                             type="text"
                             placeholder="Tìm kiếm phường xã..."
+                            className="admin-search-input"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ 
-                                padding: '6px 12px 6px 32px', 
-                                borderRadius: '6px', 
-                                border: '1px solid #e2e8f0', 
-                                width: '100%',
-                                transition: 'all 0.2s',
-                                outline: 'none',
-                                fontSize: '12px',
-                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                            }}
-                            onFocus={(e) => {
-                                e.target.style.borderColor = '#4299e1';
-                                e.target.style.boxShadow = '0 0 0 3px rgba(66, 153, 225, 0.15)';
-                            }}
-                            onBlur={(e) => {
-                                e.target.style.borderColor = '#e2e8f0';
-                                e.target.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
-                            }}
                         />
                         <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#a0aec0' }}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -149,72 +125,52 @@ const WardManagement = () => {
                 </div>
 
                 <div className="table-container" style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <table className="admin-table">
                         <thead>
-                            <tr style={{ textAlign: 'left', borderBottom: '1px solid #f7fafc' }}>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>ID</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Tên Phường xã</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Thuộc Tỉnh/Thành</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Trạng thái</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px', textAlign: 'right' }}>Thao tác</th>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên Phường xã</th>
+                                <th>Thuộc Tỉnh/Thành</th>
+                                <th>Trạng thái</th>
+                                <th style={{ textAlign: 'right' }}>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#718096' }}>
+                                    <td colSpan="5" style={{ textAlign: 'center', padding: '40px' }}>
                                         Đang tải dữ liệu...
                                     </td>
                                 </tr>
                             ) : filteredWards.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#718096' }}>
+                                    <td colSpan="5" style={{ textAlign: 'center', padding: '40px' }}>
                                         Không tìm thấy phường xã nào
                                     </td>
                                 </tr>
                             ) : (
                                 filteredWards.map((ward) => (
-                                    <tr key={ward.wardId} style={{ borderBottom: '1px solid #f7fafc', transition: 'background 0.2s', fontSize: '12px' }}>
-                                        <td style={{ padding: '8px 12px' }}>{ward.wardId}</td>
-                                        <td style={{ padding: '8px 12px', fontWeight: '600', color: '#2d3748' }}>{ward.wardName}</td>
-                                        <td style={{ padding: '8px 12px', color: '#718096' }}>
+                                    <tr key={ward.wardId}>
+                                        <td>{ward.wardId}</td>
+                                        <td style={{ fontWeight: '600', color: '#2d3748' }}>{ward.wardName}</td>
+                                        <td style={{ color: '#718096' }}>
                                             {getProvinceName(ward.provinceId)}
                                         </td>
-                                        <td style={{ padding: '8px 12px' }}>
-                                            <span style={{
-                                                padding: '2px 8px',
-                                                borderRadius: '20px',
-                                                fontSize: '10px',
-                                                fontWeight: '600',
-                                                backgroundColor: ward.isActive ? '#e6fffa' : '#fff5f5',
-                                                color: ward.isActive ? '#38a169' : '#e53e3e',
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: '3px'
-                                            }}>
-                                                <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: ward.isActive ? '#38a169' : '#e53e3e' }}></span>
+                                        <td>
+                                            <span className={`status-badge ${ward.isActive ? 'status-active' : 'status-inactive'}`}>
+                                                <span className="status-dot" style={{ backgroundColor: 'currentColor' }}></span>
                                                 {ward.isActive ? 'Đang hoạt động' : 'Dừng hoạt động'}
                                             </span>
                                         </td>
-                                        <td style={{ padding: '8px 12px', textAlign: 'right' }}>
+                                        <td style={{ textAlign: 'right' }}>
                                             <button
+                                                className="admin-btn-outline"
                                                 onClick={() => handleToggleActiveClick(ward)}
                                                 style={{
                                                     color: ward.isActive ? '#e53e3e' : '#38a169',
-                                                    border: '1px solid currentColor',
-                                                    background: 'none',
-                                                    cursor: 'pointer',
-                                                    fontWeight: '600',
-                                                    padding: '4px 12px',
-                                                    borderRadius: '6px',
+                                                    borderColor: 'currentColor',
                                                     minWidth: '90px',
-                                                    transition: 'all 0.2s'
-                                                }}
-                                                onMouseOver={(e) => {
-                                                    e.currentTarget.style.backgroundColor = ward.isActive ? '#fff5f5' : '#e6fffa';
-                                                }}
-                                                onMouseOut={(e) => {
-                                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                                    justifyContent: 'center'
                                                 }}
                                             >
                                                 {ward.isActive ? 'Khóa' : 'Mở khóa'}
@@ -241,6 +197,7 @@ const WardManagement = () => {
             />
         </div>
     );
+
 };
 
 export default WardManagement;

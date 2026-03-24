@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import locationService from '../../services/location.service';
 import { toast } from 'react-toastify';
-import ConfirmationModal from '../../components/Common/ConfirmationModal';
+import { ConfirmationModal, CustomSelect } from '../../components/Common';
+import { handleApiResponse } from '../../utils/common';
+
+
 
 const LocationManagement = () => {
     const [locations, setLocations] = useState([]);
@@ -25,8 +28,8 @@ const LocationManagement = () => {
         try {
             setLoading(true);
             const response = await locationService.getLocations();
-            const locationData = response.data?.data || response.data || [];
-            setLocations(Array.isArray(locationData) ? locationData : []);
+            setLocations(handleApiResponse(response));
+
         } catch (error) {
             toast.error('Không thể tải danh sách địa điểm');
         } finally {

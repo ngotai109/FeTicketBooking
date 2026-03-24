@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import ConfirmationModal from '../../components/Common/ConfirmationModal';
+import { ConfirmationModal } from '../../components/Common';
+
 import '../../assets/styles/AdminDashboard.css';
+import '../../assets/styles/admin-common.css';
+
 import logo from '../../assets/images/logo.webp';
 
 const AdminLayout = () => {

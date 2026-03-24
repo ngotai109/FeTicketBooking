@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import ConfirmationModal from '../../components/Common/ConfirmationModal';
+import { ConfirmationModal, CustomSelect } from '../../components/Common';
+import { handleApiResponse } from '../../utils/common';
+
+
 import busService from '../../services/bus.service';
 import { getBusLayout } from '../../constants/busLayouts';
 
@@ -40,8 +43,8 @@ const BusManagement = () => {
         try {
             setLoading(true);
             const response = await busService.getAllBuses();
-            const data = response.data?.data || response.data || [];
-            setBuses(Array.isArray(data) ? data : []);
+            setBuses(handleApiResponse(response));
+
         } catch (error) {
             toast.error('Không thể tải danh sách phương tiện');
             // Mock data for development if API fails
@@ -172,119 +175,77 @@ const BusManagement = () => {
     };
 
     return (
-        <div className="location-management">
-            <header className="dashboard-header" style={{ marginBottom: '10px', paddingBottom: '6px', borderBottomWidth: '1px' }}>
-                <div className="header-left">
-                    <h1 style={{ fontSize: '18px', marginBottom: '1px' }}>Quản lý Xe</h1>
-                    <p className="header-time" style={{ fontSize: '11px', opacity: 0.8 }}>Quản lý đội xe, loại giường và trạng thái hoạt động</p>
+        <div className="admin-page-container">
+            <header className="admin-header">
+                <div className="admin-header-title">
+                    <h1>Quản lý Xe</h1>
+                    <p className="admin-header-subtitle">Quản lý đội xe, loại giường và trạng thái hoạt động</p>
                 </div>
                 <button 
-                    className="add-button" 
+                    className="admin-btn-add" 
                     onClick={() => handleOpenFormModal()}
-                    style={{
-                        background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '8px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        boxShadow: '0 2px 6px rgba(247, 147, 30, 0.3)',
-                        fontSize: '13px'
-                    }}
                 >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Thêm Xe mới
                 </button>
             </header>
 
-            <div className="content-card" style={{ background: 'white', padding: '16px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                <div style={{ 
-                    display: 'flex', 
-                    gap: '12px', 
-                    marginBottom: '16px', 
-                    flexWrap: 'wrap',
-                    alignItems: 'center',
-                    background: '#f8fafc',
-                    padding: '12px',
-                    borderRadius: '10px'
-                }}>
+            <div className="admin-card">
+                <div className="admin-toolbar">
                     <div className="search-box" style={{ flex: '1.5', minWidth: '200px', position: 'relative' }}>
                         <input
                             type="text"
                             placeholder="Tìm bằng biển số hoặc tên xe..."
+                            className="admin-search-input"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ 
-                                padding: '6px 12px 6px 32px', 
-                                borderRadius: '6px', 
-                                border: '1px solid #e2e8f0', 
-                                width: '100%',
-                                outline: 'none',
-                                fontSize: '12px'
-                            }}
                         />
                         <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#a0aec0' }}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                         </span>
                     </div>
 
-                    <select
+                    <CustomSelect
                         value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
-                        style={{ 
-                            padding: '6px 12px', 
-                            borderRadius: '6px', 
-                            border: '1px solid #e2e8f0', 
-                            outline: 'none',
-                            fontSize: '12px',
-                            minWidth: '150px'
-                        }}
-                    >
-                        <option value="all">Tất cả loại xe</option>
-                        {busTypes.map(t => (
-                            <option key={t.value} value={t.value}>{t.label}</option>
-                        ))}
-                    </select>
+                        onChange={(val) => setFilterType(val)}
+                        options={[
+                            { value: 'all', label: 'Tất cả loại xe' },
+                            ...busTypes
+                        ]}
+                    />
                 </div>
 
                 <div className="table-container" style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <table className="admin-table">
                         <thead>
-                            <tr style={{ textAlign: 'left', borderBottom: '1px solid #f7fafc' }}>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Biển số xe</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Tên gọi</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Loại xe</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Ghi chú</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Trạng thái</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px', textAlign: 'right' }}>Thao tác</th>
+                            <tr>
+                                <th>Biển số xe</th>
+                                <th>Tên gọi</th>
+                                <th>Loại xe</th>
+                                <th>Ghi chú</th>
+                                <th>Trạng thái</th>
+                                <th style={{ textAlign: 'right' }}>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading && buses.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: '#718096', fontSize: '12px' }}>
+                                    <td colSpan="6" style={{ textAlign: 'center', padding: '40px' }}>
                                         Đang tải dữ liệu...
                                     </td>
                                 </tr>
                             ) : filteredBuses.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: '#718096', fontSize: '12px' }}>
+                                    <td colSpan="6" style={{ textAlign: 'center', padding: '40px' }}>
                                         Không tìm thấy phương tiện nào
                                     </td>
                                 </tr>
                             ) : (
                                 filteredBuses.map((bus) => (
-                                    <tr key={bus.busId} style={{ borderBottom: '1px solid #f7fafc', transition: 'background 0.2s', fontSize: '12px' }}>
-                                        <td style={{ padding: '8px 12px', fontWeight: '600', color: '#2d3748' }}>{bus.licensePlate}</td>
-                                        <td style={{ padding: '8px 12px', color: '#4a5568' }}>{bus.busName}</td>
-                                        <td style={{ padding: '8px 12px', color: '#2d3748' }}>
+                                    <tr key={bus.busId}>
+                                        <td style={{ fontWeight: '600', color: '#2d3748' }}>{bus.licensePlate}</td>
+                                        <td style={{ color: '#4a5568' }}>{bus.busName}</td>
+                                        <td>
                                             <span style={{ 
                                                 backgroundColor: '#ebf4ff', 
                                                 color: '#3182ce', 
@@ -296,51 +257,40 @@ const BusManagement = () => {
                                                 {getBusTypeLabel(bus.busType)}
                                             </span>
                                         </td>
-                                        <td style={{ padding: '8px 12px', color: '#718096' }}>{bus.description}</td>
-                                        <td style={{ padding: '8px 12px' }}>
-                                            <span style={{
-                                                padding: '2px 8px',
-                                                borderRadius: '20px',
-                                                fontSize: '10px',
-                                                fontWeight: '600',
-                                                backgroundColor: bus.isActive ? '#e6fffa' : '#fff5f5',
-                                                color: bus.isActive ? '#38a169' : '#e53e3e',
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: '3px'
-                                            }}>
-                                                <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: bus.isActive ? '#38a169' : '#e53e3e' }}></span>
+                                        <td style={{ color: '#718096' }}>{bus.description}</td>
+                                        <td>
+                                            <span className={`status-badge ${bus.isActive ? 'status-active' : 'status-inactive'}`}>
+                                                <span className="status-dot" style={{ backgroundColor: 'currentColor' }}></span>
                                                 {bus.isActive ? 'Hoạt động' : 'Tạm dừng'}
                                             </span>
                                         </td>
-                                        <td style={{ padding: '8px 12px', textAlign: 'right' }}>
+                                        <td style={{ textAlign: 'right' }}>
                                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                 <button
                                                     onClick={() => {
                                                         setViewingLayoutBus(bus);
                                                         setIsLayoutModalOpen(true);
                                                     }}
-                                                    style={{
-                                                        color: '#3182ce', background: 'white', border: '1px solid #e2e8f0',
-                                                        cursor: 'pointer', fontWeight: '600', fontSize: '11px', padding: '4px 8px', borderRadius: '6px'
-                                                    }}
+                                                    className="admin-btn-outline"
+                                                    style={{ color: '#3182ce', borderColor: '#3182ce' }}
                                                 >
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
                                                     Sơ đồ
                                                 </button>
                                                 <button
                                                     onClick={() => handleOpenFormModal(bus)}
-                                                    style={{
-                                                        color: '#4a5568', background: 'white', border: '1px solid #e2e8f0',
-                                                        cursor: 'pointer', fontWeight: '600', fontSize: '11px', padding: '4px 8px', borderRadius: '6px'
-                                                    }}
+                                                    className="admin-btn-outline"
                                                 >
                                                     Sửa
                                                 </button>
                                                 <button
                                                     onClick={() => handleToggleActiveClick(bus)}
+                                                    className="admin-btn-outline"
                                                     style={{
-                                                        color: bus.isActive ? '#e53e3e' : '#38a169', background: 'none', border: '1px solid currentColor',
-                                                        cursor: 'pointer', fontWeight: '600', fontSize: '11px', padding: '4px 8px', borderRadius: '6px', minWidth: '60px'
+                                                        color: bus.isActive ? '#e53e3e' : '#38a169',
+                                                        borderColor: 'currentColor',
+                                                        minWidth: '60px',
+                                                        justifyContent: 'center'
                                                     }}
                                                 >
                                                     {bus.isActive ? 'Khóa' : 'Mở'}
@@ -357,86 +307,35 @@ const BusManagement = () => {
 
             {/* Modal Xem Sơ Đồ */}
             {isLayoutModalOpen && viewingLayoutBus && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100
-                }}>
-                    <div style={{ 
-                        background: 'white', padding: '24px', borderRadius: '20px', 
-                        width: '800px', maxHeight: '90vh', overflowY: 'auto'
-                    }}>
+                <div className="admin-modal-overlay" onClick={() => setIsLayoutModalOpen(false)}>
+                    <div className="admin-modal-content" style={{ width: '800px' }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                             <div>
-                                <h2 style={{ fontSize: '18px', fontWeight: '700' }}>Sơ đồ ghế: {viewingLayoutBus.licensePlate}</h2>
-                                <p style={{ fontSize: '12px', color: '#718096' }}>{getBusLayout(viewingLayoutBus.busType).name}</p>
+                                <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>Sơ đồ ghế: {viewingLayoutBus.licensePlate}</h2>
+                                <p style={{ fontSize: '13px', color: '#718096', margin: '4px 0 0' }}>{getBusLayout(viewingLayoutBus.busType).name}</p>
                             </div>
                             <button onClick={() => setIsLayoutModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a0aec0' }}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '30px', justifyContent: 'center', background: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
-                            {/* Render Tầng 1 */}
-                            <div>
-                                <h3 style={{ textAlign: 'center', fontSize: '14px', marginBottom: '15px' }}>Tầng 1</h3>
-                                <div style={{ 
-                                    display: 'grid', 
-                                    gridTemplateColumns: `repeat(${getBusLayout(viewingLayoutBus.busType).columns}, 45px)`,
-                                    gap: '10px',
-                                    padding: '15px',
-                                    background: 'white',
-                                    borderRadius: '12px',
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                                }}>
-                                    {/* Backend seats should be used here if available, otherwise use template for preview */}
+                        <div className="admin-bus-layout-container">
+                            <div className="admin-floor-section">
+                                <h3 className="admin-floor-title">Tầng 1</h3>
+                                <div className="admin-seat-grid" style={{ gridTemplateColumns: `repeat(${getBusLayout(viewingLayoutBus.busType).columns}, 45px)` }}>
                                     {getBusLayout(viewingLayoutBus.busType).floor1.map(seat => (
-                                        <div key={seat.seatNumber} style={{
-                                            gridRow: seat.row + 1,
-                                            gridColumn: seat.col + 1,
-                                            height: '45px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            backgroundColor: '#ebf4ff',
-                                            color: '#3182ce',
-                                            borderRadius: '8px',
-                                            fontSize: '11px',
-                                            fontWeight: '700',
-                                            border: '1px solid #bee3f8'
-                                        }}>
+                                        <div key={seat.seatNumber} className="admin-seat-item floor-1" style={{ gridRow: seat.row + 1, gridColumn: seat.col + 1 }}>
                                             {seat.seatNumber}
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* Render Tầng 2 */}
-                            <div>
-                                <h3 style={{ textAlign: 'center', fontSize: '14px', marginBottom: '15px' }}>Tầng 2</h3>
-                                <div style={{ 
-                                    display: 'grid', 
-                                    gridTemplateColumns: `repeat(${getBusLayout(viewingLayoutBus.busType).columns}, 45px)`,
-                                    gap: '10px',
-                                    padding: '15px',
-                                    background: 'white',
-                                    borderRadius: '12px',
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                                }}>
+                            <div className="admin-floor-section">
+                                <h3 className="admin-floor-title">Tầng 2</h3>
+                                <div className="admin-seat-grid" style={{ gridTemplateColumns: `repeat(${getBusLayout(viewingLayoutBus.busType).columns}, 45px)` }}>
                                     {getBusLayout(viewingLayoutBus.busType).floor2.map(seat => (
-                                        <div key={seat.seatNumber} style={{
-                                            gridRow: seat.row + 1,
-                                            gridColumn: seat.col + 1,
-                                            height: '45px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            backgroundColor: '#fef3c7',
-                                            color: '#d97706',
-                                            borderRadius: '8px',
-                                            fontSize: '11px',
-                                            fontWeight: '700',
-                                            border: '1px solid #fde68a'
-                                        }}>
+                                        <div key={seat.seatNumber} className="admin-seat-item floor-2" style={{ gridRow: seat.row + 1, gridColumn: seat.col + 1 }}>
                                             {seat.seatNumber}
                                         </div>
                                     ))}
@@ -444,13 +343,13 @@ const BusManagement = () => {
                             </div>
                         </div>
 
-                        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
-                                <div style={{ width: '15px', height: '15px', backgroundColor: '#ebf4ff', borderRadius: '3px', border: '1px solid #bee3f8' }}></div>
+                        <div className="admin-layout-legend">
+                            <div className="legend-item">
+                                <span className="legend-dot" style={{ backgroundColor: '#ebf4ff', border: '1px solid #bee3f8' }}></span>
                                 <span>Tầng 1</span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
-                                <div style={{ width: '15px', height: '15px', backgroundColor: '#fef3c7', borderRadius: '3px', border: '1px solid #fde68a' }}></div>
+                            <div className="legend-item">
+                                <span className="legend-dot" style={{ backgroundColor: '#fef3c7', border: '1px solid #fde68a' }}></span>
                                 <span>Tầng 2</span>
                             </div>
                         </div>
@@ -472,16 +371,10 @@ const BusManagement = () => {
 
             {/* Modal Form */}
             {isFormModalOpen && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
-                }}>
-                    <div style={{ 
-                        background: 'white', padding: '32px', borderRadius: '16px', 
-                        width: '500px', maxHeight: '90vh', overflowY: 'auto'
-                    }}>
+                <div className="admin-modal-overlay" onClick={handleCloseFormModal}>
+                    <div className="admin-modal-content" style={{ width: '500px' }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                            <h2 style={{ fontSize: '18px', fontWeight: '700' }}>{isEditing ? 'Cập nhật xe' : 'Thêm xe mới'}</h2>
+                            <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>{isEditing ? 'Cập nhật xe' : 'Thêm xe mới'}</h2>
                             <button onClick={handleCloseFormModal} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a0aec0' }}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
@@ -489,36 +382,36 @@ const BusManagement = () => {
 
                         <form onSubmit={handleFormSubmit}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px' }}>Biển số xe *</label>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">Biển số xe *</label>
                                     <input
                                         type="text"
+                                        className="admin-form-input"
                                         value={formData.licensePlate}
                                         onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value })}
                                         required
-                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                                         placeholder="VD: 37B-123.45"
                                     />
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px' }}>Tên xe/Biệt danh</label>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">Tên xe/Biệt danh</label>
                                     <input
                                         type="text"
+                                        className="admin-form-input"
                                         value={formData.busName}
                                         onChange={(e) => setFormData({ ...formData, busName: e.target.value })}
-                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                                         placeholder="VD: Xe 01"
                                     />
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px' }}>Loại xe *</label>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">Loại xe *</label>
                                     <select
+                                        className="admin-form-select"
                                         value={formData.busType}
                                         onChange={(e) => setFormData({ ...formData, busType: e.target.value })}
                                         required
-                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                                     >
                                         {busTypes.map(t => (
                                             <option key={t.value} value={t.value}>{t.label}</option>
@@ -526,32 +419,33 @@ const BusManagement = () => {
                                     </select>
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px' }}>Trạng thái</label>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">Trạng thái</label>
                                     <select
+                                        className="admin-form-select"
                                         value={formData.isActive}
                                         onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
-                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                                     >
                                         <option value="true">Đang hoạt động</option>
                                         <option value="false">Tạm dừng</option>
                                     </select>
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px' }}>Ghi chú</label>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">Ghi chú</label>
                                     <textarea
+                                        className="admin-form-textarea"
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', minHeight: '80px' }}
+                                        style={{ minHeight: '80px' }}
                                         placeholder="Thông tin thêm về xe..."
                                     />
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px' }}>
-                                <button type="button" onClick={handleCloseFormModal} style={{ padding: '8px 20px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', fontWeight: '600' }}>Hủy</button>
-                                <button type="submit" disabled={isSubmitting} style={{ padding: '8px 24px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)', color: 'white', fontWeight: '600', opacity: isSubmitting ? 0.7 : 1 }}>
+                            <div className="admin-form-actions">
+                                <button type="button" className="admin-btn-outline" onClick={handleCloseFormModal}>Hủy</button>
+                                <button type="submit" className="admin-btn-primary" disabled={isSubmitting}>
                                     {isSubmitting ? 'Đanh lưu...' : (isEditing ? 'Cập nhật' : 'Thêm mới')}
                                 </button>
                             </div>

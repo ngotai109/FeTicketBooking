@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import ConfirmationModal from '../../components/Common/ConfirmationModal';
-import CustomSelect from '../../components/Common/CustomSelect';
+import { ConfirmationModal, CustomSelect } from '../../components/Common';
+import { handleApiResponse, formatCurrency } from '../../utils/common';
+
+
 import routeService from '../../services/route.service';
 import officeService from '../../services/office.service';
 import provinceService from '../../services/province.service';
@@ -45,8 +47,8 @@ const RouteManagement = () => {
         try {
             setLoading(true);
             const response = await routeService.getRoutes();
-            const data = response.data?.data || response.data || [];
-            setRoutes(Array.isArray(data) ? data : []);
+            setRoutes(handleApiResponse(response));
+
         } catch (error) {
             toast.error('Không thể tải danh sách tuyến đường');
             setRoutes([]);
@@ -58,9 +60,8 @@ const RouteManagement = () => {
     const fetchOffices = async () => {
         try {
             const response = await officeService.getAllOffices();
-            const data = response.data?.data || response.data || [];
-            console.log('Offices loaded:', data);
-            setOffices(Array.isArray(data) ? data : []);
+            setOffices(handleApiResponse(response));
+
         } catch (error) {
             toast.error('Không thể tải danh sách văn phòng');
         }
@@ -69,8 +70,8 @@ const RouteManagement = () => {
     const fetchProvinces = async () => {
         try {
             const response = await provinceService.getAllProvinces();
-            const data = response.data?.data || response.data || [];
-            if (Array.isArray(data)) setProvinces(data);
+            setProvinces(handleApiResponse(response));
+
         } catch (error) {
             console.error('Lỗi khi tải tỉnh thành:', error);
         }
@@ -79,8 +80,8 @@ const RouteManagement = () => {
     const fetchAllWards = async () => {
         try {
             const response = await wardService.getAllWards();
-            const data = response.data?.data || response.data || [];
-            if (Array.isArray(data)) setAllWards(data);
+            setAllWards(handleApiResponse(response));
+
         } catch (error) {
             console.error('Lỗi khi tải xã phường:', error);
         }
@@ -266,9 +267,7 @@ const RouteManagement = () => {
         }));
     };
 
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-    };
+
 
     const filteredRoutes = routes.filter(r => {
         const name = r.routeName || '';
@@ -283,63 +282,30 @@ const RouteManagement = () => {
     });
 
     return (
-        <div className="location-management">
-            <header className="dashboard-header" style={{ marginBottom: '10px', paddingBottom: '6px', borderBottomWidth: '1px' }}>
-                <div className="header-left">
-                    <h1 style={{ fontSize: '18px', marginBottom: '1px' }}>Quản lý Tuyến đường</h1>
-                    <p className="header-time" style={{ fontSize: '11px', opacity: 0.8 }}>Quản lý danh mục các tuyến xe, giá vé và khoảng cách</p>
+        <div className="admin-page-container">
+            <header className="admin-header">
+                <div className="admin-header-title">
+                    <h1>Quản lý Tuyến đường</h1>
+                    <p className="admin-header-subtitle">Quản lý các tuyến xe, văn phòng và giá vé</p>
                 </div>
                 <button 
-                    className="add-button" 
+                    className="admin-btn-add" 
                     onClick={() => handleOpenFormModal()}
-                    style={{
-                        background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '8px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        boxShadow: '0 2px 6px rgba(247, 147, 30, 0.3)',
-                        fontSize: '13px'
-                    }}
                 >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Thêm Tuyến mới
                 </button>
             </header>
 
-            <div className="content-card" style={{ background: 'white', padding: '16px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                <div style={{ 
-                    display: 'flex', 
-                    gap: '12px', 
-                    marginBottom: '16px', 
-                    flexWrap: 'wrap',
-                    alignItems: 'center',
-                    background: '#f8fafc',
-                    padding: '12px',
-                    borderRadius: '10px'
-                }}>
+            <div className="admin-card">
+                <div className="admin-toolbar">
                     <div className="search-box" style={{ flex: '1.5', minWidth: '200px', position: 'relative' }}>
                         <input
                             type="text"
                             placeholder="Tìm kiếm tuyến đường..."
+                            className="admin-search-input"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ 
-                                padding: '6px 12px 6px 32px', 
-                                borderRadius: '6px', 
-                                border: '1px solid #e2e8f0', 
-                                width: '100%',
-                                outline: 'none',
-                                fontSize: '12px'
-                            }}
                         />
                         <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#a0aec0' }}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -376,36 +342,36 @@ const RouteManagement = () => {
                 </div>
 
                 <div className="table-container" style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <table className="admin-table">
                         <thead>
-                            <tr style={{ textAlign: 'left', borderBottom: '1px solid #f7fafc' }}>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Tên Tuyến</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Văn phòng Đi/Đến</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Giá cơ bản</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Khoảng cách</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Thời gian</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px' }}>Trạng thái</th>
-                                <th style={{ padding: '8px 12px', color: '#718096', fontWeight: '600', fontSize: '12px', textAlign: 'right' }}>Thao tác</th>
+                            <tr>
+                                <th>Tên Tuyến</th>
+                                <th>Văn phòng Đi/Đến</th>
+                                <th>Giá cơ bản</th>
+                                <th>Khoảng cách</th>
+                                <th>Thời gian</th>
+                                <th>Trạng thái</th>
+                                <th style={{ textAlign: 'right' }}>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: '#718096', fontSize: '12px' }}>
+                                    <td colSpan="7" style={{ textAlign: 'center', padding: '40px' }}>
                                         Đang tải dữ liệu...
                                     </td>
                                 </tr>
                             ) : filteredRoutes.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: '#718096', fontSize: '12px' }}>
+                                    <td colSpan="7" style={{ textAlign: 'center', padding: '40px' }}>
                                         Không tìm thấy tuyến đường nào
                                     </td>
                                 </tr>
                             ) : (
                                 filteredRoutes.map((route) => (
-                                    <tr key={route.routeId} style={{ borderBottom: '1px solid #f7fafc', transition: 'background 0.2s', fontSize: '12px' }}>
-                                        <td style={{ padding: '8px 12px', fontWeight: '600', color: '#2d3748' }}>{route.routeName}</td>
-                                        <td style={{ padding: '8px 12px', color: '#4a5568' }}>
+                                    <tr key={route.routeId}>
+                                        <td style={{ fontWeight: '600', color: '#2d3748' }}>{route.routeName}</td>
+                                        <td style={{ color: '#4a5568' }}>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                     <span style={{ color: '#38a169', fontSize: '10px' }}>●</span> {getOfficeName(route.departureOfficeId)}
@@ -415,41 +381,31 @@ const RouteManagement = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td style={{ padding: '8px 12px', color: '#2d3748', fontWeight: '600' }}>{formatCurrency(route.basePrice)}</td>
-                                        <td style={{ padding: '8px 12px', color: '#4a5568' }}>{route.distanceKm} km</td>
-                                        <td style={{ padding: '8px 12px', color: '#4a5568' }}>{route.estimatedTimeHours} giờ</td>
-                                        <td style={{ padding: '8px 12px' }}>
-                                            <span style={{
-                                                padding: '2px 8px',
-                                                borderRadius: '20px',
-                                                fontSize: '10px',
-                                                fontWeight: '600',
-                                                backgroundColor: route.isActive ? '#e6fffa' : '#fff5f5',
-                                                color: route.isActive ? '#38a169' : '#e53e3e',
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: '3px'
-                                            }}>
-                                                <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: route.isActive ? '#38a169' : '#e53e3e' }}></span>
+                                        <td style={{ color: '#2d3748', fontWeight: '600' }}>{formatCurrency(route.basePrice)}</td>
+                                        <td style={{ color: '#4a5568' }}>{route.distanceKm} km</td>
+                                        <td style={{ color: '#4a5568' }}>{route.estimatedTimeHours} giờ</td>
+                                        <td>
+                                            <span className={`status-badge ${route.isActive ? 'status-active' : 'status-inactive'}`}>
+                                                <span className="status-dot" style={{ backgroundColor: 'currentColor' }}></span>
                                                 {route.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
                                             </span>
                                         </td>
-                                        <td style={{ padding: '8px 12px', textAlign: 'right' }}>
+                                        <td style={{ textAlign: 'right' }}>
                                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                 <button
                                                     onClick={() => handleOpenFormModal(route)}
-                                                    style={{
-                                                        color: '#4a5568', background: 'white', border: '1px solid #e2e8f0',
-                                                        cursor: 'pointer', fontWeight: '600', fontSize: '11px', padding: '4px 8px', borderRadius: '6px'
-                                                    }}
+                                                    className="admin-btn-outline"
                                                 >
                                                     Sửa
                                                 </button>
                                                 <button
                                                     onClick={() => handleToggleActiveClick(route)}
+                                                    className="admin-btn-outline"
                                                     style={{
-                                                        color: route.isActive ? '#e53e3e' : '#38a169', background: 'none', border: '1px solid currentColor',
-                                                        cursor: 'pointer', fontWeight: '600', fontSize: '11px', padding: '4px 8px', borderRadius: '6px', minWidth: '60px'
+                                                        color: route.isActive ? '#e53e3e' : '#38a169',
+                                                        borderColor: 'currentColor',
+                                                        minWidth: '60px',
+                                                        justifyContent: 'center'
                                                     }}
                                                 >
                                                     {route.isActive ? 'Khóa' : 'Mở'}
@@ -478,16 +434,10 @@ const RouteManagement = () => {
 
             {/* Modal Form */}
             {isFormModalOpen && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
-                }}>
-                    <div style={{ 
-                        background: 'white', padding: '32px', borderRadius: '16px', 
-                        width: '600px', maxHeight: '95vh', overflowY: 'auto'
-                    }}>
+                <div className="admin-modal-overlay" onClick={handleCloseFormModal}>
+                    <div className="admin-modal-content" style={{ width: '600px' }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                            <h2 style={{ fontSize: '18px', fontWeight: '700' }}>{isEditing ? 'Cập nhật tuyến đường' : 'Thêm tuyến mới'}</h2>
+                            <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>{isEditing ? 'Cập nhật tuyến đường' : 'Thêm tuyến mới'}</h2>
                             <button onClick={handleCloseFormModal} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a0aec0' }}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
@@ -495,25 +445,25 @@ const RouteManagement = () => {
 
                         <form onSubmit={handleFormSubmit}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                                <div style={{ gridColumn: 'span 2' }}>
-                                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px' }}>Tên Tuyến đường *</label>
+                                <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
+                                    <label className="admin-form-label">Tên Tuyến đường *</label>
                                     <input
                                         type="text"
+                                        className="admin-form-input"
                                         value={formData.routeName}
                                         onChange={(e) => setFormData({ ...formData, routeName: e.target.value })}
                                         required
-                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                                         placeholder="Ví dụ: Hà Nội - Đà Nẵng"
                                     />
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px' }}>Văn phòng/Điểm đi *</label>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">Văn phòng/Điểm đi *</label>
                                     <select
+                                        className="admin-form-select"
                                         value={formData.departureOfficeId}
                                         onChange={(e) => setFormData({ ...formData, departureOfficeId: e.target.value })}
                                         required
-                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                                     >
                                         <option value="">-- Chọn điểm đi --</option>
                                         {getGroupedOffices().map(group => (
@@ -526,13 +476,13 @@ const RouteManagement = () => {
                                     </select>
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px' }}>Văn phòng/Điểm đến *</label>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">Văn phòng/Điểm đến *</label>
                                     <select
+                                        className="admin-form-select"
                                         value={formData.arrivalOfficeId}
                                         onChange={(e) => setFormData({ ...formData, arrivalOfficeId: e.target.value })}
                                         required
-                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                                     >
                                         <option value="">-- Chọn điểm đến --</option>
                                         {getGroupedOffices().map(group => (
@@ -545,49 +495,49 @@ const RouteManagement = () => {
                                     </select>
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px' }}>Giá vé cơ bản (VND) *</label>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">Giá vé cơ bản (VND) *</label>
                                     <input
                                         type="number"
+                                        className="admin-form-input"
                                         value={formData.basePrice}
                                         onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
                                         required
-                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                                         placeholder="Vd: 250000"
                                     />
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px' }}>Khoảng cách (Km) *</label>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">Khoảng cách (Km) *</label>
                                     <input
                                         type="number"
                                         step="0.1"
+                                        className="admin-form-input"
                                         value={formData.distanceKm}
                                         onChange={(e) => setFormData({ ...formData, distanceKm: e.target.value })}
                                         required
-                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                                         placeholder="Vd: 350.5"
                                     />
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px' }}>Thời gian dự kiến (giờ) *</label>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">Thời gian dự kiến (giờ) *</label>
                                     <input
                                         type="number"
+                                        className="admin-form-input"
                                         value={formData.estimatedTimeHours}
                                         onChange={(e) => setFormData({ ...formData, estimatedTimeHours: e.target.value })}
                                         required
-                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                                         placeholder="Vd: 8"
                                     />
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '13px' }}>Trạng thái</label>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label">Trạng thái</label>
                                     <select
+                                        className="admin-form-select"
                                         value={formData.isActive}
                                         onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
-                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                                     >
                                         <option value="true">Đang hoạt động</option>
                                         <option value="false">Ngừng hoạt động</option>
@@ -595,9 +545,9 @@ const RouteManagement = () => {
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px' }}>
-                                <button type="button" onClick={handleCloseFormModal} style={{ padding: '8px 20px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', fontWeight: '600' }}>Hủy</button>
-                                <button type="submit" disabled={isSubmitting} style={{ padding: '8px 24px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)', color: 'white', fontWeight: '600', opacity: isSubmitting ? 0.7 : 1 }}>
+                            <div className="admin-form-actions">
+                                <button type="button" className="admin-btn-outline" onClick={handleCloseFormModal}>Hủy</button>
+                                <button type="submit" className="admin-btn-primary" disabled={isSubmitting}>
                                     {isSubmitting ? 'Đang lưu...' : (isEditing ? 'Cập nhật' : 'Thêm mới')}
                                 </button>
                             </div>
