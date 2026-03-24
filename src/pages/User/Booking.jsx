@@ -1,25 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import provinceService from '../../services/province.service';
+import wardService from '../../services/ward.service';
 import '../../assets/styles/Booking.css';
 import bg3 from '../../assets/images/bg3.jpg';
 import noScheduleImg from '../../assets/images/route-no-schedule-2.png';
 import { getBusLayout } from '../../constants/busLayouts';
 
-const LOCATIONS = [
-    'Hà Nội', 'Đà Nẵng', 'TP. Hồ Chí Minh', 'Vinh (Nghệ An)', 'Thanh Hóa', 'Huế', 'Nam Định', 'Thái Bình'
-];
-
 const Booking = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const searchData = location.state || { departure: '', destination: '', date: '' };
+    
+    const [provinces, setProvinces] = useState([]);
+    const [wards, setWards] = useState([]);
     const [departure, setDeparture] = useState(searchData.departure);
     const [destination, setDestination] = useState(searchData.destination);
     const [showDepList, setShowDepList] = useState(false);
     const [showDestList, setShowDestList] = useState(false);
     const [date, setDate] = useState(searchData.date);
     const [sortType, setSortType] = useState('earliest');
+
+    useEffect(() => {
+        const fetchLocations = async () => {
+            try {
+                const [provinceRes, wardRes] = await Promise.all([
+                    provinceService.getAllProvincesActive(),
+                    wardService.getAllWardsActive()
+                ]);
+                if (provinceRes && provinceRes.data) {
+                    setProvinces(provinceRes.data);
+                }
+                if (wardRes && wardRes.data) {
+                    setWards(wardRes.data);
+                }
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách địa điểm:', error);
+            }
+        };
+        fetchLocations();
+    }, []);
 
     // MOCK DATA: Chuyến đi
     const trips = [
@@ -174,25 +195,39 @@ const Booking = () => {
                         <div className="mod-input custom-select-wrapper">
                             <label>Điểm khởi hành</label>
                             <div className="custom-select-display" onClick={() => setShowDepList(!showDepList)}>{departure || 'Chọn điểm đi'}</div>
-                            {showDepList && (
-                                <ul className="custom-select-list">
-                                    {LOCATIONS.map(loc => (
-                                        <li key={loc} onClick={() => { setDeparture(loc); setShowDepList(false); }} className={departure === loc ? 'active' : ''}>{loc}</li>
-                                    ))}
-                                </ul>
-                            )}
+                             {showDepList && (
+                                 <ul className="custom-select-list">
+                                     {provinces.length > 0 ? provinces.map(prov => (
+                                         <React.Fragment key={prov.provinceId}>
+                                             <li className="province-header">{prov.provinceName}</li>
+                                             {wards.filter(w => w.provinceId === prov.provinceId).map(ward => (
+                                                 <li key={ward.wardId} onClick={(e) => { e.stopPropagation(); setDeparture(ward.wardName); setShowDepList(false); }} className={`ward-item ${departure === ward.wardName ? 'active' : ''}`}>{ward.wardName}</li>
+                                             ))}
+                                         </React.Fragment>
+                                     )) : (
+                                         <li className="loading-item">Đang tải...</li>
+                                     )}
+                                 </ul>
+                             )}
                         </div>
                         <div className="mod-swap" onClick={() => { const temp = departure; setDeparture(destination); setDestination(temp); }}>⇌</div>
                         <div className="mod-input custom-select-wrapper">
                             <label>Nơi đến</label>
                             <div className="custom-select-display" onClick={() => setShowDestList(!showDestList)}>{destination || 'Chọn điểm đến'}</div>
-                            {showDestList && (
-                                <ul className="custom-select-list">
-                                    {LOCATIONS.map(loc => (
-                                        <li key={loc} onClick={() => { setDestination(loc); setShowDestList(false); }} className={destination === loc ? 'active' : ''}>{loc}</li>
-                                    ))}
-                                </ul>
-                            )}
+                             {showDestList && (
+                                 <ul className="custom-select-list">
+                                     {provinces.length > 0 ? provinces.map(prov => (
+                                         <React.Fragment key={prov.provinceId}>
+                                             <li className="province-header">{prov.provinceName}</li>
+                                             {wards.filter(w => w.provinceId === prov.provinceId).map(ward => (
+                                                 <li key={ward.wardId} onClick={(e) => { e.stopPropagation(); setDestination(ward.wardName); setShowDestList(false); }} className={`ward-item ${destination === ward.wardName ? 'active' : ''}`}>{ward.wardName}</li>
+                                             ))}
+                                         </React.Fragment>
+                                     )) : (
+                                         <li className="loading-item">Đang tải...</li>
+                                     )}
+                                 </ul>
+                             )}
                         </div>
                         <div className="mod-input">
                             <label>Ngày đi</label>

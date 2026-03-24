@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import provinceService from '../../services/province.service';
+import wardService from '../../services/ward.service';
 import '../../assets/styles/Home.css';
 import bg3 from '../../assets/images/bg3.jpg';
 
@@ -11,27 +13,46 @@ const LocationIcon = () => (
 
 );
 
-const LOCATIONS = [
-    'Hà Nội',
-    'Đà Nẵng',
-    'TP. Hồ Chí Minh',
-    'Vinh (Nghệ An)',
-    'Thanh Hóa',
-    'Huế',
-    'Nam Định',
-    'Thái Bình'
-];
-
 const Home = () => {
-    const [departure, setDeparture] = useState(LOCATIONS[0]);
-    const [destination, setDestination] = useState(LOCATIONS[1]);
+    const [provinces, setProvinces] = useState([]);
+    const [wards, setWards] = useState([]);
+    const [departure, setDeparture] = useState('');
+    const [destination, setDestination] = useState('');
     const [showDepList, setShowDepList] = useState(false);
     const [showDestList, setShowDestList] = useState(false);
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const fetchLocations = async () => {
+            try {
+                const [provinceRes, wardRes] = await Promise.all([
+                    provinceService.getAllProvincesActive(),
+                    wardService.getAllWardsActive()
+                ]);
+
+                if (provinceRes && provinceRes.data) {
+                    setProvinces(provinceRes.data);
+                }
+
+                if (wardRes && wardRes.data) {
+                    setWards(wardRes.data);
+                }
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách địa điểm:', error);
+                setDeparture('Hà Nội');
+                setDestination('Nghệ An');
+            }
+        };
+        fetchLocations();
+    }, []);
+
 
     const handleSearch = () => {
+        if (!departure || !destination) {
+            // Hiển thị thông báo nếu chưa chọn địa điểm
+            return;
+        }
         // Navigate to booking page with search params
         navigate('/booking', {
             state: { departure, destination, date }
@@ -54,20 +75,36 @@ const Home = () => {
                         <div className="search-form">
                             <div className="input-group custom-select-wrapper">
                                 <label><LocationIcon />Điểm khởi hành</label>
-                                <div className="custom-select-display" onClick={() => setShowDepList(!showDepList)}>
-                                    {departure}
+                                <div 
+                                    className={`custom-select-display ${!departure ? 'placeholder' : ''}`} 
+                                    onClick={() => setShowDepList(!showDepList)}
+                                >
+                                    {departure || 'Chọn điểm đi'}
                                 </div>
                                 {showDepList && (
                                     <ul className="custom-select-list">
-                                        {LOCATIONS.map(loc => (
-                                            <li 
-                                                key={loc} 
-                                                onClick={() => { setDeparture(loc); setShowDepList(false); }}
-                                                className={departure === loc ? 'active' : ''}
-                                            >
-                                                {loc}
-                                            </li>
-                                        ))}
+                                        {provinces.length > 0 ? provinces.map(prov => (
+                                            <React.Fragment key={prov.provinceId}>
+                                                <li className="province-header">
+                                                    {prov.provinceName}
+                                                </li>
+                                                {wards.filter(w => w.provinceId === prov.provinceId).map(ward => (
+                                                    <li 
+                                                        key={ward.wardId} 
+                                                        onClick={(e) => { 
+                                                            e.stopPropagation();
+                                                            setDeparture(ward.wardName); 
+                                                            setShowDepList(false); 
+                                                        }}
+                                                        className={`ward-item ${departure === ward.wardName ? 'active' : ''}`}
+                                                    >
+                                                        {ward.wardName}
+                                                    </li>
+                                                ))}
+                                            </React.Fragment>
+                                        )) : (
+                                            <li className="loading-item">Đang tải dữ liệu...</li>
+                                        )}
                                     </ul>
                                 )}
                             </div>
@@ -78,20 +115,36 @@ const Home = () => {
 
                             <div className="input-group custom-select-wrapper">
                                 <label><LocationIcon /> Điểm đến</label>
-                                <div className="custom-select-display" onClick={() => setShowDestList(!showDestList)}>
-                                    {destination}
+                                <div 
+                                    className={`custom-select-display ${!destination ? 'placeholder' : ''}`} 
+                                    onClick={() => setShowDestList(!showDestList)}
+                                >
+                                    {destination || 'Chọn điểm đến'}
                                 </div>
                                 {showDestList && (
                                     <ul className="custom-select-list">
-                                        {LOCATIONS.map(loc => (
-                                            <li 
-                                                key={loc} 
-                                                onClick={() => { setDestination(loc); setShowDestList(false); }}
-                                                className={destination === loc ? 'active' : ''}
-                                            >
-                                                {loc}
-                                            </li>
-                                        ))}
+                                        {provinces.length > 0 ? provinces.map(prov => (
+                                            <React.Fragment key={prov.provinceId}>
+                                                <li className="province-header">
+                                                    {prov.provinceName}
+                                                </li>
+                                                {wards.filter(w => w.provinceId === prov.provinceId).map(ward => (
+                                                    <li 
+                                                        key={ward.wardId} 
+                                                        onClick={(e) => { 
+                                                            e.stopPropagation();
+                                                            setDestination(ward.wardName); 
+                                                            setShowDestList(false); 
+                                                        }}
+                                                        className={`ward-item ${destination === ward.wardName ? 'active' : ''}`}
+                                                    >
+                                                        {ward.wardName}
+                                                    </li>
+                                                ))}
+                                            </React.Fragment>
+                                        )) : (
+                                            <li className="loading-item">Đang tải dữ liệu...</li>
+                                        )}
                                     </ul>
                                 )}
                             </div>

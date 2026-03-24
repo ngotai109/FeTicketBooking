@@ -5,7 +5,7 @@ const provinceService = {
         return await api.get('Province/all');
     },
     getAllProvincesActive: async () => {
-        return await api.get('Province/active');
+        return await api.get('Province');
     },
     getProvinceById: async (id) => {
         return await api.get(`Province/${id}`);

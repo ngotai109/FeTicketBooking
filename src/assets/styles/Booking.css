@@ -94,6 +94,30 @@
     font-weight: 600;
 }
 
+.mod-input .custom-select-list li.province-header {
+    background-color: #f8fafc;
+    color: #1e3a8a;
+    font-weight: 800;
+    font-size: 11px;
+    text-transform: uppercase;
+    padding: 8px 15px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e2e8f0;
+    cursor: default;
+}
+
+.mod-input .custom-select-list li.province-header:hover {
+    background-color: #f1f5f9;
+}
+
+.mod-input .custom-select-list li.ward-item {
+    padding-left: 25px;
+}
+
+.mod-input .custom-select-list li.ward-item:hover {
+    padding-left: 30px;
+}
+
 
 
 .mod-swap {

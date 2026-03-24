@@ -93,6 +93,11 @@
     min-height: 31px;
 }
 
+.custom-select-display.placeholder {
+    color: #9ca3af;
+    font-weight: 500;
+}
+
 .custom-select-list {
     position: absolute;
     top: 100%;
@@ -127,6 +132,31 @@
     background-color: #fee2e2;
     color: #ef4444;
     font-weight: 600;
+}
+
+.custom-select-list li.province-header {
+    background-color: #f8fafc;
+    color: #1e3a8a;
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-top: 5px;
+    cursor: default;
+}
+
+.custom-select-list li.province-header:hover {
+    background-color: #f1f5f9;
+}
+
+.custom-select-list li.ward-item {
+    padding-left: 35px;
+}
+
+.custom-select-list li.ward-item:hover {
+    padding-left: 40px;
 }
 
 .custom-select-list::-webkit-scrollbar {
