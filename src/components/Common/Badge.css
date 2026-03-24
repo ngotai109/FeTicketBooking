@@ -1,0 +1,37 @@
+.admin-badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+}
+
+.admin-badge-info { 
+    background: #ebf4ff; 
+    color: #2b6cb0; 
+    border: 1px solid #bee3f8;
+}
+
+.admin-badge-success { 
+    background: #f0fff4; 
+    color: #2f855a; 
+    border: 1px solid #c6f6d5;
+}
+
+.admin-badge-warning { 
+    background: #fffaf0; 
+    color: #c05621; 
+    border: 1px solid #feebc8;
+}
+
+.admin-badge-danger { 
+    background: #fff5f5; 
+    color: #c53030; 
+    border: 1px solid #fed7d7;
+}

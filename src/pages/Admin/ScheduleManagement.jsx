@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, CustomSelect } from '../../components/Common';
+import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination } from '../../components/Common';
 import scheduleService from '../../services/schedule.service';
 import routeService from '../../services/route.service';
 import busService from '../../services/bus.service';
@@ -23,6 +23,8 @@ const ScheduleManagement = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [scheduleToDelete, setScheduleToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10;
     
     const [formData, setFormData] = useState({
         routeId: '',
@@ -195,9 +197,10 @@ const ScheduleManagement = () => {
                 </button>
             </header>
 
-            <div className="admin-card">
-                <div className="admin-toolbar">
-                    <h2 style={{ fontSize: '16px', margin: 0, color: '#2d3748' }}>Danh sách Lịch Cố Định</h2>
+            <Card padding="0" className="admin-table-card">
+                <div className="table-card-content">
+                <div className="admin-toolbar" style={{ margin: 0, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}>
+                    <h2 className="u-size-15 u-m-0 u-color-slate-800">Danh sách Lịch Cố Định</h2>
                     <button 
                         className="admin-btn-add"
                         onClick={() => handleOpenModal()}
@@ -216,30 +219,44 @@ const ScheduleManagement = () => {
                                 <th>Giờ Xuất Bến</th>
                                 <th>Giờ Đến</th>
                                 <th>Vé Mặc định</th>
-                                <th style={{ textAlign: 'right' }}>Thao tác</th>
+                                <th className="u-text-center">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
-                                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px' }}>Đang tải...</td></tr>
+                                <tr><td colSpan="6" className="u-text-center u-p-40">Đang tải...</td></tr>
                             ) : schedules.length === 0 ? (
-                                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px' }}>Chưa có lịch trình (Schedules) nào!</td></tr>
+                                <tr><td colSpan="6" className="u-text-center u-p-40">Chưa có lịch trình (Schedules) nào!</td></tr>
                             ) : (
-                                schedules.map(s => (
+                                schedules.slice((currentPage - 1) * pageSize, currentPage * pageSize).map(s => (
                                     <tr key={s.scheduleId}>
-                                        <td style={{ fontWeight: '600', color: '#3182ce' }}>{getRouteName(s.routeId)}</td>
+                                        <td className="u-weight-600 u-color-blue">{getRouteName(s.routeId)}</td>
                                         <td>
-                                            <span style={{ background: '#edf2f7', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: '500' }}>
+                                            <Badge type="info" className="u-size-12 u-weight-600 u-bg-transparent" style={{ border: '1px solid #e2e8f0', color: '#4a5568' }}>
                                                 {getBusPlate(s.defaultBusId)}
-                                            </span>
+                                            </Badge>
                                         </td>
-                                        <td style={{ color: '#38a169', fontWeight: '700' }}>{s.departureTime}</td>
-                                        <td style={{ color: '#e53e3e', fontWeight: '700' }}>{s.arrivalTime}</td>
-                                        <td style={{ fontWeight: '600' }}>{s.defaultTicketPrice?.toLocaleString()} đ</td>
-                                        <td style={{ textAlign: 'right' }}>
-                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                <button onClick={() => handleOpenModal(s)} className="admin-btn-outline">Sửa</button>
-                                                <button onClick={() => handleDeleteClick(s)} className="admin-btn-outline" style={{ color: '#e53e3e', borderColor: '#feb2b2' }}>Xóa</button>
+                                        <td className="u-color-green u-weight-700">{s.departureTime}</td>
+                                        <td className="u-color-red u-weight-700">{s.arrivalTime}</td>
+                                        <td className="u-weight-600">{s.defaultTicketPrice?.toLocaleString()} đ</td>
+                                        <td className="u-text-center">
+                                            <div className="u-flex u-gap-12 u-justify-center">
+                                                <button 
+                                                    onClick={() => handleOpenModal(s)} 
+                                                    className="admin-btn-icon"
+                                                    title="Chỉnh sửa"
+                                                    style={{ color: '#2b6cb0' }}
+                                                >
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteClick(s)} 
+                                                    className="admin-btn-icon"
+                                                    title="Xóa"
+                                                    style={{ color: '#e53e3e' }}
+                                                >
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -248,120 +265,113 @@ const ScheduleManagement = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
-
-            {/* Modal Add/Edit Schedule */}
-            {isModalOpen && (
-                <div className="admin-modal-overlay" onClick={() => setIsModalOpen(false)}>
-                    <div className="admin-modal-content" style={{ width: '500px' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>
-                                {isEditMode ? 'Cập Nhật Lịch Trình' : 'Thêm Lịch Trình Mới'}
-                            </h2>
-                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a0aec0' }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                            </button>
-                        </div>
-                        
-                        <form onSubmit={handleSubmit}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Tuyến đường:</label>
-                                    <select 
-                                        className="admin-form-select"
-                                        required 
-                                        value={formData.routeId} 
-                                        onChange={(e) => setFormData({...formData, routeId: e.target.value})}
-                                    >
-                                        <option value="">-- Chọn tuyến đường --</option>
-                                        {routes.map(r => (
-                                            <option key={r.routeId || r.RouteId} value={r.routeId || r.RouteId}>
-                                                {r.routeName || r.RouteName}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Xe mặc định:</label>
-                                    <select 
-                                        className="admin-form-select"
-                                        required 
-                                        value={formData.defaultBusId} 
-                                        onChange={(e) => setFormData({...formData, defaultBusId: e.target.value})}
-                                    >
-                                        <option value="">-- Chọn xe --</option>
-                                        {buses.map(b => (
-                                            <option key={b.busId || b.BusId} value={b.busId || b.BusId}>
-                                                {b.plateNumber || b.PlateNumber || b.licensePlate} ({b.totalSeats || b.TotalSeats || b.capacity} chỗ)
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '16px' }}>
-                                    <div className="admin-form-group" style={{ flex: 1 }}>
-                                        <label className="admin-form-label">Giờ xuất bến:</label>
-                                        <input type="time" className="admin-form-input" required value={formData.departureTime} onChange={(e) => setFormData({...formData, departureTime: e.target.value})} />
-                                    </div>
-                                    <div className="admin-form-group" style={{ flex: 1 }}>
-                                        <label className="admin-form-label">Giờ đến (dự kiến):</label>
-                                        <input type="time" className="admin-form-input" required value={formData.arrivalTime} onChange={(e) => setFormData({...formData, arrivalTime: e.target.value})} />
-                                    </div>
-                                </div>
-
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Giá vé mặc định (VNĐ):</label>
-                                    <input type="number" className="admin-form-input" required min="0" value={formData.defaultTicketPrice} onChange={(e) => setFormData({...formData, defaultTicketPrice: e.target.value})} placeholder="VD: 200000" />
-                                </div>
-                            </div>
-
-                            <div className="admin-form-actions">
-                                <button type="button" className="admin-btn-outline" onClick={() => setIsModalOpen(false)}>Hủy</button>
-                                <button type="submit" className="admin-btn-primary">
-                                    {isEditMode ? 'Lưu Thay Đổi' : 'Thêm Mới'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
                 </div>
-            )}
+                <Pagination 
+                    currentPage={currentPage}
+                    totalItems={schedules.length}
+                    pageSize={pageSize}
+                    onPageChange={setCurrentPage}
+                />
+            </Card>
 
-            {/* Modal Auto-Generate Trips */}
-            {isGeneratorOpen && (
-                <div className="admin-modal-overlay" onClick={() => setIsGeneratorOpen(false)}>
-                    <div className="admin-modal-content" style={{ width: '450px' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#10b981', margin: 0 }}>Tự động Sinh Chuyến</h2>
-                            <button onClick={() => setIsGeneratorOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a0aec0' }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                            </button>
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title={isEditMode ? 'Cập Nhật Lịch Trình' : 'Thêm Lịch Trình Mới'}
+                width="500px"
+            >
+                <form onSubmit={handleSubmit}>
+                    <div className="u-flex-column u-gap-16">
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Tuyến đường:</label>
+                            <select 
+                                className="admin-form-select"
+                                required 
+                                value={formData.routeId} 
+                                onChange={(e) => setFormData({...formData, routeId: e.target.value})}
+                            >
+                                <option value="">-- Chọn tuyến đường --</option>
+                                {routes.map(r => (
+                                    <option key={r.routeId || r.RouteId} value={r.routeId || r.RouteId}>
+                                        {r.routeName || r.RouteName}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
-                        
-                        <div style={{ fontSize: '13px', color: '#065f46', marginBottom: '24px', background: '#ecfdf5', padding: '16px', borderRadius: '12px', border: '1px solid #a7f3d0', lineHeight: 1.5 }}>
-                            💡 Hệ thống sẽ tự động sao chép các <b>Lịch Cố Định</b> và tạo ra hàng loạt <b>Chuyến Thực Tế</b> kèm theo sơ đồ ghế cho những ngày được chọn.
+
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Xe mặc định:</label>
+                            <select 
+                                className="admin-form-select"
+                                required 
+                                value={formData.defaultBusId} 
+                                onChange={(e) => setFormData({...formData, defaultBusId: e.target.value})}
+                            >
+                                <option value="">-- Chọn xe --</option>
+                                {buses.map(b => (
+                                    <option key={b.busId || b.BusId} value={b.busId || b.BusId}>
+                                        {b.plateNumber || b.PlateNumber || b.licensePlate} ({b.totalSeats || b.TotalSeats || b.capacity} chỗ)
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
-                        <form onSubmit={handleGenerateTrips}>
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Từ Ngày:</label>
-                                <input type="date" className="admin-form-input" required value={genDates.fromDate} onChange={(e) => setGenDates({...genDates, fromDate: e.target.value})} />
+                        <div className="u-flex u-gap-16">
+                            <div className="admin-form-group" style={{ flex: 1 }}>
+                                <label className="admin-form-label">Giờ xuất bến:</label>
+                                <input type="time" className="admin-form-input" required value={formData.departureTime} onChange={(e) => setFormData({...formData, departureTime: e.target.value})} />
                             </div>
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Đến Ngày:</label>
-                                <input type="date" className="admin-form-input" required value={genDates.toDate} onChange={(e) => setGenDates({...genDates, toDate: e.target.value})} />
+                            <div className="admin-form-group" style={{ flex: 1 }}>
+                                <label className="admin-form-label">Giờ đến (dự kiến):</label>
+                                <input type="time" className="admin-form-input" required value={formData.arrivalTime} onChange={(e) => setFormData({...formData, arrivalTime: e.target.value})} />
                             </div>
+                        </div>
 
-                            <div className="admin-form-actions">
-                                <button type="button" className="admin-btn-outline" onClick={() => setIsGeneratorOpen(false)}>Hủy</button>
-                                <button type="submit" className="admin-btn-success" disabled={isGenerating}>
-                                    {isGenerating ? 'Đang xử lý...' : 'Bắt đầu Sinh chuyến'}
-                                </button>
-                            </div>
-                        </form>
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Giá vé mặc định (VNĐ):</label>
+                            <input type="number" className="admin-form-input" required min="0" value={formData.defaultTicketPrice} onChange={(e) => setFormData({...formData, defaultTicketPrice: e.target.value})} placeholder="VD: 200000" />
+                        </div>
                     </div>
+
+                    <div className="admin-form-actions">
+                        <button type="button" className="admin-btn-outline" onClick={() => setIsModalOpen(false)}>Hủy</button>
+                        <button type="submit" className="admin-btn-primary">
+                            {isEditMode ? 'Lưu Thay Đổi' : 'Thêm Mới'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
+
+            <Modal
+                isOpen={isGeneratorOpen}
+                onClose={() => setIsGeneratorOpen(false)}
+                title="Tự động Sinh Chuyến"
+                width="450px"
+            >
+                <div className="u-size-13 u-color-emerald-deep u-p-16 u-bg-emerald-faint u-weight-600" style={{ marginBottom: '24px', borderRadius: '12px', lineHeight: 1.5 }}>
+                    💡 Hệ thống sẽ tự động sao chép các <b>Lịch Cố Định</b> và tạo ra hàng loạt <b>Chuyến Thực Tế</b> kèm theo sơ đồ ghế cho những ngày được chọn.
                 </div>
-            )}
+
+                <form onSubmit={handleGenerateTrips}>
+                    <div className="u-flex-column u-gap-16">
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Từ Ngày:</label>
+                            <input type="date" className="admin-form-input" required value={genDates.fromDate} onChange={(e) => setGenDates({...genDates, fromDate: e.target.value})} />
+                        </div>
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Đến Ngày:</label>
+                            <input type="date" className="admin-form-input" required value={genDates.toDate} onChange={(e) => setGenDates({...genDates, toDate: e.target.value})} />
+                        </div>
+                    </div>
+
+                    <div className="admin-form-actions">
+                        <button type="button" className="admin-btn-outline" onClick={() => setIsGeneratorOpen(false)}>Hủy</button>
+                        <button type="submit" className="admin-btn-success" disabled={isGenerating}>
+                            {isGenerating ? 'Đang xử lý...' : 'Bắt đầu Sinh chuyến'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
 
             <ConfirmationModal 
                 isOpen={isDeleteModalOpen}
@@ -377,4 +387,3 @@ const ScheduleManagement = () => {
 };
 
 export default ScheduleManagement;
-

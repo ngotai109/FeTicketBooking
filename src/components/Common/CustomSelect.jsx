@@ -7,6 +7,7 @@ const CustomSelect = ({ options, value, onChange, placeholder, style, minWidth =
 
     // Tìm label tương ứng với value (hỗ trợ cả lồng nhau)
     const findLabel = (opts, val) => {
+        if (!Array.isArray(opts)) return null;
         for (const opt of opts) {
             if (opt.value === val) return opt.label;
             if (opt.type === 'group' && opt.items) {
@@ -56,8 +57,8 @@ const CustomSelect = ({ options, value, onChange, placeholder, style, minWidth =
             {isOpen && (
                 <div className="custom-select-dropdown">
                     <div className="custom-select-options">
-                        {options.map((option, index) => {
-                            if (option.type === 'group') {
+                        {(options || []).map((option, index) => {
+                            if (option.type === 'group' && option.items) {
                                 return (
                                     <div key={index} className="custom-select-group">
                                         <div className="custom-select-group-title">{option.label}</div>
@@ -77,10 +78,10 @@ const CustomSelect = ({ options, value, onChange, placeholder, style, minWidth =
                             return (
                                 <div 
                                     key={index} 
-                                    className={`custom-select-option ${option.value === value ? 'selected' : ''}`}
+                                    className={`custom-select-option ${option?.value === value ? 'selected' : ''}`}
                                     onClick={() => handleSelect(option)}
                                 >
-                                    {option.label}
+                                    {option?.label}
                                 </div>
                             );
                         })}

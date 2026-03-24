@@ -1,0 +1,77 @@
+/* Trip Monitoring Specific Styles */
+
+.trip-monitoring-header-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.trip-monitoring-date-input, .trip-monitoring-route-select {
+    width: auto !important;
+    font-weight: 600;
+}
+
+.trip-monitoring-loading-container {
+    text-align: center;
+    padding: 100px;
+}
+
+.trip-monitoring-loading-text {
+    margin-top: 16px;
+    color: #718096;
+}
+
+.trip-monitoring-empty-state {
+    padding: 60px;
+    text-align: center;
+    color: #718096;
+    font-size: 15px;
+}
+
+.trip-monitoring-time-display {
+    color: #3182ce;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.trip-monitoring-bus-plate {
+    font-weight: 700;
+}
+
+.trip-monitoring-fill-percent {
+    text-align: right;
+    font-size: 11px;
+    margin-top: 4px;
+    font-weight: 700;
+    color: #718096;
+}
+
+.trip-monitoring-modal-info {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #4a5568;
+    font-weight: 600;
+}
+
+.trip-monitoring-departure-time {
+    color: #e53e3e;
+}
+
+.trip-monitoring-seat-item-custom {
+    height: 54px !important;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.trip-monitoring-quick-booking-seat {
+    color: #e53e3e;
+}
+
+.trip-monitoring-status-active {
+    background: #fffaf0;
+}
+
+.trip-monitoring-status-paid {
+    background: #f0fff4;
+}

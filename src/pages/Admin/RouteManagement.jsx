@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, CustomSelect } from '../../components/Common';
+import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination } from '../../components/Common';
 import { handleApiResponse, formatCurrency } from '../../utils/common';
-
 
 import routeService from '../../services/route.service';
 import officeService from '../../services/office.service';
@@ -23,8 +22,9 @@ const RouteManagement = () => {
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterDeparture, setFilterDeparture] = useState('all');
     const [filterArrival, setFilterArrival] = useState('all');
-    const [isToggling, setIsToggling] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10;
 
     const [formData, setFormData] = useState({
         routeName: '',
@@ -37,53 +37,41 @@ const RouteManagement = () => {
     });
 
     useEffect(() => {
-        fetchRoutes();
-        fetchOffices();
-        fetchProvinces();
-        fetchAllWards();
+        fetchInitialData();
     }, []);
 
-    const fetchRoutes = async () => {
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterStatus, filterDeparture, filterArrival]);
+
+    const fetchInitialData = async () => {
         try {
             setLoading(true);
-            const response = await routeService.getRoutes();
-            setRoutes(handleApiResponse(response));
+            const [routesRes, officesRes, provincesRes, wardsRes] = await Promise.all([
+                routeService.getRoutes(),
+                officeService.getAllOffices(),
+                provinceService.getAllProvinces(),
+                wardService.getAllWards()
+            ]);
 
+            setRoutes(handleApiResponse(routesRes));
+            setOffices(handleApiResponse(officesRes));
+            setProvinces(handleApiResponse(provincesRes));
+            setAllWards(handleApiResponse(wardsRes));
         } catch (error) {
-            toast.error('Không thể tải danh sách tuyến đường');
-            setRoutes([]);
+            toast.error('Không thể tải danh sách dữ liệu');
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchOffices = async () => {
+    const fetchRoutes = async () => {
         try {
-            const response = await officeService.getAllOffices();
-            setOffices(handleApiResponse(response));
-
+            const response = await routeService.getRoutes();
+            setRoutes(handleApiResponse(response));
         } catch (error) {
-            toast.error('Không thể tải danh sách văn phòng');
-        }
-    };
-
-    const fetchProvinces = async () => {
-        try {
-            const response = await provinceService.getAllProvinces();
-            setProvinces(handleApiResponse(response));
-
-        } catch (error) {
-            console.error('Lỗi khi tải tỉnh thành:', error);
-        }
-    };
-
-    const fetchAllWards = async () => {
-        try {
-            const response = await wardService.getAllWards();
-            setAllWards(handleApiResponse(response));
-
-        } catch (error) {
-            console.error('Lỗi khi tải xã phường:', error);
+            toast.error('Không thể tải danh sách tuyến đường');
+            setRoutes([]);
         }
     };
 
@@ -163,7 +151,6 @@ const RouteManagement = () => {
     };
 
     const handleToggleActiveConfirm = async () => {
-        // Assume routeService has a way to toggle status or just use updateRoute
         try {
             setIsToggling(true);
             const payload = { ...currentRoute, isActive: !currentRoute.isActive };
@@ -195,7 +182,6 @@ const RouteManagement = () => {
         let pName = getProvinceName(office.provinceId);
         let wName = getWardName(office.wardId);
         
-        // Nếu office không có trực tiếp provinceId, tìm qua wardId
         if (!pName && office.wardId) {
             const ward = allWards.find(w => w.wardId === office.wardId);
             if (ward) {
@@ -217,7 +203,6 @@ const RouteManagement = () => {
         const map = {};
         
         offices.forEach(o => {
-            // Xác định Tỉnh cho văn phòng
             let pId = o.provinceId ? parseInt(o.provinceId) : null;
             const ward = allWards.find(w => parseInt(w.wardId) === parseInt(o.wardId));
             if (!pId && ward) pId = parseInt(ward.provinceId);
@@ -235,13 +220,10 @@ const RouteManagement = () => {
             let label = '';
             
             if (isHanoi) {
-                // Nhóm Hà Nội -> Hiện: VP.Nhà xe
                 label = o.officeName;
             } else if (isNgheAn) {
-                // Nhóm Nghệ An -> Hiện: Tên Xã
                 label = wName || o.officeName;
             } else {
-                // Các tỉnh khác -> Hiện cả Xã và Văn phòng
                 label = `${wName ? wName + ' - ' : ''}${o.officeName}`;
             }
             
@@ -251,7 +233,6 @@ const RouteManagement = () => {
             });
         });
         
-        // Chuyển map thành mảng và sắp xếp (Hà Nội, Nghệ An lên đầu)
         return Object.keys(map).sort((a, b) => {
             const aLow = a.toLowerCase();
             const bLow = b.toLowerCase();
@@ -266,8 +247,6 @@ const RouteManagement = () => {
             items: map[name]
         }));
     };
-
-
 
     const filteredRoutes = routes.filter(r => {
         const name = r.routeName || '';
@@ -297,9 +276,10 @@ const RouteManagement = () => {
                 </button>
             </header>
 
-            <div className="admin-card">
-                <div className="admin-toolbar">
-                    <div className="search-box" style={{ flex: '1.5', minWidth: '200px', position: 'relative' }}>
+            <Card padding="0" className="admin-table-card">
+                <div className="table-card-content">
+                <div className="admin-toolbar" style={{ margin: 0, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}>
+                    <div className="search-box u-flex u-align-center" style={{ flex: '1.5', minWidth: '200px', position: 'relative' }}>
                         <input
                             type="text"
                             placeholder="Tìm kiếm tuyến đường..."
@@ -351,64 +331,61 @@ const RouteManagement = () => {
                                 <th>Khoảng cách</th>
                                 <th>Thời gian</th>
                                 <th>Trạng thái</th>
-                                <th style={{ textAlign: 'right' }}>Thao tác</th>
+                                <th className="u-text-center">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="7" style={{ textAlign: 'center', padding: '40px' }}>
-                                        Đang tải dữ liệu...
-                                    </td>
+                                    <td colSpan="7" className="u-text-center u-p-40">Đang tải dữ liệu...</td>
                                 </tr>
                             ) : filteredRoutes.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7" style={{ textAlign: 'center', padding: '40px' }}>
-                                        Không tìm thấy tuyến đường nào
-                                    </td>
+                                    <td colSpan="7" className="u-text-center u-p-40">Không tìm thấy tuyến đường nào</td>
                                 </tr>
                             ) : (
-                                filteredRoutes.map((route) => (
+                                filteredRoutes.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((route) => (
                                     <tr key={route.routeId}>
-                                        <td style={{ fontWeight: '600', color: '#2d3748' }}>{route.routeName}</td>
-                                        <td style={{ color: '#4a5568' }}>
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <span style={{ color: '#38a169', fontSize: '10px' }}>●</span> {getOfficeName(route.departureOfficeId)}
+                                        <td className="u-weight-600 u-color-slate-800">{route.routeName}</td>
+                                        <td>
+                                            <div className="u-flex u-flex-column u-gap-12">
+                                                <div className="u-flex u-align-center u-gap-8 u-size-13">
+                                                    <span className="u-color-green" style={{ fontSize: '10px' }}>●</span> {getOfficeName(route.departureOfficeId)}
                                                 </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <span style={{ color: '#e53e3e', fontSize: '10px' }}>●</span> {getOfficeName(route.arrivalOfficeId)}
+                                                <div className="u-flex u-align-center u-gap-8 u-size-13">
+                                                    <span className="u-color-red" style={{ fontSize: '10px' }}>●</span> {getOfficeName(route.arrivalOfficeId)}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td style={{ color: '#2d3748', fontWeight: '600' }}>{formatCurrency(route.basePrice)}</td>
-                                        <td style={{ color: '#4a5568' }}>{route.distanceKm} km</td>
-                                        <td style={{ color: '#4a5568' }}>{route.estimatedTimeHours} giờ</td>
+                                        <td className="u-weight-600 u-color-slate-800">{formatCurrency(route.basePrice)}</td>
+                                        <td className="u-color-slate-600">{route.distanceKm} km</td>
+                                        <td className="u-color-slate-600">{route.estimatedTimeHours} giờ</td>
                                         <td>
-                                            <span className={`status-badge ${route.isActive ? 'status-active' : 'status-inactive'}`}>
-                                                <span className="status-dot" style={{ backgroundColor: 'currentColor' }}></span>
+                                            <Badge type={route.isActive ? 'success' : 'danger'}>
                                                 {route.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
-                                            </span>
+                                            </Badge>
                                         </td>
-                                        <td style={{ textAlign: 'right' }}>
-                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                <button
-                                                    onClick={() => handleOpenFormModal(route)}
-                                                    className="admin-btn-outline"
+                                        <td className="u-text-center">
+                                            <div className="u-flex u-gap-12 u-justify-center">
+                                                <button 
+                                                    onClick={() => handleOpenFormModal(route)} 
+                                                    className="admin-btn-icon"
+                                                    title="Chỉnh sửa"
+                                                    style={{ color: '#2b6cb0' }}
                                                 >
-                                                    Sửa
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                                 </button>
                                                 <button
                                                     onClick={() => handleToggleActiveClick(route)}
-                                                    className="admin-btn-outline"
-                                                    style={{
-                                                        color: route.isActive ? '#e53e3e' : '#38a169',
-                                                        borderColor: 'currentColor',
-                                                        minWidth: '60px',
-                                                        justifyContent: 'center'
-                                                    }}
+                                                    className="admin-btn-icon"
+                                                    title={route.isActive ? 'Khóa tuyến' : 'Mở tuyến'}
+                                                    style={{ color: route.isActive ? '#e53e3e' : '#38a169' }}
                                                 >
-                                                    {route.isActive ? 'Khóa' : 'Mở'}
+                                                    {route.isActive ? (
+                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                                    ) : (
+                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
+                                                    )}
                                                 </button>
                                             </div>
                                         </td>
@@ -418,7 +395,14 @@ const RouteManagement = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
+                </div>
+                <Pagination 
+                    currentPage={currentPage}
+                    totalItems={filteredRoutes.length}
+                    pageSize={pageSize}
+                    onPageChange={setCurrentPage}
+                />
+            </Card>
 
             <ConfirmationModal
                 isOpen={isToggleModalOpen}
@@ -432,129 +416,123 @@ const RouteManagement = () => {
                 isDangerous={currentRoute?.isActive}
             />
 
-            {/* Modal Form */}
-            {isFormModalOpen && (
-                <div className="admin-modal-overlay" onClick={handleCloseFormModal}>
-                    <div className="admin-modal-content" style={{ width: '600px' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                            <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>{isEditing ? 'Cập nhật tuyến đường' : 'Thêm tuyến mới'}</h2>
-                            <button onClick={handleCloseFormModal} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a0aec0' }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                            </button>
+            <Modal
+                isOpen={isFormModalOpen}
+                onClose={handleCloseFormModal}
+                title={isEditing ? 'Cập nhật tuyến đường' : 'Thêm tuyến mới'}
+                width="600px"
+            >
+                <form onSubmit={handleFormSubmit}>
+                    <div className="u-flex-column u-gap-20">
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Tên Tuyến đường *</label>
+                            <input
+                                type="text"
+                                className="admin-form-input"
+                                value={formData.routeName}
+                                onChange={(e) => setFormData({ ...formData, routeName: e.target.value })}
+                                required
+                                placeholder="Ví dụ: Hà Nội - Đà Nẵng"
+                            />
                         </div>
 
-                        <form onSubmit={handleFormSubmit}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                                <div className="admin-form-group" style={{ gridColumn: 'span 2' }}>
-                                    <label className="admin-form-label">Tên Tuyến đường *</label>
-                                    <input
-                                        type="text"
-                                        className="admin-form-input"
-                                        value={formData.routeName}
-                                        onChange={(e) => setFormData({ ...formData, routeName: e.target.value })}
-                                        required
-                                        placeholder="Ví dụ: Hà Nội - Đà Nẵng"
-                                    />
-                                </div>
-
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Văn phòng/Điểm đi *</label>
-                                    <select
-                                        className="admin-form-select"
-                                        value={formData.departureOfficeId}
-                                        onChange={(e) => setFormData({ ...formData, departureOfficeId: e.target.value })}
-                                        required
-                                    >
-                                        <option value="">-- Chọn điểm đi --</option>
-                                        {getGroupedOffices().map(group => (
-                                            <optgroup key={group.label} label={group.label}>
-                                                {group.items.map(item => (
-                                                    <option key={item.value} value={item.value}>{item.label}</option>
-                                                ))}
-                                            </optgroup>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Văn phòng/Điểm đến *</label>
-                                    <select
-                                        className="admin-form-select"
-                                        value={formData.arrivalOfficeId}
-                                        onChange={(e) => setFormData({ ...formData, arrivalOfficeId: e.target.value })}
-                                        required
-                                    >
-                                        <option value="">-- Chọn điểm đến --</option>
-                                        {getGroupedOffices().map(group => (
-                                            <optgroup key={group.label} label={group.label}>
-                                                {group.items.map(item => (
-                                                    <option key={item.value} value={item.value}>{item.label}</option>
-                                                ))}
-                                            </optgroup>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Giá vé cơ bản (VND) *</label>
-                                    <input
-                                        type="number"
-                                        className="admin-form-input"
-                                        value={formData.basePrice}
-                                        onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
-                                        required
-                                        placeholder="Vd: 250000"
-                                    />
-                                </div>
-
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Khoảng cách (Km) *</label>
-                                    <input
-                                        type="number"
-                                        step="0.1"
-                                        className="admin-form-input"
-                                        value={formData.distanceKm}
-                                        onChange={(e) => setFormData({ ...formData, distanceKm: e.target.value })}
-                                        required
-                                        placeholder="Vd: 350.5"
-                                    />
-                                </div>
-
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Thời gian dự kiến (giờ) *</label>
-                                    <input
-                                        type="number"
-                                        className="admin-form-input"
-                                        value={formData.estimatedTimeHours}
-                                        onChange={(e) => setFormData({ ...formData, estimatedTimeHours: e.target.value })}
-                                        required
-                                        placeholder="Vd: 8"
-                                    />
-                                </div>
-
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Trạng thái</label>
-                                    <select
-                                        className="admin-form-select"
-                                        value={formData.isActive}
-                                        onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
-                                    >
-                                        <option value="true">Đang hoạt động</option>
-                                        <option value="false">Ngừng hoạt động</option>
-                                    </select>
-                                </div>
+                        <div className="u-flex u-gap-20">
+                            <div className="admin-form-group" style={{ flex: 1 }}>
+                                <label className="admin-form-label">Điểm đi *</label>
+                                <select
+                                    className="admin-form-select"
+                                    value={formData.departureOfficeId}
+                                    onChange={(e) => setFormData({ ...formData, departureOfficeId: e.target.value })}
+                                    required
+                                >
+                                    <option value="">-- Chọn điểm đi --</option>
+                                    {getGroupedOffices().map(group => (
+                                        <optgroup key={group.label} label={group.label}>
+                                            {group.items.map(item => (
+                                                <option key={item.value} value={item.value}>{item.label}</option>
+                                            ))}
+                                        </optgroup>
+                                    ))}
+                                </select>
                             </div>
 
-                            <div className="admin-form-actions">
-                                <button type="button" className="admin-btn-outline" onClick={handleCloseFormModal}>Hủy</button>
-                                <button type="submit" className="admin-btn-primary" disabled={isSubmitting}>
-                                    {isSubmitting ? 'Đang lưu...' : (isEditing ? 'Cập nhật' : 'Thêm mới')}
-                                </button>
+                            <div className="admin-form-group" style={{ flex: 1 }}>
+                                <label className="admin-form-label">Điểm đến *</label>
+                                <select
+                                    className="admin-form-select"
+                                    value={formData.arrivalOfficeId}
+                                    onChange={(e) => setFormData({ ...formData, arrivalOfficeId: e.target.value })}
+                                    required
+                                >
+                                    <option value="">-- Chọn điểm đến --</option>
+                                    {getGroupedOffices().map(group => (
+                                        <optgroup key={group.label} label={group.label}>
+                                            {group.items.map(item => (
+                                                <option key={item.value} value={item.value}>{item.label}</option>
+                                            ))}
+                                        </optgroup>
+                                    ))}
+                                </select>
                             </div>
-                        </form>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">Giá vé (VND) *</label>
+                                <input
+                                    type="number"
+                                    className="admin-form-input"
+                                    value={formData.basePrice}
+                                    onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">Khoảng cách (Km) *</label>
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    className="admin-form-input"
+                                    value={formData.distanceKm}
+                                    onChange={(e) => setFormData({ ...formData, distanceKm: e.target.value })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">Thời gian (giờ) *</label>
+                                <input
+                                    type="number"
+                                    className="admin-form-input"
+                                    value={formData.estimatedTimeHours}
+                                    onChange={(e) => setFormData({ ...formData, estimatedTimeHours: e.target.value })}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Trạng thái</label>
+                            <select
+                                className="admin-form-select"
+                                value={formData.isActive}
+                                onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
+                            >
+                                <option value="true">Đang hoạt động</option>
+                                <option value="false">Ngừng hoạt động</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-            )}
+
+                    <div className="admin-form-actions">
+                        <button type="button" className="admin-btn-outline" onClick={handleCloseFormModal}>Hủy</button>
+                        <button type="submit" className="admin-btn-primary" disabled={isSubmitting}>
+                            {isSubmitting ? 'Đang lưu...' : (isEditing ? 'Cập nhật' : 'Thêm mới')}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 };

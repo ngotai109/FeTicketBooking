@@ -110,7 +110,7 @@ const Home = () => {
                             </div>
 
                             <button className="swap-button" onClick={handleSwap}>
-                                <span style={{ fontSize: '20px', fontWeight: 'bold' }}>⇌</span>
+                                <span className="u-size-20 u-weight-bold">⇌</span>
                             </button>
 
                             <div className="input-group custom-select-wrapper">
@@ -160,7 +160,7 @@ const Home = () => {
                             </div>
 
                             <button className="search-button" onClick={handleSearch}>
-                                <span style={{ fontSize: '18px' }}>🔍</span> Tìm vé xe
+                                <span className="u-size-18">🔍</span> Tìm vé xe
                             </button>
                         </div>
 

@@ -6,6 +6,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
 } from 'recharts';
+import { Card, Badge } from '../components/Common';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -81,7 +82,6 @@ const AdminDashboard = () => {
         { action: 'Hủy vé sát giờ (#TK-105)', user: 'Phạm Thị D', time: '2 giờ trước', type: 'cancel' }
     ];
 
-    // Dữ liệu mock cho Biểu đồ Doanh thu (Area Chart)
     const revenueData = [
         { date: '14/03', revenue: 15.2 },
         { date: '15/03', revenue: 18.5 },
@@ -92,7 +92,6 @@ const AdminDashboard = () => {
         { date: '20/03', revenue: 35.6 },
     ];
 
-    // Dữ liệu mock cho Biểu đồ Tỷ trọng Tuyến đường (Pie Chart)
     const routePieData = [
         { name: 'HN - Nghệ An', value: 45 },
         { name: 'Nghệ An - HN', value: 35 },
@@ -102,68 +101,65 @@ const AdminDashboard = () => {
     const COLORS = ['#3182ce', '#38a169', '#dd6b20', '#a0aec0'];
 
     return (
-        <div style={{ padding: '0 10px 20px 10px', height: '100%', overflowY: 'auto' }}>
+        <div className="admin-page-container" style={{ padding: '0 10px 20px 10px', height: '100%', overflowY: 'auto' }}>
             {/* --- HEADER --- */}
-            <header className="dashboard-header" style={{ marginBottom: '24px', borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
-                <div className="header-left">
-                    <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1a202c', marginBottom: '4px' }}>Tổng quan Nhà xe (Dashboard)</h1>
-                    <p className="header-time" style={{ color: '#718096', fontSize: '14px' }}>
+            <header className="admin-header u-m-b-20" style={{ paddingBottom: '12px' }}>
+                <div className="admin-header-title">
+                    <h1 className="u-size-20 u-weight-800 u-color-slate-800">Tổng quan Nhà xe (Dashboard)</h1>
+                    <p className="u-color-slate-500 u-size-12">
                         Cập nhật lúc: {currentTime.toLocaleString('vi-VN', {
                             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
                             hour: '2-digit', minute: '2-digit', second: '2-digit'
                         })}
                     </p>
                 </div>
-                <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div className="user-profile" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f7fafc', padding: '8px 16px', borderRadius: '50px', border: '1px solid #edf2f7' }}>
-                        <div className="user-avatar" style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#3182ce', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                <div className="u-flex u-align-center u-gap-16">
+                    <div className="u-flex u-align-center u-gap-12 u-p-x-16 u-p-y-8 u-rounded-50 u-bg-slate-50" style={{ border: '1px solid #edf2f7' }}>
+                        <div className="u-flex u-align-center u-justify-center u-weight-bold" style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#3182ce', color: 'white' }}>
                             {userEmail.charAt(0).toUpperCase()}
                         </div>
-                        <div className="user-info" style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span className="user-name" style={{ fontWeight: '700', fontSize: '14px', color: '#2d3748' }}>{userEmail}</span>
-                            <span className="user-role" style={{ fontSize: '12px', color: '#718096' }}>Quản trị viên cấp cao</span>
+                        <div className="u-flex u-flex-column">
+                            <span className="u-weight-700 u-size-14 u-color-slate-800">{userEmail}</span>
+                            <span className="u-size-12 u-color-slate-500">Quản trị viên cấp cao</span>
                         </div>
                     </div>
                 </div>
             </header>
 
             {/* --- CARDS TỔNG QUAN --- */}
-            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '24px' }}>
+            <div className="u-flex u-gap-20 u-m-b-24">
                 {stats.map((stat, index) => (
-                    <div key={index} className="stat-card" style={{ 
-                        background: 'white', borderRadius: '16px', padding: '24px', 
-                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05)', position: 'relative', overflow: 'hidden', border: '1px solid #edf2f7'
-                    }}>
+                    <Card key={index} padding="24px" className="u-flex-1" style={{ position: 'relative', overflow: 'hidden' }}>
                         {/* Hiệu ứng màu gradient bóng mờ ở góc */}
                         <div style={{ position: 'absolute', top: '-15%', right: '-10%', width: '100px', height: '100px', borderRadius: '50%', background: stat.color, filter: 'blur(50px)', opacity: '0.15' }}></div>
                         
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                            <div style={{ padding: '12px', borderRadius: '12px', background: `${stat.color}15`, color: stat.color }}>
+                        <div className="u-flex u-justify-between u-align-start u-m-b-16">
+                            <div className="u-p-12 u-rounded-12" style={{ background: `${stat.color}15`, color: stat.color }}>
                                 {stat.icon}
                             </div>
-                            <div className={`stat-change ${stat.trend}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#f0fff4', color: '#38a169', padding: '4px 8px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold' }}>
+                            <div className="u-flex u-align-center u-gap-4 u-p-x-8 u-p-y-4 u-rounded-20 u-size-12 u-weight-bold" style={{ background: '#f0fff4', color: '#38a169' }}>
                                 <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
                                     <path d="M12 19V5M5 12L12 5L19 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                                 <span>{stat.change}</span>
                             </div>
                         </div>
-                        <div className="stat-content">
-                            <h3 style={{ fontSize: '14px', color: '#718096', fontWeight: '600', marginBottom: '4px' }}>{stat.title}</h3>
-                            <div className="stat-value" style={{ fontSize: '28px', fontWeight: '800', color: '#1a202c' }}>{stat.value}</div>
+                        <div>
+                            <h3 className="u-size-14 u-color-slate-500 u-weight-600 u-m-b-4">{stat.title}</h3>
+                            <div className="u-size-28 u-weight-800 u-color-slate-800">{stat.value}</div>
                         </div>
-                    </div>
+                    </Card>
                 ))}
             </div>
 
             {/* --- KHU VỰC BIỂU ĐỒ & HOẠT ĐỘNG --- */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+            <div className="u-flex u-gap-20">
                 
                 {/* Cột trái: Biểu đồ Area Doanh thu */}
-                <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', border: '1px solid #edf2f7' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#2d3748' }}>Doanh thu 7 ngày gần nhất (Triệu VNĐ)</h2>
-                        <select style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '13px', fontWeight: '600' }}>
+                <Card padding="24px" style={{ flex: 2 }}>
+                    <div className="u-flex u-justify-between u-align-center u-m-b-20">
+                        <h2 className="u-size-18 u-weight-700 u-color-slate-800">Doanh thu 7 ngày gần nhất (Triệu VNĐ)</h2>
+                        <select className="u-p-x-12 u-p-y-6 u-rounded-8 u-size-13 u-weight-600" style={{ border: '1px solid #e2e8f0', outline: 'none' }}>
                             <option>7 ngày qua</option>
                             <option>Tháng này</option>
                         </select>
@@ -188,14 +184,14 @@ const AdminDashboard = () => {
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
-                </div>
+                </Card>
 
                 {/* Cột phải: Dọc (Pie chart + Hoạt động gần đây) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div className="u-flex-1 u-flex u-flex-column u-gap-20">
                     
                     {/* Miếng 1: Pie Chart tỉ trọng tuyến */}
-                    <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', border: '1px solid #edf2f7' }}>
-                        <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#2d3748', marginBottom: '10px' }}>Tỷ trọng Tuyến đường</h2>
+                    <Card padding="24px">
+                        <h2 className="u-size-18 u-weight-700 u-color-slate-800 u-m-b-10">Tỷ trọng Tuyến đường</h2>
                         <div style={{ height: '200px', width: '100%' }}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
@@ -218,37 +214,35 @@ const AdminDashboard = () => {
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
-                    </div>
+                    </Card>
 
                     {/* Miếng 2: Hoạt động gần đây */}
-                    <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', border: '1px solid #edf2f7', flexGrow: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                            <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#2d3748' }}>Tin tức / Hoạt động</h2>
-                            <span style={{ fontSize: '13px', color: '#3182ce', cursor: 'pointer', fontWeight: '600' }}>Xem tất cả</span>
+                    <Card padding="24px" style={{ flex: 1 }}>
+                        <div className="u-flex u-justify-between u-align-center u-m-b-15">
+                            <h2 className="u-size-18 u-weight-700 u-color-slate-800">Tin tức / Hoạt động</h2>
+                            <span className="u-size-13 u-color-blue u-weight-600 u-cursor-pointer">Xem tất cả</span>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div className="u-flex u-flex-column u-gap-15">
                             {recentActivities.map((activity, index) => (
-                                <div key={index} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', borderBottom: index < recentActivities.length - 1 ? '1px dashed #e2e8f0' : 'none', paddingBottom: index < recentActivities.length - 1 ? '15px' : '0' }}>
+                                <div key={index} className={`u-flex u-align-start u-gap-12 u-p-b-15 ${index < recentActivities.length - 1 ? 'u-border-b-dashed' : ''}`}>
                                     <div style={{ 
                                         width: '10px', height: '10px', borderRadius: '50%', marginTop: '5px',
                                         background: activity.type === 'booking' ? '#3182ce' : activity.type === 'payment' ? '#38a169' : activity.type === 'cancel' ? '#e53e3e' : '#dd6b20'
                                     }}></div>
-                                    <div style={{ flexGrow: 1 }}>
-                                        <p style={{ fontSize: '13px', fontWeight: '700', color: '#2d3748', marginBottom: '2px' }}>{activity.action}</p>
-                                        <p style={{ fontSize: '12px', color: '#718096' }}>Bởi: <span style={{ fontWeight: '600' }}>{activity.user}</span></p>
+                                    <div className="u-flex-1">
+                                        <p className="u-size-13 u-weight-700 u-color-slate-800 u-m-b-2">{activity.action}</p>
+                                        <p className="u-size-12 u-color-slate-500">Bởi: <span className="u-weight-600">{activity.user}</span></p>
                                     </div>
-                                    <span style={{ fontSize: '11px', color: '#a0aec0', whiteSpace: 'nowrap' }}>{activity.time}</span>
+                                    <span className="u-size-11 u-color-slate-400 u-text-nowrap">{activity.time}</span>
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </Card>
 
                 </div>
             </div>
-            {/* End Wrap */}
         </div>
     );
 };
 
 export default AdminDashboard;
-

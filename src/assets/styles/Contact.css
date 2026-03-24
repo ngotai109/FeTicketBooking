@@ -98,6 +98,11 @@
     flex-shrink: 0;
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
+.cq-icon.orange { background: linear-gradient(135deg,#f39c12,#e67e22); }
+.cq-icon.blue { background: linear-gradient(135deg,#2980b9,#1abc9c); }
+.cq-icon.purple { background: linear-gradient(135deg,#8e44ad,#3498db); }
+.cq-icon.red { background: linear-gradient(135deg,#e74c3c,#c0392b); }
+
 .cq-info {
     display: flex;
     flex-direction: column;
@@ -332,6 +337,11 @@
     border-bottom: 2px solid;
     margin-bottom: 16px;
 }
+.office-city-header.city-hanoi { border-color: #e74c3c; }
+.office-city-header.city-hanoi h3 { color: #e74c3c; }
+.office-city-header.city-nghean { border-color: #2980b9; }
+.office-city-header.city-nghean h3 { color: #2980b9; }
+
 .office-city-icon { font-size: 22px; }
 .office-city-header h3 {
     font-size: 17px;

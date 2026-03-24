@@ -3,6 +3,8 @@ import { toast } from 'react-toastify';
 import tripService from '../../services/trip.service';
 import routeService from '../../services/route.service';
 import { getBusLayout } from '../../constants/busLayouts';
+import { Badge, Card, Modal, Pagination } from '../../components/Common';
+import '../../assets/styles/AdminTripMonitoring.css';
 
 const TripMonitoring = () => {
     // ---- State Filter ----
@@ -28,6 +30,8 @@ const TripMonitoring = () => {
         pickupPoint: '',
         status: 1
     });
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 8; // Grid usually looks better with 8 or 12
 
     useEffect(() => {
         fetchInitialData();
@@ -37,6 +41,10 @@ const TripMonitoring = () => {
         if (filterDate) {
             fetchTrips();
         }
+    }, [filterDate, selectedRoute]);
+
+    useEffect(() => {
+        setCurrentPage(1);
     }, [filterDate, selectedRoute]);
 
     const fetchInitialData = async () => {
@@ -123,20 +131,20 @@ const TripMonitoring = () => {
         }
     };
 
-    const getSeatStyles = (status) => {
+    const getSeatConfig = (status) => {
         switch (status) {
-            case 1: return { class: 'floor-3', bg: '#fefcbf', color: '#b7791f', border: '#faf089', label: 'Đang Giữ' };
-            case 2: return { class: 'floor-4', bg: '#fed7d7', color: '#c53030', border: '#feb2b2', label: 'Đã Bán' };
-            case 3: return { class: 'floor-5', bg: '#e2e8f0', color: '#718096', border: '#cbd5e0', label: 'Bị Khóa' };
-            default: return { class: 'floor-1', bg: '#ebf4ff', color: '#3182ce', border: '#bee3f8', label: 'Còn Trống'};
+            case 1: return { type: 'warning', label: 'Đang Giữ' };
+            case 2: return { type: 'danger', label: 'Đã Bán' };
+            case 3: return { type: 'info', label: 'Bị Khóa' }; // Grayish
+            default: return { type: 'info', label: 'Còn Trống'};
         }
     };
 
-    const StatusBadge = ({ status }) => {
+    const getTripStatusBadge = (status) => {
         switch (status) {
-            case 0: return <span className="admin-badge admin-badge-info">Sắp chạy</span>;
-            case 1: return <span className="admin-badge admin-badge-warning">Đang đi</span>;
-            case 2: return <span className="admin-badge admin-badge-success">Hoàn thành</span>;
+            case 0: return <Badge type="info">Sắp chạy</Badge>;
+            case 1: return <Badge type="warning">Đang đi</Badge>;
+            case 2: return <Badge type="success">Hoàn thành</Badge>;
             default: return null;
         }
     };
@@ -148,19 +156,17 @@ const TripMonitoring = () => {
                     <h1>Theo Dõi Chuyến Hàng Ngày</h1>
                     <p className="admin-header-subtitle">Quản lý vé, tình trạng lấp đầy và điều phối xe xuất bến</p>
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div className="trip-monitoring-header-controls">
                     <input 
                         type="date" 
-                        className="admin-form-input"
+                        className="admin-form-input trip-monitoring-date-input"
                         value={filterDate} 
                         onChange={(e) => setFilterDate(e.target.value)}
-                        style={{ width: 'auto', fontWeight: '600' }}
                     />
                     <select 
-                        className="admin-form-select"
+                        className="admin-form-select trip-monitoring-route-select"
                         value={selectedRoute} 
                         onChange={(e) => setSelectedRoute(e.target.value)}
-                        style={{ width: 'auto', fontWeight: '600' }}
                     >
                         <option value="all">Tất cả tuyến</option>
                         {routes.map(r => (
@@ -171,103 +177,113 @@ const TripMonitoring = () => {
             </header>
 
             {loading ? (
-                <div style={{ textAlign: 'center', padding: '100px' }} className="admin-loading">
+                <div className="trip-monitoring-loading-container admin-loading">
                     <div className="loader"></div>
-                    <p style={{ marginTop: '16px', color: '#718096' }}>Đang tải lịch trình...</p>
+                    <p className="trip-monitoring-loading-text">Đang tải lịch trình...</p>
                 </div>
             ) : trips.length === 0 ? (
-                <div className="admin-card" style={{ padding: '60px', textAlign: 'center' }}>
-                    <p style={{ color: '#718096', fontSize: '15px' }}>Không có chuyến nào được tìm thấy cho bộ lọc này.</p>
-                </div>
+                <Card className="trip-monitoring-empty-state">
+                    <p>Không có chuyến nào được tìm thấy cho bộ lọc này.</p>
+                </Card>
             ) : (
-                <div className="admin-grid-layout">
-                    {trips.filter(t => selectedRoute === 'all' || (t.routeId || t.RouteId)?.toString() === selectedRoute).map(trip => {
-                        const filledSeats = trip.totalSeats - trip.availableSeats;
-                        const fillPercent = Math.round((filledSeats / trip.totalSeats) * 100) || 0;
-                        const isFull = trip.availableSeats === 0;
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div className="admin-grid-layout">
+                        {trips
+                            .filter(t => selectedRoute === 'all' || (t.routeId || t.RouteId)?.toString() === selectedRoute)
+                            .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                            .map(trip => {
+                                const filledSeats = trip.totalSeats - trip.availableSeats;
+                                const fillPercent = Math.round((filledSeats / trip.totalSeats) * 100) || 0;
+                                const isFull = trip.availableSeats === 0;
 
-                        return (
-                            <div 
-                                key={trip.tripId} 
-                                className={`admin-trip-card ${isFull ? 'full' : 'available'}`}
-                                onClick={() => handleOpenTripDetail(trip)}
-                            >
-                                <div className="admin-trip-info-row">
-                                    <h3 className="admin-trip-route">{trip.routeName}</h3>
-                                    <StatusBadge status={trip.status} />
-                                </div>
+                                return (
+                                    <Card 
+                                        key={trip.tripId} 
+                                        className={`admin-trip-card ${isFull ? 'full' : 'available'}`}
+                                        onClick={() => handleOpenTripDetail(trip)}
+                                        interactive
+                                        padding="24px"
+                                    >
+                                        <div className="admin-trip-info-row">
+                                            <h3 className="admin-trip-route">{trip.routeName}</h3>
+                                            {getTripStatusBadge(trip.status)}
+                                        </div>
 
-                                <div className="admin-trip-time">
-                                    <span style={{ color: '#3182ce', fontSize: '15px', fontWeight: '700' }}>{trip.departureTime}</span>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                                    <span>{trip.arrivalTime}</span>
-                                </div>
+                                        <div className="admin-trip-time">
+                                            <span className="trip-monitoring-time-display">{trip.departureTime}</span>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                            <span>{trip.arrivalTime}</span>
+                                        </div>
 
-                                <div className="admin-trip-bus-info">
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                        <span style={{ fontWeight: '700' }}>{trip.busPlate}</span>
-                                    </div>
-                                    <span className="admin-badge admin-badge-info" style={{ borderRadius: '6px' }}>{trip.busType} chỗ</span>
-                                </div>
+                                        <div className="admin-trip-bus-info">
+                                            <div className="u-flex u-align-center u-gap-8">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                                <span className="trip-monitoring-bus-plate">{trip.busPlate}</span>
+                                            </div>
+                                            <Badge type="info">{trip.busType} chỗ</Badge>
+                                        </div>
 
-                                <div>
-                                    <div className="admin-trip-info-row" style={{ marginBottom: '4px' }}>
-                                        <span className="admin-trip-stat-label">Tình trạng lấp đầy:</span>
-                                        <span className="admin-trip-stat-value" style={{ color: isFull ? '#e53e3e' : '#38a169' }}>
-                                            {filledSeats} / {trip.totalSeats} ghế
-                                        </span>
-                                    </div>
-                                    <div className="admin-progress-container">
-                                        <div 
-                                            className="admin-progress-bar" 
-                                            style={{ 
-                                                width: `${fillPercent}%`,
-                                                background: isFull ? '#e53e3e' : '#3182ce'
-                                            }}
-                                        ></div>
-                                    </div>
-                                    <div style={{ textAlign: 'right', fontSize: '11px', marginTop: '4px', fontWeight: '700', color: '#718096' }}>
-                                        {fillPercent}% lấp đầy
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
+                                        <div>
+                                            <div className="admin-trip-info-row" style={{ marginBottom: '4px' }}>
+                                                <span className="admin-trip-stat-label">Tình trạng lấp đầy:</span>
+                                                <span className="admin-trip-stat-value" style={{ color: isFull ? '#e53e3e' : '#38a169' }}>
+                                                    {filledSeats} / {trip.totalSeats} ghế
+                                                </span>
+                                            </div>
+                                            <div className="admin-progress-container">
+                                                <div 
+                                                    className="admin-progress-bar" 
+                                                    style={{ 
+                                                        width: `${fillPercent}%`,
+                                                        background: isFull ? '#e53e3e' : '#3182ce'
+                                                    }}
+                                                ></div>
+                                            </div>
+                                            <div className="trip-monitoring-fill-percent">
+                                                {fillPercent}% lấp đầy
+                                            </div>
+                                        </div>
+                                    </Card>
+                                );
+                            })}
+                    </div>
+                    <Pagination 
+                        currentPage={currentPage}
+                        totalItems={trips.filter(t => selectedRoute === 'all' || (t.routeId || t.RouteId)?.toString() === selectedRoute).length}
+                        pageSize={pageSize}
+                        onPageChange={setCurrentPage}
+                    />
                 </div>
             )}
 
             {/* Modal Detail Seat Map */}
-            {isSeatMapOpen && selectedTrip && (
-                <div className="admin-modal-overlay" onClick={() => setIsSeatMapOpen(false)}>
-                    <div className="admin-modal-content" style={{ width: '900px' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #edf2f7', paddingBottom: '20px', marginBottom: '24px' }}>
-                            <div>
-                                <h2 style={{ fontSize: '20px', fontWeight: '800', margin: 0 }}>Sơ đồ Vé - {selectedTrip.routeName}</h2>
-                                <div style={{ display: 'flex', gap: '16px', marginTop: '8px', fontSize: '13px', color: '#4a5568', fontWeight: '600' }}>
-                                    <span>🕒 Giờ đi: <strong style={{ color: '#e53e3e' }}>{selectedTrip.departureTime}</strong></span>
-                                    <span>🚌 Xe: <strong>{selectedTrip.busPlate}</strong></span>
-                                    <span>🏷️ Loại: <strong>{selectedTrip.busType} chỗ</strong></span>
-                                </div>
-                            </div>
-                            <button onClick={() => setIsSeatMapOpen(false)} style={{ background: '#f7fafc', border: 'none', cursor: 'pointer', padding: '10px', borderRadius: '50%', color: '#a0aec0' }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                            </button>
+            <Modal 
+                isOpen={isSeatMapOpen} 
+                onClose={() => setIsSeatMapOpen(false)}
+                title={`Sơ đồ Vé - ${selectedTrip?.routeName}`}
+                width="900px"
+            >
+                {selectedTrip && (
+                    <>
+                        <div className="trip-monitoring-modal-info">
+                            <span>🕒 Giờ đi: <strong className="trip-monitoring-departure-time">{selectedTrip.departureTime}</strong></span>
+                            <span>🚌 Xe: <strong>{selectedTrip.busPlate}</strong></span>
+                            <span>🏷️ Loại: <strong>{selectedTrip.busType} chỗ</strong></span>
                         </div>
 
                         <div className="admin-layout-legend" style={{ marginBottom: '32px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: 'none' }}>
                             {[0, 1, 2, 3].map(status => {
-                                const styles = getSeatStyles(status);
+                                const config = getSeatConfig(status);
                                 return (
                                     <div key={status} className="legend-item">
-                                        <div className="legend-dot" style={{ background: styles.bg, border: `1px solid ${styles.border}` }}></div>
-                                        <span style={{ fontWeight: '700', fontSize: '12px' }}>{styles.label}</span>
+                                        <div className={`legend-dot admin-badge-${config.type}`}></div>
+                                        <span className="u-weight-700 u-size-12">{config.label}</span>
                                     </div>
                                 );
                             })}
                         </div>
 
-                        <div className="admin-bus-layout-container" style={{ background: 'transparent', padding: 0 }}>
+                        <div className="admin-bus-layout-container u-p-0 u-bg-transparent">
                             {/* Tầng 1 */}
                             <div className="admin-floor-section">
                                 <h4 className="admin-floor-title" style={{ color: '#3182ce' }}>Tầng 1 (Dưới)</h4>
@@ -280,15 +296,13 @@ const TripMonitoring = () => {
                                 >
                                     {getBusLayout(selectedTrip.busType || '34').floor1.map(seatProto => {
                                         const actualSeat = tripSeats.find(s => s.seatNumber === seatProto.seatNumber) || { status: 0 };
-                                        const s = getSeatStyles(actualSeat.status);
+                                        const config = getSeatConfig(actualSeat.status);
                                         return (
                                             <div 
                                                 key={seatProto.seatNumber} 
-                                                className={`admin-seat-item ${s.class}`}
+                                                className={`admin-seat-item admin-badge-${config.type} trip-monitoring-seat-item-custom`}
                                                 style={{ 
-                                                    gridRow: seatProto.row + 1, gridColumn: seatProto.col + 1,
-                                                    height: '54px', fontSize: '12px', cursor: 'pointer',
-                                                    background: s.bg, color: s.color, border: `2px solid ${s.border}`
+                                                    gridRow: seatProto.row + 1, gridColumn: seatProto.col + 1
                                                 }}
                                                 onClick={() => handleSeatClick({ ...seatProto, status: actualSeat.status })}
                                             >
@@ -311,15 +325,13 @@ const TripMonitoring = () => {
                                 >
                                     {getBusLayout(selectedTrip.busType || '34').floor2.map(seatProto => {
                                         const actualSeat = tripSeats.find(s => s.seatNumber === seatProto.seatNumber) || { status: 0 };
-                                        const s = getSeatStyles(actualSeat.status);
+                                        const config = getSeatConfig(actualSeat.status);
                                         return (
                                             <div 
                                                 key={seatProto.seatNumber} 
-                                                className={`admin-seat-item ${s.class}`}
+                                                className={`admin-seat-item admin-badge-${config.type} trip-monitoring-seat-item-custom`}
                                                 style={{ 
-                                                    gridRow: seatProto.row + 1, gridColumn: seatProto.col + 1,
-                                                    height: '54px', fontSize: '12px', cursor: 'pointer',
-                                                    background: s.bg, color: s.color, border: `2px solid ${s.border}`
+                                                    gridRow: seatProto.row + 1, gridColumn: seatProto.col + 1
                                                 }}
                                                 onClick={() => handleSeatClick({ ...seatProto, status: actualSeat.status })}
                                             >
@@ -330,64 +342,60 @@ const TripMonitoring = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            )}
+                    </>
+                )}
+            </Modal>
 
             {/* Modal Quick Booking */}
-            {isQuickBookingOpen && selectedSeat && (
-                <div className="admin-modal-overlay" style={{ zIndex: 1300 }} onClick={() => setIsQuickBookingOpen(false)}>
-                    <div className="admin-modal-content" style={{ width: '420px' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                            <h3 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>
-                                Bán/Giữ Vé Nhanh - Ghế <span style={{ color: '#e53e3e' }}>{selectedSeat.seatNumber}</span>
-                            </h3>
-                            <button onClick={() => setIsQuickBookingOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a0aec0' }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                            </button>
-                        </div>
-                        
-                        <form onSubmit={(e) => {
-                            e.preventDefault();
-                            const updatedSeats = tripSeats.map(s => 
-                                s.seatNumber === selectedSeat.seatNumber ? { ...s, status: parseInt(bookingForm.status) } : s
-                            );
-                            setTripSeats(updatedSeats);
-                            toast.success(`Đã thành công ghế ${selectedSeat.seatNumber}!`);
-                            setIsQuickBookingOpen(false);
-                        }}>
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Tên hành khách *</label>
-                                <input type="text" className="admin-form-input" required value={bookingForm.customerName} onChange={e => setBookingForm({...bookingForm, customerName: e.target.value})} placeholder="VD: Nguyễn Văn A" />
-                            </div>
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Số điện thoại *</label>
-                                <input type="text" className="admin-form-input" required value={bookingForm.phoneNumber} onChange={e => setBookingForm({...bookingForm, phoneNumber: e.target.value})} placeholder="VD: 0912345678" />
-                            </div>
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Điểm đón khách</label>
-                                <input type="text" className="admin-form-input" value={bookingForm.pickupPoint} onChange={e => setBookingForm({...bookingForm, pickupPoint: e.target.value})} placeholder="VD: Bến xe Nước Ngầm" />
-                            </div>
-                            <div className="admin-form-group">
-                                <label className="admin-form-label">Trạng thái thanh toán *</label>
-                                <select 
-                                    className="admin-form-select" 
-                                    value={bookingForm.status} 
-                                    onChange={e => setBookingForm({...bookingForm, status: e.target.value})}
-                                    style={{ background: bookingForm.status == 1 ? '#fffaf0' : '#f0fff4' }}
-                                >
-                                    <option value={1}>Chưa thu tiền (Giữ chỗ)</option>
-                                    <option value={2}>Đã thanh toán</option>
-                                </select>
-                            </div>
-                            <div className="admin-form-actions">
-                                <button type="button" className="admin-btn-outline" onClick={() => setIsQuickBookingOpen(false)}>Hủy</button>
-                                <button type="submit" className="admin-btn-primary">Xác nhận Lưu</button>
-                            </div>
-                        </form>
+            <Modal
+                isOpen={isQuickBookingOpen}
+                onClose={() => setIsQuickBookingOpen(false)}
+                title={
+                    <>
+                        Bán/Giữ Vé Nhanh - Ghế <span className="trip-monitoring-quick-booking-seat">{selectedSeat?.seatNumber}</span>
+                    </>
+                }
+                width="420px"
+                zIndex={1300}
+            >
+                <form onSubmit={(e) => {
+                    e.preventDefault();
+                    const updatedSeats = tripSeats.map(s => 
+                        s.seatNumber === selectedSeat.seatNumber ? { ...s, status: parseInt(bookingForm.status) } : s
+                    );
+                    setTripSeats(updatedSeats);
+                    toast.success(`Đã thành công ghế ${selectedSeat.seatNumber}!`);
+                    setIsQuickBookingOpen(false);
+                }}>
+                    <div className="admin-form-group">
+                        <label className="admin-form-label">Tên hành khách *</label>
+                        <input type="text" className="admin-form-input" required value={bookingForm.customerName} onChange={e => setBookingForm({...bookingForm, customerName: e.target.value})} placeholder="VD: Nguyễn Văn A" />
                     </div>
-                </div>
-            )}
+                    <div className="admin-form-group">
+                        <label className="admin-form-label">Số điện thoại *</label>
+                        <input type="text" className="admin-form-input" required value={bookingForm.phoneNumber} onChange={e => setBookingForm({...bookingForm, phoneNumber: e.target.value})} placeholder="VD: 0912345678" />
+                    </div>
+                    <div className="admin-form-group">
+                        <label className="admin-form-label">Điểm đón khách</label>
+                        <input type="text" className="admin-form-input" value={bookingForm.pickupPoint} onChange={e => setBookingForm({...bookingForm, pickupPoint: e.target.value})} placeholder="VD: Bến xe Nước Ngầm" />
+                    </div>
+                    <div className="admin-form-group">
+                        <label className="admin-form-label">Trạng thái thanh toán *</label>
+                        <select 
+                            className={`admin-form-select ${bookingForm.status == 1 ? 'trip-monitoring-status-active' : 'trip-monitoring-status-paid'}`}
+                            value={bookingForm.status} 
+                            onChange={e => setBookingForm({...bookingForm, status: e.target.value})}
+                        >
+                            <option value={1}>Chưa thu tiền (Giữ chỗ)</option>
+                            <option value={2}>Đã thanh toán</option>
+                        </select>
+                    </div>
+                    <div className="admin-form-actions">
+                        <button type="button" className="admin-btn-outline" onClick={() => setIsQuickBookingOpen(false)}>Hủy</button>
+                        <button type="submit" className="admin-btn-primary">Xác nhận Lưu</button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 };

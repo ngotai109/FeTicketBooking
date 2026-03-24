@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, CustomSelect } from '../../components/Common';
+import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination } from '../../components/Common';
 import { handleApiResponse } from '../../utils/common';
-
 
 import busService from '../../services/bus.service';
 import { getBusLayout } from '../../constants/busLayouts';
@@ -17,9 +16,9 @@ const BusManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isToggling, setIsToggling] = useState(false);
-    const [viewingLayoutBus, setViewingLayoutBus] = useState(null);
     const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10;
 
     const [formData, setFormData] = useState({
         licensePlate: '',
@@ -39,12 +38,15 @@ const BusManagement = () => {
         fetchBuses();
     }, []);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterType]);
+
     const fetchBuses = async () => {
         try {
             setLoading(true);
             const response = await busService.getAllBuses();
             setBuses(handleApiResponse(response));
-
         } catch (error) {
             toast.error('Không thể tải danh sách phương tiện');
             // Mock data for development if API fails
@@ -93,10 +95,8 @@ const BusManagement = () => {
         try {
             setIsSubmitting(true);
             
-            // Lấy mẫu sơ đồ ứng với loại xe
             const layout = getBusLayout(formData.busType);
             
-            // Tự động tạo danh sách ghế dựa trên sơ đồ mẫu
             const generatedSeats = [
                 ...layout.floor1.map(s => ({ 
                     seatNumber: s.seatNumber, 
@@ -116,9 +116,9 @@ const BusManagement = () => {
 
             const payload = {
                 ...formData,
-                busType: parseInt(formData.busType).toString(), // Đảm bảo đúng định dạng string cho backend
+                busType: parseInt(formData.busType).toString(),
                 totalSeats: generatedSeats.length,
-                seats: isEditing ? undefined : generatedSeats // Chỉ tạo ghế khi thêm mới xe
+                seats: isEditing ? undefined : generatedSeats
             };
 
             if (isEditing) {
@@ -145,10 +145,6 @@ const BusManagement = () => {
     const handleToggleActiveConfirm = async () => {
         try {
             setIsToggling(true);
-            // If backend has toggleStatus endpoint
-            // await busService.toggleStatus(currentBus.busId);
-            
-            // Otherwise use updateBus
             const payload = { ...currentBus, isActive: !currentBus.isActive };
             await busService.updateBus(currentBus.busId, payload);
             
@@ -190,9 +186,10 @@ const BusManagement = () => {
                 </button>
             </header>
 
-            <div className="admin-card">
-                <div className="admin-toolbar">
-                    <div className="search-box" style={{ flex: '1.5', minWidth: '200px', position: 'relative' }}>
+            <Card padding="0" className="admin-table-card">
+                <div className="table-card-content">
+                <div className="admin-toolbar" style={{ margin: 0, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}>
+                    <div className="search-box u-flex u-align-center" style={{ flex: '1.5', minWidth: '200px', position: 'relative' }}>
                         <input
                             type="text"
                             placeholder="Tìm bằng biển số hoặc tên xe..."
@@ -220,80 +217,70 @@ const BusManagement = () => {
                         <thead>
                             <tr>
                                 <th>Biển số xe</th>
-                                <th>Tên gọi</th>
+                                <th style={{ whiteSpace: 'nowrap' }}>Tên gọi</th>
                                 <th>Loại xe</th>
                                 <th>Ghi chú</th>
                                 <th>Trạng thái</th>
-                                <th style={{ textAlign: 'right' }}>Thao tác</th>
+                                <th className="u-text-center">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading && buses.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" style={{ textAlign: 'center', padding: '40px' }}>
-                                        Đang tải dữ liệu...
-                                    </td>
+                                    <td colSpan="6" className="u-text-center u-p-40">Đang tải dữ liệu...</td>
                                 </tr>
                             ) : filteredBuses.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" style={{ textAlign: 'center', padding: '40px' }}>
-                                        Không tìm thấy phương tiện nào
-                                    </td>
+                                    <td colSpan="6" className="u-text-center u-p-40">Không tìm thấy phương tiện nào</td>
                                 </tr>
                             ) : (
-                                filteredBuses.map((bus) => (
+                                filteredBuses.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((bus) => (
                                     <tr key={bus.busId}>
-                                        <td style={{ fontWeight: '600', color: '#2d3748' }}>{bus.licensePlate}</td>
-                                        <td style={{ color: '#4a5568' }}>{bus.busName}</td>
+                                        <td className="u-weight-600 u-color-slate-800">{bus.licensePlate}</td>
+                                        <td className="u-color-slate-600">{bus.busName}</td>
                                         <td>
-                                            <span style={{ 
-                                                backgroundColor: '#ebf4ff', 
-                                                color: '#3182ce', 
-                                                padding: '2px 8px', 
-                                                borderRadius: '4px',
-                                                fontSize: '11px',
-                                                fontWeight: '600'
-                                            }}>
+                                            <Badge type="info" className="u-size-11 u-weight-600 u-bg-transparent" style={{ border: '1px solid #3182ce', color: '#3182ce' }}>
                                                 {getBusTypeLabel(bus.busType)}
-                                            </span>
+                                            </Badge>
                                         </td>
-                                        <td style={{ color: '#718096' }}>{bus.description}</td>
+                                        <td className="u-color-slate-500 u-size-13">{bus.description}</td>
                                         <td>
-                                            <span className={`status-badge ${bus.isActive ? 'status-active' : 'status-inactive'}`}>
-                                                <span className="status-dot" style={{ backgroundColor: 'currentColor' }}></span>
+                                            <Badge type={bus.isActive ? 'success' : 'danger'}>
                                                 {bus.isActive ? 'Hoạt động' : 'Tạm dừng'}
-                                            </span>
+                                            </Badge>
                                         </td>
-                                        <td style={{ textAlign: 'right' }}>
-                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                        <td className="u-text-center">
+                                            <div className="u-flex u-gap-12 u-justify-center">
                                                 <button
                                                     onClick={() => {
                                                         setViewingLayoutBus(bus);
                                                         setIsLayoutModalOpen(true);
                                                     }}
-                                                    className="admin-btn-outline"
-                                                    style={{ color: '#3182ce', borderColor: '#3182ce' }}
+                                                    className="admin-btn-icon"
+                                                    title="Xem sơ đồ"
+                                                    style={{ color: '#3182ce' }}
                                                 >
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                                                    Sơ đồ
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
                                                 </button>
-                                                <button
-                                                    onClick={() => handleOpenFormModal(bus)}
-                                                    className="admin-btn-outline"
+                                                <button 
+                                                    onClick={() => handleOpenFormModal(bus)} 
+                                                    className="admin-btn-icon"
+                                                    title="Chỉnh sửa"
+                                                    style={{ color: '#2b6cb0' }}
                                                 >
-                                                    Sửa
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                                 </button>
                                                 <button
                                                     onClick={() => handleToggleActiveClick(bus)}
-                                                    className="admin-btn-outline"
-                                                    style={{
-                                                        color: bus.isActive ? '#e53e3e' : '#38a169',
-                                                        borderColor: 'currentColor',
-                                                        minWidth: '60px',
-                                                        justifyContent: 'center'
-                                                    }}
+                                                    className="admin-btn-icon"
+                                                    title={bus.isActive ? 'Khóa xe' : 'Mở xe'}
+                                                    style={{ color: bus.isActive ? '#e53e3e' : '#38a169' }}
                                                 >
-                                                    {bus.isActive ? 'Khóa' : 'Mở'}
+                                                    {bus.isActive ? (
+                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                                    ) : (
+                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
+                                                    )}
                                                 </button>
                                             </div>
                                         </td>
@@ -303,59 +290,86 @@ const BusManagement = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
-
-            {/* Modal Xem Sơ Đồ */}
-            {isLayoutModalOpen && viewingLayoutBus && (
-                <div className="admin-modal-overlay" onClick={() => setIsLayoutModalOpen(false)}>
-                    <div className="admin-modal-content" style={{ width: '800px' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                            <div>
-                                <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>Sơ đồ ghế: {viewingLayoutBus.licensePlate}</h2>
-                                <p style={{ fontSize: '13px', color: '#718096', margin: '4px 0 0' }}>{getBusLayout(viewingLayoutBus.busType).name}</p>
-                            </div>
-                            <button onClick={() => setIsLayoutModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a0aec0' }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                            </button>
-                        </div>
-
-                        <div className="admin-bus-layout-container">
-                            <div className="admin-floor-section">
-                                <h3 className="admin-floor-title">Tầng 1</h3>
-                                <div className="admin-seat-grid" style={{ gridTemplateColumns: `repeat(${getBusLayout(viewingLayoutBus.busType).columns}, 45px)` }}>
-                                    {getBusLayout(viewingLayoutBus.busType).floor1.map(seat => (
-                                        <div key={seat.seatNumber} className="admin-seat-item floor-1" style={{ gridRow: seat.row + 1, gridColumn: seat.col + 1 }}>
-                                            {seat.seatNumber}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="admin-floor-section">
-                                <h3 className="admin-floor-title">Tầng 2</h3>
-                                <div className="admin-seat-grid" style={{ gridTemplateColumns: `repeat(${getBusLayout(viewingLayoutBus.busType).columns}, 45px)` }}>
-                                    {getBusLayout(viewingLayoutBus.busType).floor2.map(seat => (
-                                        <div key={seat.seatNumber} className="admin-seat-item floor-2" style={{ gridRow: seat.row + 1, gridColumn: seat.col + 1 }}>
-                                            {seat.seatNumber}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="admin-layout-legend">
-                            <div className="legend-item">
-                                <span className="legend-dot" style={{ backgroundColor: '#ebf4ff', border: '1px solid #bee3f8' }}></span>
-                                <span>Tầng 1</span>
-                            </div>
-                            <div className="legend-item">
-                                <span className="legend-dot" style={{ backgroundColor: '#fef3c7', border: '1px solid #fde68a' }}></span>
-                                <span>Tầng 2</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-            )}
+                <Pagination 
+                    currentPage={currentPage}
+                    totalItems={filteredBuses.length}
+                    pageSize={pageSize}
+                    onPageChange={setCurrentPage}
+                />
+            </Card>
+
+            <Modal
+                isOpen={isLayoutModalOpen}
+                onClose={() => setIsLayoutModalOpen(false)}
+                title={`Sơ đồ ghế: ${viewingLayoutBus?.licensePlate}`}
+                width="800px"
+            >
+                {viewingLayoutBus && (
+                    <>
+                        <p className="u-size-13 u-color-slate-500 u-m-b-20">{getBusLayout(viewingLayoutBus.busType).name}</p>
+                        
+                        <div className="admin-bus-layout-container u-flex u-gap-40" style={{ justifyContent: 'center' }}>
+                            <div className="admin-floor-section">
+                                <h3 className="admin-floor-title u-size-14 u-weight-700 u-p-b-12 u-text-center">Tầng 1</h3>
+                                <div className="admin-seat-grid" style={{ 
+                                    display: 'grid',
+                                    gap: '8px',
+                                    gridTemplateColumns: `repeat(${getBusLayout(viewingLayoutBus.busType).columns}, 45px)` 
+                                }}>
+                                    {getBusLayout(viewingLayoutBus.busType).floor1.map(seat => (
+                                        <div key={seat.seatNumber} className="admin-seat-item floor-1 u-flex u-align-center u-justify-center u-size-11 u-weight-600" style={{ 
+                                            gridRow: seat.row + 1, 
+                                            gridColumn: seat.col + 1,
+                                            width: '45px',
+                                            height: '45px',
+                                            background: '#ebf4ff',
+                                            border: '1px solid #bee3f8',
+                                            borderRadius: '6px'
+                                        }}>
+                                            {seat.seatNumber}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="admin-floor-section">
+                                <h3 className="admin-floor-title u-size-14 u-weight-700 u-p-b-12 u-text-center">Tầng 2</h3>
+                                <div className="admin-seat-grid" style={{ 
+                                    display: 'grid',
+                                    gap: '8px',
+                                    gridTemplateColumns: `repeat(${getBusLayout(viewingLayoutBus.busType).columns}, 45px)` 
+                                }}>
+                                    {getBusLayout(viewingLayoutBus.busType).floor2.map(seat => (
+                                        <div key={seat.seatNumber} className="admin-seat-item floor-2 u-flex u-align-center u-justify-center u-size-11 u-weight-600" style={{ 
+                                            gridRow: seat.row + 1, 
+                                            gridColumn: seat.col + 1,
+                                            width: '45px',
+                                            height: '45px',
+                                            background: '#fef3c7',
+                                            border: '1px solid #fde68a',
+                                            borderRadius: '6px'
+                                        }}>
+                                            {seat.seatNumber}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="u-flex u-justify-center u-gap-24 u-m-t-32">
+                            <div className="u-flex u-align-center u-gap-8">
+                                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#ebf4ff', border: '1px solid #bee3f8' }}></span>
+                                <span className="u-size-12 u-color-slate-600">Tầng 1</span>
+                            </div>
+                            <div className="u-flex u-align-center u-gap-8">
+                                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#fef3c7', border: '1px solid #fde68a' }}></span>
+                                <span className="u-size-12 u-color-slate-600">Tầng 2</span>
+                            </div>
+                        </div>
+                    </>
+                )}
+            </Modal>
 
             <ConfirmationModal
                 isOpen={isToggleModalOpen}
@@ -369,90 +383,83 @@ const BusManagement = () => {
                 isDangerous={currentBus?.isActive}
             />
 
-            {/* Modal Form */}
-            {isFormModalOpen && (
-                <div className="admin-modal-overlay" onClick={handleCloseFormModal}>
-                    <div className="admin-modal-content" style={{ width: '500px' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                            <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>{isEditing ? 'Cập nhật xe' : 'Thêm xe mới'}</h2>
-                            <button onClick={handleCloseFormModal} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a0aec0' }}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                            </button>
+            <Modal
+                isOpen={isFormModalOpen}
+                onClose={handleCloseFormModal}
+                title={isEditing ? 'Cập nhật xe' : 'Thêm xe mới'}
+                width="500px"
+            >
+                <form onSubmit={handleFormSubmit}>
+                    <div className="u-flex-column u-gap-16">
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Biển số xe *</label>
+                            <input
+                                type="text"
+                                className="admin-form-input"
+                                value={formData.licensePlate}
+                                onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value })}
+                                required
+                                placeholder="VD: 37B-123.45"
+                            />
                         </div>
 
-                        <form onSubmit={handleFormSubmit}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Biển số xe *</label>
-                                    <input
-                                        type="text"
-                                        className="admin-form-input"
-                                        value={formData.licensePlate}
-                                        onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value })}
-                                        required
-                                        placeholder="VD: 37B-123.45"
-                                    />
-                                </div>
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Tên xe/Biệt danh</label>
+                            <input
+                                type="text"
+                                className="admin-form-input"
+                                value={formData.busName}
+                                onChange={(e) => setFormData({ ...formData, busName: e.target.value })}
+                                placeholder="VD: Xe 01"
+                            />
+                        </div>
 
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Tên xe/Biệt danh</label>
-                                    <input
-                                        type="text"
-                                        className="admin-form-input"
-                                        value={formData.busName}
-                                        onChange={(e) => setFormData({ ...formData, busName: e.target.value })}
-                                        placeholder="VD: Xe 01"
-                                    />
-                                </div>
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Loại xe *</label>
+                            <select
+                                className="admin-form-select"
+                                value={formData.busType}
+                                onChange={(e) => setFormData({ ...formData, busType: e.target.value })}
+                                required
+                            >
+                                {busTypes.map(t => (
+                                    <option key={t.value} value={t.value}>{t.label}</option>
+                                ))}
+                            </select>
+                        </div>
 
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Loại xe *</label>
-                                    <select
-                                        className="admin-form-select"
-                                        value={formData.busType}
-                                        onChange={(e) => setFormData({ ...formData, busType: e.target.value })}
-                                        required
-                                    >
-                                        {busTypes.map(t => (
-                                            <option key={t.value} value={t.value}>{t.label}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Trạng thái</label>
+                            <select
+                                className="admin-form-select"
+                                value={formData.isActive}
+                                onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
+                            >
+                                <option value="true">Đang hoạt động</option>
+                                <option value="false">Tạm dừng</option>
+                            </select>
+                        </div>
 
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Trạng thái</label>
-                                    <select
-                                        className="admin-form-select"
-                                        value={formData.isActive}
-                                        onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
-                                    >
-                                        <option value="true">Đang hoạt động</option>
-                                        <option value="false">Tạm dừng</option>
-                                    </select>
-                                </div>
-
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Ghi chú</label>
-                                    <textarea
-                                        className="admin-form-textarea"
-                                        value={formData.description}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        style={{ minHeight: '80px' }}
-                                        placeholder="Thông tin thêm về xe..."
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="admin-form-actions">
-                                <button type="button" className="admin-btn-outline" onClick={handleCloseFormModal}>Hủy</button>
-                                <button type="submit" className="admin-btn-primary" disabled={isSubmitting}>
-                                    {isSubmitting ? 'Đanh lưu...' : (isEditing ? 'Cập nhật' : 'Thêm mới')}
-                                </button>
-                            </div>
-                        </form>
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Ghi chú</label>
+                            <textarea
+                                className="admin-form-textarea"
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                style={{ minHeight: '80px' }}
+                                placeholder="Thông tin thêm về xe..."
+                            />
+                        </div>
                     </div>
-                </div>
-            )}
+
+                    <div className="admin-form-actions">
+                        <button type="button" className="admin-btn-outline" onClick={handleCloseFormModal}>Hủy</button>
+                        <button type="submit" className="admin-btn-primary" disabled={isSubmitting}>
+                            {isSubmitting ? 'Đang lưu...' : (isEditing ? 'Cập nhật' : 'Thêm mới')}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 };

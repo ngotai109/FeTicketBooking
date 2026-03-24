@@ -6,8 +6,9 @@ import serviceImg from '../../assets/images/482248215_1000882942146826_246755371
 const offices = [
     {
         city: 'Hà Nội',
+        id: 'hanoi',
         icon: '🏙️',
-        color: '#e74c3c',
+        color: '#e74c3c', // Keep for branch dots
         branches: [
             { name: 'VP Mỗ Lao', address: '364 P.Nguyễn Văn Lộc, Khu đô thị Mỗ Lao, Hà Đông, Hà Nội' },
             { name: 'VP Trần Vỹ', address: '160 P.Trần Vỹ, Mai Dịch, Cầu Giấy, Hà Nội' },
@@ -16,8 +17,9 @@ const offices = [
     },
     {
         city: 'Nghệ An',
+        id: 'nghean',
         icon: '🌊',
-        color: '#2980b9',
+        color: '#2980b9', // Keep for branch dots
         branches: [
             { name: 'VP Anh Sơn', address: 'Tổ dân phố 3, Khu đô thị Anh Sơn, Nghệ An' },
             { name: 'VP Tân Kì', address: 'Khối 2, Thị trấn Tân Kì, Nghệ An' },
@@ -49,9 +51,8 @@ const Contact = () => {
     return (
         <div className="contact-page">
 
-            {/* ── Hero Banner ── */}
             <div className="contact-hero">
-                <img src={heroBg} alt="Đồng Hương Sông Lam trên đường" className="contact-hero-img" />
+                <img src={heroBg} alt="Đồng Hương Sông Lam" className="contact-hero-img" />
                 <div className="contact-hero-overlay">
                     <div className="contact-hero-content">
                         <span className="contact-hero-tag">LIÊN HỆ VỚI CHÚNG TÔI</span>
@@ -63,10 +64,9 @@ const Contact = () => {
                 </div>
             </div>
 
-            {/* ── Quick Info Cards ── */}
             <div className="contact-quick-bar">
                 <div className="contact-quick-card">
-                    <div className="cq-icon" style={{ background: 'linear-gradient(135deg,#f39c12,#e67e22)' }}>📞</div>
+                    <div className="cq-icon orange">📞</div>
                     <div className="cq-info">
                         <span className="cq-label">Hotline đặt vé</span>
                         <a href="tel:0969037123" className="cq-value">0969 037 123</a>
@@ -74,21 +74,21 @@ const Contact = () => {
                     </div>
                 </div>
                 <div className="contact-quick-card">
-                    <div className="cq-icon" style={{ background: 'linear-gradient(135deg,#2980b9,#1abc9c)' }}>✉️</div>
+                    <div className="cq-icon blue">✉️</div>
                     <div className="cq-info">
                         <span className="cq-label">Email hỗ trợ</span>
                         <a href="mailto:support@donghuongsonglam.vn" className="cq-value">support@donghuongsonglam.vn</a>
                     </div>
                 </div>
                 <div className="contact-quick-card">
-                    <div className="cq-icon" style={{ background: 'linear-gradient(135deg,#8e44ad,#3498db)' }}>🕐</div>
+                    <div className="cq-icon purple">🕐</div>
                     <div className="cq-info">
                         <span className="cq-label">Giờ làm việc</span>
                         <span className="cq-value">Thứ 2 – CN: 6:00 – 22:00</span>
                     </div>
                 </div>
                 <div className="contact-quick-card">
-                    <div className="cq-icon" style={{ background: 'linear-gradient(135deg,#e74c3c,#c0392b)' }}>📍</div>
+                    <div className="cq-icon red">📍</div>
                     <div className="cq-info">
                         <span className="cq-label">Tuyến hoạt động</span>
                         <span className="cq-value">Nghệ An – Hà Nội – Nội Bài</span>
@@ -98,7 +98,6 @@ const Contact = () => {
 
             <div className="contact-main-wrap">
 
-                {/* ── Left: Contact Form ── */}
                 <div className="contact-form-section">
                     <div className="contact-section-label">
                         <span className="label-line"></span>
@@ -210,7 +209,6 @@ const Contact = () => {
                     )}
                 </div>
 
-                {/* ── Right: Office List ── */}
                 <div className="contact-offices-section">
                     <div className="contact-section-label">
                         <span className="label-line"></span>
@@ -221,9 +219,9 @@ const Contact = () => {
 
                     {offices.map((office) => (
                         <div className="office-city-block" key={office.city}>
-                            <div className="office-city-header" style={{ borderColor: office.color }}>
+                            <div className={`office-city-header city-${office.id}`}>
                                 <span className="office-city-icon">{office.icon}</span>
-                                <h3 style={{ color: office.color }}>Tại {office.city}</h3>
+                                <h3>Tại {office.city}</h3>
                             </div>
                             <div className="office-branches">
                                 {office.branches.map((branch) => (
@@ -239,7 +237,6 @@ const Contact = () => {
                         </div>
                     ))}
 
-                    {/* Hotline card */}
                     <div className="contact-hotline-card">
                         <div className="hotline-ring">📞</div>
                         <div className="hotline-details">
@@ -249,7 +246,6 @@ const Contact = () => {
                         </div>
                     </div>
 
-                    {/* Social links */}
                     <div className="contact-social-row">
                         <a
                             href="https://www.facebook.com/nhaxedonghuongsonglam"
@@ -270,9 +266,8 @@ const Contact = () => {
                 </div>
             </div>
 
-            {/* ── Service Image Banner ── */}
             <div className="contact-service-banner">
-                <img src={serviceImg} alt="Dịch vụ xe giường nằm Đồng Hương Sông Lam" className="service-banner-img" />
+                <img src={serviceImg} alt="Dịch vụ xe" className="service-banner-img" />
                 <div className="service-banner-overlay">
                     <div className="service-banner-content">
                         <h2>Dịch Vụ Xe Giường Nằm</h2>
@@ -282,16 +277,15 @@ const Contact = () => {
                 </div>
             </div>
 
-            {/* ── Google Map ── */}
             <div className="contact-map-section">
-                <div className="contact-section-label" style={{ padding: '0 20px 20px' }}>
+                <div className="contact-section-label u-p-20 u-p-b-20 u-flex u-justify-center">
                     <span className="label-line"></span>
                     <span>BẢN ĐỒ</span>
                     <span className="label-line"></span>
                 </div>
                 <div className="contact-map-wrap">
                     <iframe
-                        title="Bản đồ Đồng Hương Sông Lam - Văn phòng Mỗ Lao"
+                        title="Bản đồ"
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3725.2758101119107!2d105.77767581143205!3d20.981578389315526!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31345395ed2ba787%3A0xa4201d5678492f0d!2zQ8O0bmcgVHkgWMOieSBE4buxbmcgVsOgIEThu4tjaCBW4bulIFbhuq1uIFThuqNpIMSQ4buTbmcgSMawxqFuZyBTw7RuZyBMYW0!5e0!3m2!1svi!2s!4v1773307430848!5m2!1svi!2s"
                         allowFullScreen
                         loading="lazy"

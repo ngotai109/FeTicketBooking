@@ -42,7 +42,6 @@ const Booking = () => {
         fetchLocations();
     }, []);
 
-    // MOCK DATA: Chuyến đi
     const trips = [
         {
             id: 101, type: 'Limousine giường CABIN', busType: '22', departureTime: '17:00', arrivalTime: '05:00',
@@ -61,12 +60,8 @@ const Booking = () => {
         }
     ];
 
-    // --- State cho hệ thống Mua Vé ---
     const [expandedTripId, setExpandedTripId] = useState(null);
     const [selectedSeats, setSelectedSeats] = useState([]);
-    const [bookingStep, setBookingStep] = useState(1); // 1: Chọn chỗ, 2: Thông tin, 3: Thanh toán
-    const [customerInfo, setCustomerInfo] = useState({ name: '', phone: '', email: '', pickup: '', dropoff: '', note: '' });
-    const [paymentMethod, setPaymentMethod] = useState('vnpay');
 
     const toggleExpand = (tripId) => {
         if (expandedTripId === tripId) {
@@ -74,7 +69,6 @@ const Booking = () => {
         } else {
             setExpandedTripId(tripId);
             setSelectedSeats([]);
-            setBookingStep(1);
         }
     };
 
@@ -93,50 +87,45 @@ const Booking = () => {
     const renderSeatMap = (trip) => {
         const layout = getBusLayout(trip.busType || '34');
         return (
-            <div style={{ flex: 1, padding: '20px', background: 'white', borderRadius: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', border: '1px solid #edf2f7' }}>
-                {/* Lưới Legend / Chú thích y hệt ảnh */}
-                <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '30px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '24px', height: '16px', background: '#b3d4ff', borderRadius: '4px' }}></div><span style={{ fontSize: '13px', color: '#4a5568', fontWeight: '500' }}>Trống</span></div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '24px', height: '16px', background: '#fbedce', borderRadius: '4px' }}></div><span style={{ fontSize: '13px', color: '#4a5568', fontWeight: '500' }}>Đặt</span></div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '24px', height: '16px', background: '#f5c6cb', borderRadius: '4px' }}></div><span style={{ fontSize: '13px', color: '#4a5568', fontWeight: '500' }}>Bán</span></div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '24px', height: '16px', background: '#e2e3e5', borderRadius: '4px' }}></div><span style={{ fontSize: '13px', color: '#4a5568', fontWeight: '500' }}>Giữ</span></div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '24px', height: '16px', background: '#c3e6cb', borderRadius: '4px' }}></div><span style={{ fontSize: '13px', color: '#4a5568', fontWeight: '500' }}>Tạm</span></div>
+            <div className="seat-map-card">
+                <div className="seat-legend">
+                    <div className="legend-item"><div className="legend-color u-bg-empty"></div><span>Trống</span></div>
+                    <div className="legend-item"><div className="legend-color u-bg-booked"></div><span>Đặt</span></div>
+                    <div className="legend-item"><div className="legend-color u-bg-sold"></div><span>Bán</span></div>
+                    <div className="legend-item"><div className="legend-color u-bg-hold"></div><span>Giữ</span></div>
+                    <div className="legend-item"><div className="legend-color u-bg-selecting"></div><span>Đang chọn</span></div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '60px', justifyContent: 'center' }}>
-                    {/* Tầng 1 */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#2d3748', fontWeight: '700', fontSize: '16px' }}>Tầng 1</h4>
-                        <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: `repeat(${layout.columns}, 54px)`, gap: '15px' }}>
-                            {/* Biểu tượng Vô lăng Tài xế */}
-                            <div style={{ position: 'absolute', top: '-40px', left: '0', fontSize: '24px' }}>👨‍✈️</div>
+                <div className="floor-container">
+                    <div className="floor-section">
+                        <h4 className="floor-title">Tầng 1</h4>
+                        <div className="seat-grid" style={{ gridTemplateColumns: `repeat(${layout.columns}, 54px)` }}>
+                            <div className="steering-wheel">👨‍✈️</div>
                             {layout.floor1.map(seat => {
                                 const isSelected = selectedSeats.includes(seat.seatNumber);
-                                // Render logic for mock states (Giả lập màu)
-                                let bgColor = '#b3d4ff'; // Trống
-                                let color = '#2d3748';
+                                let statusClass = 'empty';
                                 if (isSelected) {
-                                    bgColor = '#c3e6cb'; // Tạm (Đang chọn)
+                                    statusClass = 'selecting';
                                 } else if (seat.seatNumber === 'A1' || seat.seatNumber === 'A2') {
-                                    bgColor = '#f5c6cb'; // Bán mốc
+                                    statusClass = 'sold';
                                 } else if (seat.seatNumber === 'B1' || seat.seatNumber === 'B2') {
-                                    bgColor = '#e2e3e5'; // Giữ mốc
+                                    statusClass = 'hold';
                                 } else if (seat.seatNumber === 'C1') {
-                                    bgColor = '#fbedce'; // Đặt mốc
+                                    statusClass = 'booked';
                                 }
 
+                                const isSelectable = statusClass === 'empty' || isSelected;
+
                                 return (
-                                    <div key={seat.seatNumber} onClick={() => {
-                                        if (bgColor !== '#b3d4ff' && !isSelected) return; // Khóa ghế không trống
-                                        handleSeatToggle(seat.seatNumber);
-                                    }}
+                                    <div 
+                                        key={seat.seatNumber} 
+                                        onClick={() => isSelectable && handleSeatToggle(seat.seatNumber)}
+                                        className={`seat-item ${statusClass} ${isSelectable ? 'pointer' : 'not-allowed'}`}
                                         style={{
-                                            gridRow: seat.row + 1, gridColumn: seat.col + 1, height: '32px',
-                                            background: bgColor, color: color,
-                                            borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontSize: '12px', fontWeight: '600', cursor: bgColor === '#b3d4ff' || isSelected ? 'pointer' : 'not-allowed',
-                                            transition: 'all 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                                        }}>
+                                            gridRow: seat.row + 1, 
+                                            gridColumn: seat.col + 1
+                                        }}
+                                    >
                                         {seat.seatNumber}
                                     </div>
                                 )
@@ -144,26 +133,23 @@ const Booking = () => {
                         </div>
                     </div>
 
-                    {/* Tầng 2 */}
                     {layout.floor2 && layout.floor2.length > 0 && (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#2d3748', fontWeight: '700', fontSize: '16px' }}>Tầng 2</h4>
-                            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${layout.columns}, 54px)`, gap: '15px' }}>
+                        <div className="floor-section">
+                            <h4 className="floor-title">Tầng 2</h4>
+                            <div className="seat-grid" style={{ gridTemplateColumns: `repeat(${layout.columns}, 54px)` }}>
                                 {layout.floor2.map(seat => {
                                     const isSelected = selectedSeats.includes(seat.seatNumber);
-                                    let bgColor = '#b3d4ff'; // Trống
-                                    let color = '#2d3748';
-                                    if (isSelected) bgColor = '#c3e6cb';
-
+                                    
                                     return (
-                                        <div key={seat.seatNumber} onClick={() => handleSeatToggle(seat.seatNumber)}
+                                        <div 
+                                            key={seat.seatNumber} 
+                                            onClick={() => handleSeatToggle(seat.seatNumber)}
+                                            className={`seat-item pointer ${isSelected ? 'selecting' : 'empty'}`}
                                             style={{
-                                                gridRow: seat.row + 1, gridColumn: seat.col + 1, height: '32px',
-                                                background: bgColor, color: color,
-                                                borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                fontSize: '12px', fontWeight: '600', cursor: 'pointer',
-                                                transition: 'all 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                                            }}>
+                                                gridRow: seat.row + 1, 
+                                                gridColumn: seat.col + 1
+                                            }}
+                                        >
                                             {seat.seatNumber}
                                         </div>
                                     )
@@ -176,19 +162,8 @@ const Booking = () => {
         );
     };
 
-    const handleCheckout = (e) => {
-        e.preventDefault();
-        toast.success('Hệ thống đang chuyển hướng tới Cổng Thanh Toán VNPay...');
-        setTimeout(() => {
-            toast.success('Thanh toán thành công! Mã vé của bạn là #TK-8921');
-            setExpandedTripId(null);
-            navigate('/lookup/ticket');
-        }, 3000);
-    };
-
     return (
         <div className="booking-page">
-            {/* Top Search Modifier Bar - Sticky */}
             <div className="search-modifier-bar">
                 <div className="container">
                     <div className="modifier-inputs">
@@ -196,18 +171,18 @@ const Booking = () => {
                             <label>Điểm khởi hành</label>
                             <div className="custom-select-display" onClick={() => setShowDepList(!showDepList)}>{departure || 'Chọn điểm đi'}</div>
                              {showDepList && (
-                                 <ul className="custom-select-list">
-                                     {provinces.length > 0 ? provinces.map(prov => (
-                                         <React.Fragment key={prov.provinceId}>
-                                             <li className="province-header">{prov.provinceName}</li>
-                                             {wards.filter(w => w.provinceId === prov.provinceId).map(ward => (
-                                                 <li key={ward.wardId} onClick={(e) => { e.stopPropagation(); setDeparture(ward.wardName); setShowDepList(false); }} className={`ward-item ${departure === ward.wardName ? 'active' : ''}`}>{ward.wardName}</li>
-                                             ))}
-                                         </React.Fragment>
-                                     )) : (
-                                         <li className="loading-item">Đang tải...</li>
-                                     )}
-                                 </ul>
+                                  <ul className="custom-select-list">
+                                      {provinces.length > 0 ? provinces.map(prov => (
+                                          <React.Fragment key={prov.provinceId}>
+                                              <li className="province-header">{prov.provinceName}</li>
+                                              {wards.filter(w => w.provinceId === prov.provinceId).map(ward => (
+                                                  <li key={ward.wardId} onClick={(e) => { e.stopPropagation(); setDeparture(ward.wardName); setShowDepList(false); }} className={`ward-item ${departure === ward.wardName ? 'active' : ''}`}>{ward.wardName}</li>
+                                              ))}
+                                          </React.Fragment>
+                                      )) : (
+                                          <li className="loading-item">Đang tải...</li>
+                                      )}
+                                  </ul>
                              )}
                         </div>
                         <div className="mod-swap" onClick={() => { const temp = departure; setDeparture(destination); setDestination(temp); }}>⇌</div>
@@ -215,18 +190,18 @@ const Booking = () => {
                             <label>Nơi đến</label>
                             <div className="custom-select-display" onClick={() => setShowDestList(!showDestList)}>{destination || 'Chọn điểm đến'}</div>
                              {showDestList && (
-                                 <ul className="custom-select-list">
-                                     {provinces.length > 0 ? provinces.map(prov => (
-                                         <React.Fragment key={prov.provinceId}>
-                                             <li className="province-header">{prov.provinceName}</li>
-                                             {wards.filter(w => w.provinceId === prov.provinceId).map(ward => (
-                                                 <li key={ward.wardId} onClick={(e) => { e.stopPropagation(); setDestination(ward.wardName); setShowDestList(false); }} className={`ward-item ${destination === ward.wardName ? 'active' : ''}`}>{ward.wardName}</li>
-                                             ))}
-                                         </React.Fragment>
-                                     )) : (
-                                         <li className="loading-item">Đang tải...</li>
-                                     )}
-                                 </ul>
+                                  <ul className="custom-select-list">
+                                      {provinces.length > 0 ? provinces.map(prov => (
+                                          <React.Fragment key={prov.provinceId}>
+                                              <li className="province-header">{prov.provinceName}</li>
+                                              {wards.filter(w => w.provinceId === prov.provinceId).map(ward => (
+                                                  <li key={ward.wardId} onClick={(e) => { e.stopPropagation(); setDestination(ward.wardName); setShowDestList(false); }} className={`ward-item ${destination === ward.wardName ? 'active' : ''}`}>{ward.wardName}</li>
+                                              ))}
+                                          </React.Fragment>
+                                      )) : (
+                                          <li className="loading-item">Đang tải...</li>
+                                      )}
+                                  </ul>
                              )}
                         </div>
                         <div className="mod-input">
@@ -238,19 +213,16 @@ const Booking = () => {
                 </div>
             </div>
 
-            <div className="container booking-content" style={{ display: 'block', paddingBottom: '30px' }}>
-                
-                {/* Thanh Lọc Ngang & Sắp Xếp */}
+            <div className="container booking-content u-flex-column u-p-b-32">
                 <div className="filter-sort-bar">
                     <div className="filter-group">
-                         {/* Dropdowns */}
                          <div className="filter-controls">
                              <select className="filter-select">
                                  <option value="">Khoảng Giờ đi</option>
-                                 <option>00:00 - 06:00 (Sáng sớm)</option>
-                                 <option>06:00 - 12:00 (Sáng)</option>
-                                 <option>12:00 - 18:00 (Chiều)</option>
-                                 <option>18:00 - 24:00 (Tối)</option>
+                                 <option>00:00 - 06:00</option>
+                                 <option>06:00 - 12:00</option>
+                                 <option>12:00 - 18:00</option>
+                                 <option>18:00 - 24:00</option>
                              </select>
                              <select className="filter-select">
                                  <option value="">Khoảng Giá vé</option>
@@ -261,23 +233,22 @@ const Booking = () => {
                              <select className="filter-select">
                                  <option value="">Loại Xe</option>
                                  <option>Xe Limousine VIP</option>
-                                 <option>Xe Giường Nằm Tiêu Chuẩn</option>
+                                 <option>Xe Giường Nằm</option>
                              </select>
                              <button className="clear-filter-btn">Xóa lọc</button>
                          </div>
                     </div>
 
                     <div className="sort-group">
-                        <span className="sort-label">Sắp xếp theo:</span>
+                        <span className="sort-label">Sắp xếp:</span>
                         <div className="sort-actions">
                             <button className={`sort-tab ${sortType === 'earliest' ? 'active' : ''}`} onClick={() => setSortType('earliest')}>Giờ đi</button>
-                            <button className={`sort-tab ${sortType === 'price-asc' ? 'active' : ''}`} onClick={() => setSortType('price-asc')}>Giá tăng dần</button>
+                            <button className={`sort-tab ${sortType === 'price-asc' ? 'active' : ''}`} onClick={() => setSortType('price-asc')}>Giá vé</button>
                         </div>
                     </div>
                 </div>
 
-                {/* Main Results List */}
-                <main style={{ width: '100%' }}>
+                <main className="u-w-full">
                     <div className="trip-list">
                         {trips.length > 0 ? (
                             trips.map(trip => (
@@ -306,9 +277,7 @@ const Booking = () => {
                                         </div>
 
                                         <div className="trip-pricing">
-                                            <div className="price-value">
-                                                {trip.price.toLocaleString('vi-VN')} đ
-                                            </div>
+                                            <div className="price-value">{trip.price.toLocaleString('vi-VN')} đ</div>
                                             <div className="seat-status">Còn {trip.availableSeats} chỗ trống</div>
                                             <button 
                                                 className={`select-seat-btn ${expandedTripId === trip.id ? 'active' : ''}`}
@@ -319,47 +288,45 @@ const Booking = () => {
                                         </div>
                                     </div>
 
-                                    {/* --- GIAO DIỆN ĐẶT VÉ NẰM TRONG CARD --- */}
                                     {expandedTripId === trip.id && (
-                                        <div style={{ borderTop: '2px dashed #e2e8f0', padding: '25px', background: '#f8fafc', display: 'flex', gap: '30px', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
+                                        <div className="booking-expand-container">
                                             {renderSeatMap(trip)}
 
-                                            {/* Phần Tổng kết Ghế Đã Chọn Bên Phải */}
-                                            <div style={{ flex: 1, padding: '24px', background: 'white', borderRadius: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', border: '1px solid #edf2f7', display: 'flex', flexDirection: 'column' }}>
-                                                <h3 style={{ fontSize: '18px', marginBottom: '20px', color: '#2d3748', fontWeight: '700', borderBottom: '2px solid #e2e8f0', paddingBottom: '15px' }}>Thông tin vé đang chọn</h3>
+                                            <div className="booking-summary-card">
+                                                <h3 className="summary-title">Thông tin vé đã chọn</h3>
                                                 
                                                 {selectedSeats.length === 0 ? (
-                                                    <div style={{ padding: '30px', background: '#edf2f7', borderRadius: '12px', textAlign: 'center', color: '#718096', margin: 'auto 0' }}>
-                                                        <div style={{ fontSize: '40px', marginBottom: '10px' }}>💺</div>
-                                                        Vui lòng click chọn ghế ở cấu hình xe bên trái để tiếp tục.
+                                                    <div className="summary-empty">
+                                                        <div className="u-size-40 u-m-b-12">💺</div>
+                                                        <p className="u-size-14">Vui lòng chọn ghế để tiếp tục đặt vé</p>
                                                     </div>
                                                 ) : (
-                                                    <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', color: '#4a5568', fontSize: '15px' }}>
-                                                            <span>Chuyến xe:</span>
-                                                            <span style={{ fontWeight: '600', color: '#2d3748' }}>{trip.departureTime} • {trip.departurePoint.split(',')[0]}</span>
+                                                    <div className="u-flex u-flex-column u-flex-1">
+                                                        <div className="summary-row">
+                                                            <span className="summary-label">Chuyến xe:</span>
+                                                            <span className="summary-value">{trip.departureTime} • {trip.departurePoint.split(',')[0]}</span>
                                                         </div>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', color: '#4a5568', fontSize: '15px' }}>
-                                                            <span>Loại xe:</span>
-                                                            <span style={{ fontWeight: '600', color: '#2d3748' }}>{trip.type}</span>
+                                                        <div className="summary-row">
+                                                            <span className="summary-label">Loại xe:</span>
+                                                            <span className="summary-value">{trip.type}</span>
                                                         </div>
 
-                                                        <div style={{ marginBottom: '20px' }}>
-                                                            <div style={{ color: '#4a5568', fontSize: '15px', marginBottom: '10px' }}>Ghế đã chọn ({selectedSeats.length}):</div>
-                                                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                                                                {selectedSeats.map(s => <span key={s} style={{ background: '#e6fffa', color: '#2c7a7b', border: '1px solid #81e6d9', padding: '6px 12px', borderRadius: '8px', fontWeight: 'bold' }}>{s}</span>)}
+                                                        <div className="selected-seats-container">
+                                                            <div className="summary-label u-size-14 u-m-b-8">Ghế đã chọn ({selectedSeats.length}):</div>
+                                                            <div className="selected-seats-list">
+                                                                {selectedSeats.map(s => <span key={s} className="seat-badge">{s}</span>)}
                                                             </div>
                                                         </div>
 
-                                                        <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '18px', fontWeight: 'bold', marginBottom: '20px', borderTop: '2px dashed #e2e8f0', paddingTop: '20px' }}>
-                                                            <span style={{ color: '#4a5568' }}>Tạm tính:</span>
-                                                            <span style={{ color: '#e53e3e', fontSize: '24px' }}>{(selectedSeats.length * trip.price).toLocaleString('vi-VN')} đ</span>
+                                                        <div className="total-price-section">
+                                                            <span className="total-label">Tạm tính:</span>
+                                                            <span className="total-value">{(selectedSeats.length * trip.price).toLocaleString('vi-VN')} đ</span>
                                                         </div>
                                                         <button 
                                                             onClick={() => navigate('/checkout', { state: { trip, selectedSeats } })} 
-                                                            style={{ width: '100%', padding: '16px', background: '#3182ce', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer', transition: '0.2s', boxShadow: '0 4px 6px rgba(49, 130, 206, 0.3)' }}
+                                                            className="btn-proceed"
                                                         >
-                                                            TIẾP TỤC ĐẶT VÉ
+                                                            Tiếp tục đặt vé
                                                         </button>
                                                     </div>
                                                 )}
@@ -370,8 +337,8 @@ const Booking = () => {
                             ))
                         ) : (
                             <div className="no-results">
-                                <h2>Không tìm thấy chuyến xe</h2>
-                                <div className="empty-bus-img"><img src={noScheduleImg} alt="No Schedule" style={{ width: '100%', maxWidth: '300px' }} /></div>
+                                <h2 className="u-size-24 u-weight-700 u-m-b-16">Không tìm thấy chuyến xe</h2>
+                                <div className="empty-bus-img u-m-x-auto"><img src={noScheduleImg} alt="No Schedule" className="u-w-full" style={{ maxWidth: '300px' }} /></div>
                             </div>
                         )}
                     </div>
