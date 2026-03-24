@@ -14,7 +14,7 @@ const UserLayout = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // ── Chatbot widget state ──────────────────────────────────
-    const [chatOpen, setChatOpen] = useState(false);
+    const [chatOpen, setChatOpen] = useState(true);
     const [chatMessages, setChatMessages] = useState([
         {
             id: 1,
@@ -264,34 +264,15 @@ const UserLayout = () => {
 
             {/* ── Chatbot Widget ───────────────────────────────── */}
             <div className="chatbot-widget" ref={chatWidgetRef}>
-                {/* Toggle Button */}
-                <button
-                    className={`chatbot-toggle-btn ${chatOpen ? 'open' : ''}`}
-                    onClick={() => setChatOpen(!chatOpen)}
-                    title={chatOpen ? 'Đóng chat' : 'Trợ lý tư vấn'}
-                    aria-label="Chatbot"
-                >
-                    {chatOpen ? (
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                            <line x1="18" y1="6" x2="6" y2="18"/>
-                            <line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
-                    ) : (
-                        <img src={logo} alt="Chatbot" className="chatbot-logo" />
-                    )}
-                    {!chatOpen && <span className="chatbot-badge">1</span>}
-                </button>
-
                 {/* Chat Panel */}
                 {chatOpen && (
                     <div className="chatbot-panel" role="dialog" aria-label="Hỗ trợ trực tuyến">
                         {/* Header */}
                         <div className="chatbot-header">
-                            <img src={logo} alt="Logo" className="chatbot-header-logo" />
                             <div className="chatbot-header-info">
-                                <span className="chatbot-header-name">Đồng Hương Sông Lam</span>
+                                <span className="chatbot-header-name">Trợ lý ảo Đồng Hương Sông Lam</span>
                                 <span className="chatbot-header-status">
-                                    <span className="chatbot-online-dot"></span> Trực tuyến
+                                    <span className="chatbot-online-dot"></span> Đang trực tuyến
                                 </span>
                             </div>
                             <button
@@ -361,6 +342,17 @@ const UserLayout = () => {
                         </div>
                     </div>
                 )}
+
+                {/* Toggle Button */}
+                <button
+                    className="chatbot-toggle-btn"
+                    onClick={() => setChatOpen(!chatOpen)}
+                    title="Trợ lý tư vấn"
+                    aria-label="Chatbot"
+                >
+                    <img src={logo} alt="Chatbot" className="chatbot-logo" />
+                    {!chatOpen && <span className="chatbot-badge">1</span>}
+                </button>
             </div>
 
             <footer className="user-footer">
