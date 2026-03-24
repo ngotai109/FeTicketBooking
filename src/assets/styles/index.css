@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  --font-main: 'Lexend', sans-serif;
+  --font-main: 'Inter', sans-serif;
   --text-main: #1e293b;
   --bg-main: #f8fafc;
 }

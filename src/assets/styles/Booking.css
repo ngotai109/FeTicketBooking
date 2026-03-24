@@ -317,57 +317,163 @@
     background: transparent;
 }
 
-.sort-bar {
-    background: #fff;
-    border-radius: 8px;
-    padding: 15px 20px;
-    margin-bottom: 20px;
+.filter-sort-bar {
     display: flex;
     align-items: center;
-    gap: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    justify-content: space-between;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 24px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Bóng mềm hơn */
+    border: 1px solid #f1f5f9;
+    min-height: 64px; /* Đảm bảo độ cao tối thiểu ổn định */
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1 1 auto; /* Cho phép giãn nở nhưng không chiếm hết */
+}
+
+.filter-label {
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    font-size: 15px;
+    margin-right: 15px; /* Tạo khoảng trống riêng cho label */
+}
+
+.filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: nowrap;
+}
+
+.filter-select {
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    outline: none;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 170px; /* Cố định chiều rộng vừa đủ cho text */
+    height: 44px;
+    line-height: normal; /* Đảm bảo text căn giữa dọc */
+}
+
+.filter-select:hover {
+    border-color: #cbd5e1;
+    background-color: #fff;
+}
+
+.filter-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.clear-filter-btn {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.clear-filter-btn:hover {
+    background: #fef2f2;
+}
+
+.sort-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: 20px; /* Đảm bảo không dính vào filter group */
+    border-left: 1px solid #f1f5f9; /* Phân cách nhẹ */
+    padding-left: 20px;
+    flex-shrink: 0; /* Cực kỳ quan trọng: Buộc phần này không được co lại */
 }
 
 .sort-label {
     font-size: 14px;
-    color: #6b7280;
+    color: #64748b;
+    font-weight: 500;
+    white-space: nowrap;
 }
 
-.sort-tabs {
+.sort-actions {
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
 .sort-tab {
-    background: #f3f4f6;
-    border: none;
-    padding: 6px 15px;
-    border-radius: 6px;
-    font-size: 13px;
-    color: #4b5563;
+    padding: 0 24px; /* Tăng padding để nút dài hơn */
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14.5px;
+    border: 1.5px solid #f1f5f9;
+    background: #fff;
+    color: #64748b;
     cursor: pointer;
     transition: all 0.2s;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap; /* Tuyệt đối không cho xuống dòng */
+    flex-shrink: 0;      /* Không cho trình duyệt ép co nút */
+    min-width: 120px;    /* Đảm bảo chiều rộng tối thiểu */
 }
 
 .sort-tab.active {
     background: #2563eb;
     color: #fff;
+    border-color: #2563eb;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
+
+.sort-tab:not(.active):hover {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #1e293b;
+}
+
+/* Trip Card Adjustments */
 
 /* Trip Card */
 .trip-card {
     background: #fff;
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     border: 1px solid #f1f5f9;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.trip-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
 }
 
 .trip-main-info {
     display: grid;
-    grid-template-columns: 200px 1fr 200px;
+    grid-template-columns: 220px 1fr 200px;
     gap: 30px;
+    padding: 24px;
 }
 
 .trip-image {
@@ -394,10 +500,10 @@
 }
 
 .bus-type {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 12px;
+    color: #2563eb; /* Màu xanh branding */
+    margin-bottom: 15px;
 }
 
 .trip-timeline {
@@ -415,20 +521,26 @@
 }
 
 .time {
-    font-size: 19px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 500; /* Hạ xuống 500 cho đỡ thô */
     color: #0f172a;
-    min-width: 60px;
+    min-width: 65px;
+}
+
+.time.arrival {
+    color: #64748b; /* Giờ đến nhạt hơn một chút */
 }
 
 .dot {
     color: #cbd5e1;
     font-size: 18px;
+    margin: 0 5px;
 }
 
 .point {
-    font-size: 14.5px;
-    color: #475569;
+    font-size: 15px;
+    font-weight: 500;
+    color: #334155;
 }
 
 .duration-line {
@@ -451,40 +563,55 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 10px;
-    border-left: 1px solid #f3f4f6;
-    padding-left: 30px;
+    align-items: flex-end; /* Căn phải nội dung */
+    border-left: 1px dashed #e2e8f0;
+    padding-left: 20px;
 }
 
 .price-value {
-    font-size: 20px;
-    font-weight: 700;
-    color: #2563eb; /* Chuyển sang màu xanh branding để chuyên nghiệp hơn, hoặc giữ đỏ nếu bạn muốn */
+    font-size: 22px;
+    font-weight: 600;
+    color: #ef4444; /* Chuyển sang màu đỏ nổi bật */
+    margin-bottom: 4px;
 }
 
 .seat-status {
-    font-size: 13px;
-    color: #6b7280;
+    font-size: 14px;
+    font-weight: 500;
+    color: #10b981;
+    margin-bottom: 16px;
 }
 
 .select-seat-btn {
-    background: #ffed00; /* Vàng tươi chanh rực rỡ */
+    background: #ffed00; /* Vàng tươi chanh chuẩn */
     color: #1a1a1a;
     border: none;
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-weight: 700;
+    padding: 10px 24px;
+    border-radius: 12px;
+    font-weight: 600;
     font-size: 14px;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(255, 237, 0, 0.3);
-    transition: all 0.2s ease;
-    text-transform: none;
+    box-shadow: 0 4px 15px rgba(255, 237, 0, 0.4);
+    transition: all 0.2s;
+    min-width: 130px;
 }
 
 .select-seat-btn:hover {
     background: #fff200;
     transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(255, 237, 0, 0.45);
+    box-shadow: 0 6px 20px rgba(255, 237, 0, 0.5);
+}
+
+.select-seat-btn.active {
+    background: #ef4444; /* Đỏ chuyên nghiệp */
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.select-seat-btn.active:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(239, 68, 68, 0.45);
 }
 
 /* No Results State */

@@ -206,41 +206,37 @@ const Booking = () => {
             <div className="container booking-content" style={{ display: 'block', paddingBottom: '30px' }}>
                 
                 {/* Thanh Lọc Ngang & Sắp Xếp */}
-                <div style={{ display: 'flex', background: 'white', borderRadius: '12px', padding: '15px 25px', marginBottom: '25px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #edf2f7' }}>
-                    <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                         <span style={{ fontWeight: 'bold', color: '#2d3748', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                             ⚙️ Bộ lọc
-                         </span>
-                         
+                <div className="filter-sort-bar">
+                    <div className="filter-group">
                          {/* Dropdowns */}
-                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                             <select style={{ padding: '10px 15px', borderRadius: '8px', border: '1px solid #cbd5e0', outline: 'none', background: '#f7fafc', color: '#4a5568', fontSize: '14px', cursor: 'pointer' }}>
+                         <div className="filter-controls">
+                             <select className="filter-select">
                                  <option value="">Khoảng Giờ đi</option>
                                  <option>00:00 - 06:00 (Sáng sớm)</option>
                                  <option>06:00 - 12:00 (Sáng)</option>
                                  <option>12:00 - 18:00 (Chiều)</option>
                                  <option>18:00 - 24:00 (Tối)</option>
                              </select>
-                             <select style={{ padding: '10px 15px', borderRadius: '8px', border: '1px solid #cbd5e0', outline: 'none', background: '#f7fafc', color: '#4a5568', fontSize: '14px', cursor: 'pointer' }}>
+                             <select className="filter-select">
                                  <option value="">Khoảng Giá vé</option>
                                  <option>Dưới 200,000 đ</option>
                                  <option>200,000 đ - 500,000 đ</option>
                                  <option>Từ 500,000 đ trở lên</option>
                              </select>
-                             <select style={{ padding: '10px 15px', borderRadius: '8px', border: '1px solid #cbd5e0', outline: 'none', background: '#f7fafc', color: '#4a5568', fontSize: '14px', cursor: 'pointer' }}>
+                             <select className="filter-select">
                                  <option value="">Loại Xe</option>
                                  <option>Xe Limousine VIP</option>
                                  <option>Xe Giường Nằm Tiêu Chuẩn</option>
                              </select>
-                             <button style={{ background: 'none', border: 'none', color: '#e53e3e', fontSize: '13px', cursor: 'pointer', fontWeight: 'bold' }}>Xóa lọc</button>
+                             <button className="clear-filter-btn">Xóa lọc</button>
                          </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <span style={{ fontSize: '14px', color: '#718096', fontWeight: '500' }}>Sắp xếp theo:</span>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button className={`sort-tab ${sortType === 'earliest' ? 'active' : ''}`} style={{ padding: '8px 16px', borderRadius: '8px', fontWeight: '500' }} onClick={() => setSortType('earliest')}>Giờ đi</button>
-                            <button className={`sort-tab ${sortType === 'price-asc' ? 'active' : ''}`} style={{ padding: '8px 16px', borderRadius: '8px', fontWeight: '500' }} onClick={() => setSortType('price-asc')}>Giá tăng dần</button>
+                    <div className="sort-group">
+                        <span className="sort-label">Sắp xếp theo:</span>
+                        <div className="sort-actions">
+                            <button className={`sort-tab ${sortType === 'earliest' ? 'active' : ''}`} onClick={() => setSortType('earliest')}>Giờ đi</button>
+                            <button className={`sort-tab ${sortType === 'price-asc' ? 'active' : ''}`} onClick={() => setSortType('price-asc')}>Giá tăng dần</button>
                         </div>
                     </div>
                 </div>
@@ -250,41 +246,40 @@ const Booking = () => {
                     <div className="trip-list">
                         {trips.length > 0 ? (
                             trips.map(trip => (
-                                <div key={trip.id} className="trip-card" style={{ marginBottom: '20px', borderRadius: '12px', background: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.06)' }}>
-                                    <div className="trip-main-info" style={{ padding: '20px' }}>
+                                <div key={trip.id} className="trip-card">
+                                    <div className="trip-main-info">
                                         <div className="trip-image">
                                             <img src={trip.image} alt="Bus" />
                                             <div className="trip-notice">KHUYẾN MÃI TỚI 20%</div>
                                         </div>
 
                                         <div className="trip-details">
-                                            <div className="bus-type" style={{ fontSize: '16px', fontWeight: 'bold', color: '#2b6cb0', marginBottom: '10px' }}>{trip.type}</div>
+                                            <div className="bus-type">{trip.type}</div>
                                             <div className="trip-timeline">
                                                 <div className="time-point">
-                                                    <span className="time" style={{ fontSize: '20px', fontWeight: 'bold' }}>{trip.departureTime}</span>
+                                                    <span className="time">{trip.departureTime}</span>
                                                     <span className="dot">•</span>
-                                                    <span className="point" style={{ fontWeight:'600' }}>{trip.departurePoint}</span>
+                                                    <span className="point">{trip.departurePoint}</span>
                                                 </div>
-                                                <div className="duration-line"><span className="duration" style={{ color:'#718096' }}>{trip.duration}</span></div>
+                                                <div className="duration-line"><span className="duration">{trip.duration}</span></div>
                                                 <div className="time-point">
-                                                    <span className="time" style={{ fontSize: '20px', fontWeight: 'bold', color: '#4a5568' }}>{trip.arrivalTime}</span>
+                                                    <span className="time arrival">{trip.arrivalTime}</span>
                                                     <span className="dot">•</span>
-                                                    <span className="point" style={{ fontWeight:'600' }}>{trip.arrivalPoint}</span>
+                                                    <span className="point">{trip.arrivalPoint}</span>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="trip-pricing" style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                            <div className="price-value" style={{ fontSize: '24px', fontWeight: '800', color: '#3182ce', marginBottom: '5px' }}>
+                                        <div className="trip-pricing">
+                                            <div className="price-value">
                                                 {trip.price.toLocaleString('vi-VN')} đ
                                             </div>
-                                            <div className="seat-status" style={{ color: '#38a169', fontWeight: '600', marginBottom: '15px' }}>Còn {trip.availableSeats} chỗ trống</div>
+                                            <div className="seat-status">Còn {trip.availableSeats} chỗ trống</div>
                                             <button 
-                                                className="select-seat-btn" 
-                                                style={{ padding: '10px 20px', background: expandedTripId === trip.id ? '#e2e8f0' : '#d69e2e', color: expandedTripId === trip.id ? '#4a5568' : 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s' }}
+                                                className={`select-seat-btn ${expandedTripId === trip.id ? 'active' : ''}`}
                                                 onClick={() => toggleExpand(trip.id)}
                                             >
-                                                {expandedTripId === trip.id ? 'Đóng Sơ đồ ▴' : 'Chọn chỗ ▾'}
+                                                {expandedTripId === trip.id ? 'Đóng ▴' : 'Chọn chỗ ▾'}
                                             </button>
                                         </div>
                                     </div>
