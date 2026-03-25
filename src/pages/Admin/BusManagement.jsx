@@ -17,6 +17,8 @@ const BusManagement = () => {
     const [filterType, setFilterType] = useState('all');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false);
+    const [viewingLayoutBus, setViewingLayoutBus] = useState(null);
+    const [isToggling, setIsToggling] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10;
 
@@ -48,7 +50,6 @@ const BusManagement = () => {
             const response = await busService.getAllBuses();
             setBuses(handleApiResponse(response));
         } catch (error) {
-            toast.error('Không thể tải danh sách phương tiện');
             // Mock data for development if API fails
             setBuses([
                 { busId: 1, licensePlate: '37B-123.45', busName: 'Xe 01', busType: '40', isActive: true, description: 'Xe đời mới 2023' },

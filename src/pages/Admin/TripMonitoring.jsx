@@ -10,7 +10,7 @@ const TripMonitoring = () => {
     // ---- State Filter ----
     const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
     const [selectedRoute, setSelectedRoute] = useState('all');
-    
+
     // ---- State Data ----
     const [trips, setTrips] = useState([]);
     const [routes, setRoutes] = useState([]);
@@ -20,7 +20,7 @@ const TripMonitoring = () => {
     const [selectedTrip, setSelectedTrip] = useState(null);
     const [tripSeats, setTripSeats] = useState([]);
     const [isSeatMapOpen, setIsSeatMapOpen] = useState(false);
-    
+
     // ---- State Quick Booking ----
     const [isQuickBookingOpen, setIsQuickBookingOpen] = useState(false);
     const [selectedSeat, setSelectedSeat] = useState(null);
@@ -54,7 +54,7 @@ const TripMonitoring = () => {
             setRoutes(Array.isArray(data) ? data : []);
         } catch (error) {
             toast.error('Lỗi khi tải danh sách tuyến đường');
-            setRoutes([ { routeId: 1, routeName: 'Hà Nội - Nghệ An' }, { routeId: 2, routeName: 'Nghệ An - Đà Nẵng' } ]);
+            setRoutes([{ routeId: 1, routeName: 'Hà Nội - Nghệ An' }, { routeId: 2, routeName: 'Nghệ An - Đà Nẵng' }]);
         }
     };
 
@@ -65,10 +65,10 @@ const TripMonitoring = () => {
             if (selectedRoute !== 'all') {
                 query += `&routeId=${selectedRoute}`;
             }
-            
+
             const res = await tripService.getAllTrips(query);
             const data = res.data?.data || res.data || [];
-            if(Array.isArray(data) && data.length > 0) {
+            if (Array.isArray(data) && data.length > 0) {
                 setTrips(data);
             } else {
                 generateMockTrips();
@@ -84,7 +84,7 @@ const TripMonitoring = () => {
         setTrips([
             { tripId: 101, routeId: 1, routeName: 'Hà Nội - Nghệ An (Sáng)', departureTime: '08:00', arrivalTime: '14:00', busId: 5, busPlate: '37B-123.45', busType: '34', availableSeats: 12, totalSeats: 34, status: 0 },
             { tripId: 102, routeId: 1, routeName: 'Hà Nội - Nghệ An (Chiều)', departureTime: '13:00', arrivalTime: '19:00', busId: 6, busPlate: '37B-678.90', busType: '22', availableSeats: 0, totalSeats: 22, status: 1 },
-            { tripId: 103, routeId: 2, routeName: 'Hà Nội - Sầm Sơn', departureTime: '16:00', arrivalTime: '19:30', busId: 7, busPlate: '29H-555.55', busType: '40', availableSeats: 25, totalSeats: 40, status: 0 },
+            { tripId: 103, routeId: 2, routeName: 'Hà Nội - Nghệ An', departureTime: '16:00', arrivalTime: '19:30', busId: 7, busPlate: '29H-555.55', busType: '40', availableSeats: 25, totalSeats: 40, status: 0 },
             { tripId: 104, routeId: 1, routeName: 'Nghệ An - Hà Nội', departureTime: '21:00', arrivalTime: '03:00', busId: 8, busPlate: '37B-999.99', busType: '34', availableSeats: 10, totalSeats: 34, status: 0 }
         ]);
     };
@@ -92,18 +92,18 @@ const TripMonitoring = () => {
     const handleOpenTripDetail = async (trip) => {
         setSelectedTrip(trip);
         setIsSeatMapOpen(true);
-        
+
         try {
             const mockTripSeats = [];
             const layout = getBusLayout(trip.busType || '34');
             const allSeats = [...layout.floor1, ...layout.floor2];
-            
+
             allSeats.forEach((s, index) => {
                 let sStatus = 0;
                 if (index % 5 === 0) sStatus = 2;
                 else if (index % 7 === 0) sStatus = 1;
                 else if (index === 15) sStatus = 3;
-                
+
                 mockTripSeats.push({
                     seatId: 1000 + index,
                     seatNumber: s.seatNumber,
@@ -136,7 +136,7 @@ const TripMonitoring = () => {
             case 1: return { type: 'warning', label: 'Đang Giữ' };
             case 2: return { type: 'danger', label: 'Đã Bán' };
             case 3: return { type: 'info', label: 'Bị Khóa' }; // Grayish
-            default: return { type: 'info', label: 'Còn Trống'};
+            default: return { type: 'info', label: 'Còn Trống' };
         }
     };
 
@@ -157,15 +157,15 @@ const TripMonitoring = () => {
                     <p className="admin-header-subtitle">Quản lý vé, tình trạng lấp đầy và điều phối xe xuất bến</p>
                 </div>
                 <div className="trip-monitoring-header-controls">
-                    <input 
-                        type="date" 
+                    <input
+                        type="date"
                         className="admin-form-input trip-monitoring-date-input"
-                        value={filterDate} 
+                        value={filterDate}
                         onChange={(e) => setFilterDate(e.target.value)}
                     />
-                    <select 
+                    <select
                         className="admin-form-select trip-monitoring-route-select"
-                        value={selectedRoute} 
+                        value={selectedRoute}
                         onChange={(e) => setSelectedRoute(e.target.value)}
                     >
                         <option value="all">Tất cả tuyến</option>
@@ -197,8 +197,8 @@ const TripMonitoring = () => {
                                 const isFull = trip.availableSeats === 0;
 
                                 return (
-                                    <Card 
-                                        key={trip.tripId} 
+                                    <Card
+                                        key={trip.tripId}
                                         className={`admin-trip-card ${isFull ? 'full' : 'available'}`}
                                         onClick={() => handleOpenTripDetail(trip)}
                                         interactive
@@ -217,7 +217,7 @@ const TripMonitoring = () => {
 
                                         <div className="admin-trip-bus-info">
                                             <div className="u-flex u-align-center u-gap-8">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                                                 <span className="trip-monitoring-bus-plate">{trip.busPlate}</span>
                                             </div>
                                             <Badge type="info">{trip.busType} chỗ</Badge>
@@ -231,9 +231,9 @@ const TripMonitoring = () => {
                                                 </span>
                                             </div>
                                             <div className="admin-progress-container">
-                                                <div 
-                                                    className="admin-progress-bar" 
-                                                    style={{ 
+                                                <div
+                                                    className="admin-progress-bar"
+                                                    style={{
                                                         width: `${fillPercent}%`,
                                                         background: isFull ? '#e53e3e' : '#3182ce'
                                                     }}
@@ -247,7 +247,7 @@ const TripMonitoring = () => {
                                 );
                             })}
                     </div>
-                    <Pagination 
+                    <Pagination
                         currentPage={currentPage}
                         totalItems={trips.filter(t => selectedRoute === 'all' || (t.routeId || t.RouteId)?.toString() === selectedRoute).length}
                         pageSize={pageSize}
@@ -257,8 +257,8 @@ const TripMonitoring = () => {
             )}
 
             {/* Modal Detail Seat Map */}
-            <Modal 
-                isOpen={isSeatMapOpen} 
+            <Modal
+                isOpen={isSeatMapOpen}
                 onClose={() => setIsSeatMapOpen(false)}
                 title={`Sơ đồ Vé - ${selectedTrip?.routeName}`}
                 width="900px"
@@ -287,9 +287,9 @@ const TripMonitoring = () => {
                             {/* Tầng 1 */}
                             <div className="admin-floor-section">
                                 <h4 className="admin-floor-title" style={{ color: '#3182ce' }}>Tầng 1 (Dưới)</h4>
-                                <div 
+                                <div
                                     className="admin-seat-grid"
-                                    style={{ 
+                                    style={{
                                         gridTemplateColumns: `repeat(${getBusLayout(selectedTrip.busType || '34').columns}, 1fr)`,
                                         padding: '24px', gap: '12px'
                                     }}
@@ -298,10 +298,10 @@ const TripMonitoring = () => {
                                         const actualSeat = tripSeats.find(s => s.seatNumber === seatProto.seatNumber) || { status: 0 };
                                         const config = getSeatConfig(actualSeat.status);
                                         return (
-                                            <div 
-                                                key={seatProto.seatNumber} 
+                                            <div
+                                                key={seatProto.seatNumber}
                                                 className={`admin-seat-item admin-badge-${config.type} trip-monitoring-seat-item-custom`}
-                                                style={{ 
+                                                style={{
                                                     gridRow: seatProto.row + 1, gridColumn: seatProto.col + 1
                                                 }}
                                                 onClick={() => handleSeatClick({ ...seatProto, status: actualSeat.status })}
@@ -316,9 +316,9 @@ const TripMonitoring = () => {
                             {/* Tầng 2 */}
                             <div className="admin-floor-section">
                                 <h4 className="admin-floor-title" style={{ color: '#dd6b20' }}>Tầng 2 (Trên)</h4>
-                                <div 
+                                <div
                                     className="admin-seat-grid"
-                                    style={{ 
+                                    style={{
                                         gridTemplateColumns: `repeat(${getBusLayout(selectedTrip.busType || '34').columns}, 1fr)`,
                                         padding: '24px', gap: '12px', background: '#fffaf0'
                                     }}
@@ -327,10 +327,10 @@ const TripMonitoring = () => {
                                         const actualSeat = tripSeats.find(s => s.seatNumber === seatProto.seatNumber) || { status: 0 };
                                         const config = getSeatConfig(actualSeat.status);
                                         return (
-                                            <div 
-                                                key={seatProto.seatNumber} 
+                                            <div
+                                                key={seatProto.seatNumber}
                                                 className={`admin-seat-item admin-badge-${config.type} trip-monitoring-seat-item-custom`}
-                                                style={{ 
+                                                style={{
                                                     gridRow: seatProto.row + 1, gridColumn: seatProto.col + 1
                                                 }}
                                                 onClick={() => handleSeatClick({ ...seatProto, status: actualSeat.status })}
@@ -360,7 +360,7 @@ const TripMonitoring = () => {
             >
                 <form onSubmit={(e) => {
                     e.preventDefault();
-                    const updatedSeats = tripSeats.map(s => 
+                    const updatedSeats = tripSeats.map(s =>
                         s.seatNumber === selectedSeat.seatNumber ? { ...s, status: parseInt(bookingForm.status) } : s
                     );
                     setTripSeats(updatedSeats);
@@ -369,22 +369,22 @@ const TripMonitoring = () => {
                 }}>
                     <div className="admin-form-group">
                         <label className="admin-form-label">Tên hành khách *</label>
-                        <input type="text" className="admin-form-input" required value={bookingForm.customerName} onChange={e => setBookingForm({...bookingForm, customerName: e.target.value})} placeholder="VD: Nguyễn Văn A" />
+                        <input type="text" className="admin-form-input" required value={bookingForm.customerName} onChange={e => setBookingForm({ ...bookingForm, customerName: e.target.value })} placeholder="VD: Nguyễn Văn A" />
                     </div>
                     <div className="admin-form-group">
                         <label className="admin-form-label">Số điện thoại *</label>
-                        <input type="text" className="admin-form-input" required value={bookingForm.phoneNumber} onChange={e => setBookingForm({...bookingForm, phoneNumber: e.target.value})} placeholder="VD: 0912345678" />
+                        <input type="text" className="admin-form-input" required value={bookingForm.phoneNumber} onChange={e => setBookingForm({ ...bookingForm, phoneNumber: e.target.value })} placeholder="VD: 0912345678" />
                     </div>
                     <div className="admin-form-group">
                         <label className="admin-form-label">Điểm đón khách</label>
-                        <input type="text" className="admin-form-input" value={bookingForm.pickupPoint} onChange={e => setBookingForm({...bookingForm, pickupPoint: e.target.value})} placeholder="VD: Bến xe Nước Ngầm" />
+                        <input type="text" className="admin-form-input" value={bookingForm.pickupPoint} onChange={e => setBookingForm({ ...bookingForm, pickupPoint: e.target.value })} placeholder="VD: Bến xe Nước Ngầm" />
                     </div>
                     <div className="admin-form-group">
                         <label className="admin-form-label">Trạng thái thanh toán *</label>
-                        <select 
+                        <select
                             className={`admin-form-select ${bookingForm.status == 1 ? 'trip-monitoring-status-active' : 'trip-monitoring-status-paid'}`}
-                            value={bookingForm.status} 
-                            onChange={e => setBookingForm({...bookingForm, status: e.target.value})}
+                            value={bookingForm.status}
+                            onChange={e => setBookingForm({ ...bookingForm, status: e.target.value })}
                         >
                             <option value={1}>Chưa thu tiền (Giữ chỗ)</option>
                             <option value={2}>Đã thanh toán</option>

@@ -188,26 +188,29 @@ const ScheduleManagement = () => {
                     <p className="admin-header-subtitle">Quản lý Lịch trình cố định và Tự động sinh chuyến theo tháng</p>
                 </div>
                 
-                <button 
-                    className="admin-btn-success"
-                    onClick={() => setIsGeneratorOpen(true)}
-                >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12h-4v4h4v-4z"/></svg>
-                    Sinh Chuyến Tự Động
-                </button>
+                <div className="u-flex u-gap-12">
+                    <button 
+                        className="admin-btn-add"
+                        style={{ background: '#1a3a8f' }}
+                        onClick={() => handleOpenModal()}
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Thêm Lịch trình
+                    </button>
+                    <button 
+                        className="admin-btn-success"
+                        onClick={() => setIsGeneratorOpen(true)}
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12h-4v4h4v-4z"/></svg>
+                        Sinh Chuyến Tự Động
+                    </button>
+                </div>
             </header>
 
             <Card padding="0" className="admin-table-card">
                 <div className="table-card-content">
                 <div className="admin-toolbar" style={{ margin: 0, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}>
                     <h2 className="u-size-15 u-m-0 u-color-slate-800">Danh sách Lịch Cố Định</h2>
-                    <button 
-                        className="admin-btn-add"
-                        onClick={() => handleOpenModal()}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        Thêm Lịch trình
-                    </button>
                 </div>
 
                 <div className="table-container" style={{ overflowX: 'auto' }}>

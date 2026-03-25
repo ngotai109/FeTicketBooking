@@ -23,6 +23,7 @@ const RouteManagement = () => {
     const [filterDeparture, setFilterDeparture] = useState('all');
     const [filterArrival, setFilterArrival] = useState('all');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isToggling, setIsToggling] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10;
 

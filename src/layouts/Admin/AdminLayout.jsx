@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ConfirmationModal } from '../../components/Common';
 
@@ -48,12 +48,12 @@ const AdminLayout = () => {
                 </div>
 
                 <nav className="sidebar-nav">
-                    <a href="/admin" className={`nav-item ${isActive('/admin') ? 'active' : ''}`}>
+                    <Link to="/admin" className={`nav-item ${isActive('/admin') ? 'active' : ''}`}>
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                         <span>Dashboard</span>
-                    </a>
+                    </Link>
 
                     {/* Vận tải */}
                     <div className={`nav-group ${isOperationsMenuOpen || isParentActive(['/admin/schedules', '/admin/trips']) ? 'open' : ''}`}>
@@ -65,12 +65,12 @@ const AdminLayout = () => {
                             <svg className="chevron-icon" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         </div>
                         <div className={`submenu ${isOperationsMenuOpen || isParentActive(['/admin/schedules', '/admin/trips']) ? 'expanded' : ''}`}>
-                            <a href="/admin/schedules" className={`nav-item submenu-item ${isActive('/admin/schedules') ? 'active' : ''}`}>
+                            <Link to="/admin/schedules" className={`nav-item submenu-item ${isActive('/admin/schedules') ? 'active' : ''}`}>
                                 <span>Lịch trình & Lên chuyến</span>
-                            </a>
-                            <a href="/admin/trips" className={`nav-item submenu-item ${isActive('/admin/trips') ? 'active' : ''}`}>
+                            </Link>
+                            <Link to="/admin/trips" className={`nav-item submenu-item ${isActive('/admin/trips') ? 'active' : ''}`}>
                                 <span>Theo dõi Điều hành xe</span>
-                            </a>
+                            </Link>
                         </div>
                     </div>
 
@@ -82,9 +82,9 @@ const AdminLayout = () => {
                             <svg className="chevron-icon" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         </div>
                         <div className={`submenu ${isVehiclesMenuOpen || isParentActive(['/admin/vehicles']) ? 'expanded' : ''}`}>
-                             <a href="/admin/vehicles" className={`nav-item submenu-item ${isActive('/admin/vehicles') ? 'active' : ''}`}>
+                             <Link to="/admin/vehicles" className={`nav-item submenu-item ${isActive('/admin/vehicles') ? 'active' : ''}`}>
                                  <span>Quản lý xe</span>
-                             </a>
+                             </Link>
                          </div>
                     </div>
 
@@ -96,9 +96,9 @@ const AdminLayout = () => {
                             <svg className="chevron-icon" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         </div>
                         <div className={`submenu ${isRoutesMenuOpen || isParentActive(['/admin/routes']) ? 'expanded' : ''}`}>
-                            <a href="/admin/routes" className={`nav-item submenu-item ${isActive('/admin/routes') ? 'active' : ''}`}>
+                            <Link to="/admin/routes" className={`nav-item submenu-item ${isActive('/admin/routes') ? 'active' : ''}`}>
                                 <span>Quản lý tuyến</span>
-                            </a>
+                            </Link>
                         </div>
                     </div>
 
@@ -110,12 +110,12 @@ const AdminLayout = () => {
                             <svg className="chevron-icon" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         </div>
                         <div className={`submenu ${isLocationsMenuOpen || isParentActive(['/admin/provinces', '/admin/wards']) ? 'expanded' : ''}`}>
-                            <a href="/admin/provinces" className={`nav-item submenu-item ${isActive('/admin/provinces') ? 'active' : ''}`}>
+                            <Link to="/admin/provinces" className={`nav-item submenu-item ${isActive('/admin/provinces') ? 'active' : ''}`}>
                                 <span>Quản lý Tỉnh</span>
-                            </a>
-                            <a href="/admin/wards" className={`nav-item submenu-item ${isActive('/admin/wards') ? 'active' : ''}`}>
+                            </Link>
+                            <Link to="/admin/wards" className={`nav-item submenu-item ${isActive('/admin/wards') ? 'active' : ''}`}>
                                 <span>Quản lý Xã</span>
-                            </a>
+                            </Link>
                         </div>
                     </div>
 
@@ -127,9 +127,9 @@ const AdminLayout = () => {
                             <svg className="chevron-icon" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         </div>
                         <div className={`submenu ${isOfficesMenuOpen || isParentActive(['/admin/offices']) ? 'expanded' : ''}`}>
-                            <a href="/admin/offices" className={`nav-item submenu-item ${isActive('/admin/offices') ? 'active' : ''}`}>
+                            <Link to="/admin/offices" className={`nav-item submenu-item ${isActive('/admin/offices') ? 'active' : ''}`}>
                                 <span>Quản lý văn phòng</span>
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </nav>

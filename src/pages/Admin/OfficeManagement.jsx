@@ -21,6 +21,7 @@ const OfficeManagement = () => {
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterProvince, setFilterProvince] = useState('all');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isToggling, setIsToggling] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10;
 
