@@ -9,7 +9,7 @@
 
 /* Sidebar Styles */
 .sidebar {
-    width: 240px;
+    width: 260px;
     background: linear-gradient(180deg, #0d1b4b 0%, #1a3a8f 60%, #0d2570 100%);
     color: white;
     display: flex;
@@ -23,7 +23,7 @@
 }
 
 .admin-dashboard.collapsed .sidebar {
-    width: 88px;
+    width: 80px;
 }
 
 .sidebar-header {
@@ -162,7 +162,8 @@
     max-height: 0;
     overflow: hidden;
     transition: all 0.3s ease-out;
-    padding-left: 20px; /* Indentation for the whole group */
+    padding-left: 20px;
+    /* Indentation for the whole group */
     margin: 4px 0 8px 0;
 }
 
@@ -353,8 +354,15 @@
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dropdown-item {
@@ -391,7 +399,7 @@
 }
 
 .page-content-wrapper {
-    padding: 24px;
+    padding: 14px 20px;
     flex: 1;
     overflow-y: auto;
 }

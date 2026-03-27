@@ -55,7 +55,7 @@ const ScheduleManagement = () => {
 
             fetchSchedules();
         } catch (error) {
-            toast.error('Lỗi khi tải dữ liệu nền');
+            toast.error('Không thể tải dữ liệu Tuyến đường và Xe từ máy chủ');
         } finally {
             setLoading(false);
         }

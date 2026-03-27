@@ -196,7 +196,7 @@ const TripMonitoring = () => {
                 </Card>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div className="admin-grid-layout">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '14px' }}>
                         {trips
                             .filter(t => selectedRoute === 'all' || (t.routeId || t.RouteId)?.toString() === selectedRoute)
                             .slice((currentPage - 1) * pageSize, currentPage * pageSize)
@@ -211,20 +211,20 @@ const TripMonitoring = () => {
                                         className={`admin-trip-card ${isFull ? 'full' : 'available'}`}
                                         onClick={() => handleOpenTripDetail(trip)}
                                         interactive
-                                        padding="24px"
+                                        padding="16px"
                                     >
                                         <div className="admin-trip-info-row">
-                                            <h3 className="admin-trip-route">{trip.routeName}</h3>
+                                            <h3 className="admin-trip-route" style={{ fontSize: '13px', fontWeight: 700 }}>{trip.routeName}</h3>
                                             {getTripStatusBadge(trip.status)}
                                         </div>
 
-                                        <div className="admin-trip-time">
-                                            <span className="trip-monitoring-time-display">{trip.departureTime}</span>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                                            <span>{trip.arrivalTime}</span>
+                                        <div className="admin-trip-time" style={{ fontSize: '13px', gap: '6px', margin: '4px 0' }}>
+                                            <span className="trip-monitoring-time-display" style={{ fontSize: '15px', fontWeight: 700 }}>{trip.departureTime}</span>
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                            <span style={{ fontSize: '13px' }}>{trip.arrivalTime}</span>
                                         </div>
 
-                                        <div className="admin-trip-bus-info">
+                                        <div className="admin-trip-bus-info" style={{ padding: '8px 10px', fontSize: '12px' }}>
                                             <div className="u-flex u-align-center u-gap-8">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                                                 <span className="trip-monitoring-bus-plate">{trip.busPlate}</span>

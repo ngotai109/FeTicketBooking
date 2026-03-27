@@ -105,7 +105,7 @@ const AdminDashboard = () => {
     const COLORS = ['#3182ce', '#38a169', '#dd6b20', '#a0aec0'];
 
     return (
-        <div className="admin-page-container" style={{ padding: '0', height: '100%', overflowY: 'auto' }}>
+        <div className="admin-page-container" style={{ height: '100%', overflowY: 'auto' }}>
             {/* The header is now handled by AdminLayout */}
 
             {/* --- CARDS TỔNG QUAN --- */}
