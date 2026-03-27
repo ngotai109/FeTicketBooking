@@ -30,11 +30,14 @@ const AdminDashboard = () => {
             change: '+12.5%',
             trend: 'up',
             icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15M9 5C9 6.10457 9.89543 7 11 7H13C14.1046 7 15 6.10457 15 5M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5M12 12H15M12 16H15M9 12H9.01M9 16H9.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
             ),
-            color: '#1a3a8f'
+            color: '#10b981'
         },
         {
             title: 'Doanh thu tháng này',
@@ -42,11 +45,11 @@ const AdminDashboard = () => {
             change: '+8.2%',
             trend: 'up',
             icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2V22M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                 </svg>
             ),
-            color: '#388e3c'
+            color: '#34d399'
         },
         {
             title: 'Khách hàng mới',
@@ -54,11 +57,12 @@ const AdminDashboard = () => {
             change: '+23.1%',
             trend: 'up',
             icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
                 </svg>
             ),
-            color: '#1565c0'
+            color: '#059669'
         },
         {
             title: 'Chuyến đi xuất bến',
@@ -66,12 +70,12 @@ const AdminDashboard = () => {
             change: '+5.4%',
             trend: 'up',
             icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
                 </svg>
             ),
-            color: '#f9a825'
+            color: '#065f46'
         }
     ];
 
@@ -101,52 +105,33 @@ const AdminDashboard = () => {
     const COLORS = ['#3182ce', '#38a169', '#dd6b20', '#a0aec0'];
 
     return (
-        <div className="admin-page-container" style={{ padding: '0 10px 20px 10px', height: '100%', overflowY: 'auto' }}>
-            {/* --- HEADER --- */}
-            <header className="admin-header u-m-b-20" style={{ paddingBottom: '12px' }}>
-                <div className="admin-header-title">
-                    <h1 className="u-size-20 u-weight-800 u-color-slate-800">Tổng quan Nhà xe (Dashboard)</h1>
-                    <p className="u-color-slate-500 u-size-12">
-                        Cập nhật lúc: {currentTime.toLocaleString('vi-VN', {
-                            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-                            hour: '2-digit', minute: '2-digit', second: '2-digit'
-                        })}
-                    </p>
-                </div>
-                <div className="u-flex u-align-center u-gap-16">
-                    <div className="u-flex u-align-center u-gap-12 u-p-x-16 u-p-y-8 u-rounded-50 u-bg-slate-50" style={{ border: '1px solid #edf2f7' }}>
-                        <div className="u-flex u-align-center u-justify-center u-weight-bold" style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#3182ce', color: 'white' }}>
-                            {userEmail.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="u-flex u-flex-column">
-                            <span className="u-weight-700 u-size-14 u-color-slate-800">{userEmail}</span>
-                            <span className="u-size-12 u-color-slate-500">Quản trị viên cấp cao</span>
-                        </div>
-                    </div>
-                </div>
-            </header>
+        <div className="admin-page-container" style={{ padding: '0', height: '100%', overflowY: 'auto' }}>
+            {/* The header is now handled by AdminLayout */}
 
             {/* --- CARDS TỔNG QUAN --- */}
             <div className="u-flex u-gap-20 u-m-b-24">
                 {stats.map((stat, index) => (
-                    <Card key={index} padding="24px" className="u-flex-1" style={{ position: 'relative', overflow: 'hidden' }}>
-                        {/* Hiệu ứng màu gradient bóng mờ ở góc */}
-                        <div style={{ position: 'absolute', top: '-15%', right: '-10%', width: '100px', height: '100px', borderRadius: '50%', background: stat.color, filter: 'blur(50px)', opacity: '0.15' }}></div>
-                        
-                        <div className="u-flex u-justify-between u-align-start u-m-b-16">
-                            <div className="u-p-12 u-rounded-12" style={{ background: `${stat.color}15`, color: stat.color }}>
-                                {stat.icon}
+                    <Card key={index} padding="16px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                        <div className="u-flex u-justify-between u-align-start u-m-b-10">
+                            <h3 className="u-size-14 u-color-slate-500 u-weight-500 u-m-0">{stat.title}</h3>
+                            <div className="u-flex u-align-center u-justify-center u-rounded-12" style={{ width: '32px', height: '32px', background: `${stat.color}10`, color: stat.color }}>
+                                {React.cloneElement(stat.icon, { width: 16, height: 16 })}
                             </div>
-                            <div className="u-flex u-align-center u-gap-4 u-p-x-8 u-p-y-4 u-rounded-20 u-size-12 u-weight-bold" style={{ background: '#f0fff4', color: '#38a169' }}>
-                                <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
-                                    <path d="M12 19V5M5 12L12 5L19 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </div>
+                        
+                        <div className="u-m-b-8">
+                            <div className="u-size-24 u-weight-700 u-color-slate-800">{stat.value}</div>
+                        </div>
+
+                        <div className="u-flex u-align-center u-gap-6">
+                            <div className="u-flex u-align-center u-gap-4 u-color-emerald u-weight-600 u-size-12">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                    <polyline points="17 6 23 6 23 12"></polyline>
                                 </svg>
                                 <span>{stat.change}</span>
                             </div>
-                        </div>
-                        <div>
-                            <h3 className="u-size-14 u-color-slate-500 u-weight-600 u-m-b-4">{stat.title}</h3>
-                            <div className="u-size-28 u-weight-800 u-color-slate-800">{stat.value}</div>
+                            <span className="u-size-11 u-color-slate-400">so với tháng trước</span>
                         </div>
                     </Card>
                 ))}

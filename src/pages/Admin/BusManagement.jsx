@@ -173,19 +173,47 @@ const BusManagement = () => {
 
     return (
         <div className="admin-page-container">
-            <header className="admin-header">
-                <div className="admin-header-title">
-                    <h1>Quản lý Xe</h1>
-                    <p className="admin-header-subtitle">Quản lý đội xe, loại giường và trạng thái hoạt động</p>
-                </div>
-                <button 
-                    className="admin-btn-add" 
-                    onClick={() => handleOpenFormModal()}
-                >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    Thêm Xe mới
-                </button>
-            </header>
+            <div className="u-flex u-gap-16 u-m-b-20">
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Tổng số Xe</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#3182ce15', color: '#3182ce' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="22" height="13" rx="2" ry="2"></rect><path d="M7 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path><path d="M17 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">{buses.length}</div>
+                </Card>
+
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Đang hoạt động</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#38a16915', color: '#38a169' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">{buses.filter(b => b.isActive).length}</div>
+                </Card>
+
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Đang bảo trì</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#e53e3e15', color: '#e53e3e' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">{buses.filter(b => !b.isActive).length}</div>
+                </Card>
+
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Sức chứa TB</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#805ad515', color: '#805ad5' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">40 ghế</div>
+                </Card>
+            </div>
 
             <Card padding="0" className="admin-table-card">
                 <div className="table-card-content">
@@ -211,6 +239,14 @@ const BusManagement = () => {
                             ...busTypes
                         ]}
                     />
+
+                    <button 
+                        className="admin-btn-add u-m-l-auto" 
+                        onClick={() => handleOpenFormModal()}
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Thêm Xe mới
+                    </button>
                 </div>
 
                 <div className="table-container" style={{ overflowX: 'auto' }}>

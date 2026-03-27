@@ -182,35 +182,78 @@ const ScheduleManagement = () => {
 
     return (
         <div className="admin-page-container">
-            <header className="admin-header">
-                <div className="admin-header-title">
-                    <h1>Điều hành Chuyến</h1>
-                    <p className="admin-header-subtitle">Quản lý Lịch trình cố định và Tự động sinh chuyến theo tháng</p>
-                </div>
-                
-                <div className="u-flex u-gap-12">
-                    <button 
-                        className="admin-btn-add"
-                        style={{ background: '#1a3a8f' }}
-                        onClick={() => handleOpenModal()}
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        Thêm Lịch trình
-                    </button>
-                    <button 
-                        className="admin-btn-success"
-                        onClick={() => setIsGeneratorOpen(true)}
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12h-4v4h4v-4z"/></svg>
-                        Sinh Chuyến Tự Động
-                    </button>
-                </div>
-            </header>
+            <div className="u-flex u-gap-16 u-m-b-20">
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Lịch Cố Định</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#3182ce15', color: '#3182ce' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">{schedules.length}</div>
+                </Card>
+
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Tuyến Đang Chạy</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#38a16915', color: '#38a169' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">{routes.length}</div>
+                </Card>
+
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Xe Sẵn Sàng</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#e53e3e15', color: '#e53e3e' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="22" height="13" rx="2" ry="2"></rect><path d="M7 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path><path d="M17 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">{buses.length}</div>
+                </Card>
+
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Hiệu Suất</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#805ad515', color: '#805ad5' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v10l4.5 4.5"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">95%</div>
+                </Card>
+            </div>
 
             <Card padding="0" className="admin-table-card">
                 <div className="table-card-content">
-                <div className="admin-toolbar" style={{ margin: 0, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}>
-                    <h2 className="u-size-15 u-m-0 u-color-slate-800">Danh sách Lịch Cố Định</h2>
+                <div className="admin-toolbar">
+                    <div className="search-box" style={{ position: 'relative' }}>
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm lịch trình..."
+                            className="admin-search-input"
+                        />
+                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#a0aec0' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </span>
+                    </div>
+                    <div className="u-flex u-gap-12 u-m-l-auto">
+                        <button 
+                            className="admin-btn-add"
+                            style={{ background: '#1a3a8f' }}
+                            onClick={() => handleOpenModal()}
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Thêm Lịch trình
+                        </button>
+                        <button 
+                            className="admin-btn-success"
+                            onClick={() => setIsGeneratorOpen(true)}
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12h-4v4h4v-4z"/></svg>
+                            Sinh Chuyến Tự Động
+                        </button>
+                    </div>
                 </div>
 
                 <div className="table-container" style={{ overflowX: 'auto' }}>

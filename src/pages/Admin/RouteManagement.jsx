@@ -263,24 +263,52 @@ const RouteManagement = () => {
 
     return (
         <div className="admin-page-container">
-            <header className="admin-header">
-                <div className="admin-header-title">
-                    <h1>Quản lý Tuyến đường</h1>
-                    <p className="admin-header-subtitle">Quản lý các tuyến xe, văn phòng và giá vé</p>
-                </div>
-                <button 
-                    className="admin-btn-add" 
-                    onClick={() => handleOpenFormModal()}
-                >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    Thêm Tuyến mới
-                </button>
-            </header>
+            <div className="u-flex u-gap-16 u-m-b-20">
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Tổng Tuyến Đường</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#3182ce15', color: '#3182ce' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">{routes.length}</div>
+                </Card>
+
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Đang hoạt động</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#38a16915', color: '#38a169' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">{routes.filter(r => r.isActive).length}</div>
+                </Card>
+
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Văn phòng / Điểm</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#e53e3e15', color: '#e53e3e' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">{offices.length}</div>
+                </Card>
+
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Quãng đường TB</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#805ad515', color: '#805ad5' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">285 km</div>
+                </Card>
+            </div>
 
             <Card padding="0" className="admin-table-card">
                 <div className="table-card-content">
-                <div className="admin-toolbar" style={{ margin: 0, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}>
-                    <div className="search-box u-flex u-align-center" style={{ flex: '1.5', minWidth: '200px', position: 'relative' }}>
+                <div className="admin-toolbar">
+                    <div className="search-box" style={{ position: 'relative' }}>
                         <input
                             type="text"
                             placeholder="Tìm kiếm tuyến đường..."
@@ -320,6 +348,14 @@ const RouteManagement = () => {
                             { value: 'inactive', label: 'Ngừng hoạt động' }
                         ]}
                     />
+
+                    <button 
+                        className="admin-btn-add u-m-l-auto" 
+                        onClick={() => handleOpenFormModal()}
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Thêm Tuyến mới
+                    </button>
                 </div>
 
                 <div className="table-container" style={{ overflowX: 'auto' }}>

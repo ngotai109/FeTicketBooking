@@ -151,20 +151,24 @@ const TripMonitoring = () => {
 
     return (
         <div className="admin-page-container">
-            <header className="admin-header">
-                <div className="admin-header-title">
-                    <h1>Theo Dõi Chuyến Hàng Ngày</h1>
-                    <p className="admin-header-subtitle">Quản lý vé, tình trạng lấp đầy và điều phối xe xuất bến</p>
-                </div>
-                <div className="trip-monitoring-header-controls">
+            {/* Header handled by AdminLayout */}
+            
+            <div className="admin-toolbar u-m-b-20" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '16px', borderRadius: '12px' }}>
+                <div className="u-flex u-align-center u-gap-12">
+                    <span className="u-size-13 u-weight-600 u-color-slate-600">Ngày đi:</span>
                     <input
                         type="date"
-                        className="admin-form-input trip-monitoring-date-input"
+                        className="admin-form-input"
+                        style={{ width: '160px', padding: '6px 10px' }}
                         value={filterDate}
                         onChange={(e) => setFilterDate(e.target.value)}
                     />
+                </div>
+                <div className="u-flex u-align-center u-gap-12">
+                    <span className="u-size-13 u-weight-600 u-color-slate-600">Tuyến đường:</span>
                     <select
-                        className="admin-form-select trip-monitoring-route-select"
+                        className="admin-form-select"
+                        style={{ width: '220px', padding: '6px 10px' }}
                         value={selectedRoute}
                         onChange={(e) => setSelectedRoute(e.target.value)}
                     >
@@ -174,7 +178,12 @@ const TripMonitoring = () => {
                         ))}
                     </select>
                 </div>
-            </header>
+                <div className="u-m-l-auto">
+                    <Badge type="info" style={{ padding: '6px 12px' }}>
+                        Tổng số: {trips.length} chuyến
+                    </Badge>
+                </div>
+            </div>
 
             {loading ? (
                 <div className="trip-monitoring-loading-container admin-loading">

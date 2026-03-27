@@ -84,17 +84,52 @@ const WardManagement = () => {
 
     return (
         <div className="admin-page-container">
-            <header className="admin-header">
-                <div className="admin-header-title">
-                    <h1>Quản lý Phường xã</h1>
-                    <p className="admin-header-subtitle">Bật/tắt trạng thái hoạt động của các phường xã, điểm đón trả</p>
-                </div>
-            </header>
+            <div className="u-flex u-gap-16 u-m-b-20">
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Tổng Phường xã</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#3182ce15', color: '#3182ce' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">{wards.length}</div>
+                </Card>
+
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Đang hoạt động</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#38a16915', color: '#38a169' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">{wards.filter(w => w.isActive).length}</div>
+                </Card>
+
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Dừng hoạt động</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#e53e3e15', color: '#e53e3e' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">{wards.filter(w => !w.isActive).length}</div>
+                </Card>
+
+                <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                    <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Thuộc Tỉnh/Thành</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#805ad515', color: '#805ad5' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        </div>
+                    </div>
+                    <div className="u-size-22 u-weight-700 u-color-slate-800">{provinces.length}</div>
+                </Card>
+            </div>
 
             <Card padding="0" className="admin-table-card">
                 <div className="table-card-content">
-                    <div className="admin-toolbar" style={{ margin: 0, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}>
-                        <div className="search-box u-flex u-align-center" style={{ flex: '1', minWidth: '200px', position: 'relative' }}>
+                    <div className="admin-toolbar">
+                        <div className="search-box">
                             <input
                                 type="text"
                                 placeholder="Tìm kiếm phường xã..."
