@@ -27,6 +27,22 @@ export const BUS_LAYOUTS = {
         ]
     },
 
+    // Xe 16 chỗ (Transit/Hiace)
+    '16': {
+        name: 'Xe 16 chỗ (Ford Transit/Hiace)',
+        totalSeats: 16,
+        columns: 3,
+        floor1: [
+            { seatNumber: '01', row: 0, col: 0 }, { seatNumber: '02', row: 0, col: 1 }, { seatNumber: '03', row: 0, col: 2 },
+            { seatNumber: '04', row: 1, col: 0 }, { seatNumber: '05', row: 1, col: 1 }, { seatNumber: '06', row: 1, col: 2 },
+            { seatNumber: '07', row: 2, col: 0 }, { seatNumber: '08', row: 2, col: 1 }, { seatNumber: '09', row: 2, col: 2 },
+            { seatNumber: '10', row: 3, col: 0 }, { seatNumber: '11', row: 3, col: 1 }, { seatNumber: '12', row: 3, col: 2 },
+            { seatNumber: '13', row: 4, col: 0 }, { seatNumber: '14', row: 4, col: 1 }, { seatNumber: '15', row: 4, col: 2 },
+            { seatNumber: '16', row: 5, col: 1 },
+        ],
+        floor2: []
+    },
+
     // Xe Limousine 34 giường
     '34': {
         name: 'Xe Limousine (34 giường)',

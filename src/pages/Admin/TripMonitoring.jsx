@@ -94,26 +94,20 @@ const TripMonitoring = () => {
         setIsSeatMapOpen(true);
 
         try {
-            const mockTripSeats = [];
-            const layout = getBusLayout(trip.busType || '34');
-            const allSeats = [...layout.floor1, ...layout.floor2];
-
-            allSeats.forEach((s, index) => {
-                let sStatus = 0;
-                if (index % 5 === 0) sStatus = 2;
-                else if (index % 7 === 0) sStatus = 1;
-                else if (index === 15) sStatus = 3;
-
-                mockTripSeats.push({
-                    seatId: 1000 + index,
-                    seatNumber: s.seatNumber,
-                    status: sStatus,
-                    floor: s.floor || (index < layout.floor1.length ? 1 : 2),
-                    row: s.row,
-                    column: s.col
-                });
-            });
-            setTripSeats(mockTripSeats);
+            const res = await tripService.getTripSeats(trip.tripId || trip.TripId);
+            const data = res.data?.data || res.data || [];
+            
+            // Map the API data to the format the seat map expects
+            const mappedSeats = data.map(s => ({
+                tripSeatId: s.tripSeatId,
+                seatNumber: s.seatNumber,
+                status: s.status,
+                floor: s.floor,
+                row: s.row,
+                column: s.column
+            }));
+            
+            setTripSeats(mappedSeats);
         } catch (error) {
             toast.error('Không thể tải chi tiết sơ đồ ghế!');
         }
@@ -367,14 +361,30 @@ const TripMonitoring = () => {
                 width="420px"
                 zIndex={1300}
             >
-                <form onSubmit={(e) => {
+                <form onSubmit={async (e) => {
                     e.preventDefault();
-                    const updatedSeats = tripSeats.map(s =>
-                        s.seatNumber === selectedSeat.seatNumber ? { ...s, status: parseInt(bookingForm.status) } : s
-                    );
-                    setTripSeats(updatedSeats);
-                    toast.success(`Đã thành công ghế ${selectedSeat.seatNumber}!`);
-                    setIsQuickBookingOpen(false);
+                    try {
+                        await tripService.quickBook({
+                            tripSeatId: selectedSeat.tripSeatId,
+                            customerName: bookingForm.customerName,
+                            phoneNumber: bookingForm.phoneNumber,
+                            status: parseInt(bookingForm.status)
+                        });
+                        
+                        // Cập nhật local state để hiển thị ngay
+                        const updatedSeats = tripSeats.map(s =>
+                            s.tripSeatId === selectedSeat.tripSeatId ? { ...s, status: parseInt(bookingForm.status) } : s
+                        );
+                        setTripSeats(updatedSeats);
+                        
+                        toast.success(`Đã cập nhật trạng thái ghế ${selectedSeat.seatNumber}!`);
+                        setIsQuickBookingOpen(false);
+                        
+                        // Optional: Refresh trips list to update fill count
+                        fetchTrips();
+                    } catch (error) {
+                        toast.error('Có lỗi xảy ra khi cập nhật ghế!');
+                    }
                 }}>
                     <div className="admin-form-group">
                         <label className="admin-form-label">Tên hành khách *</label>

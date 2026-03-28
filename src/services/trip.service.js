@@ -2,8 +2,7 @@ import apiService from './api';
 
 const tripService = {
     getAllTrips: async (queryParams = '') => {
-        // queryParams VD: ?date=2026-03-20&routeId=1
-        return await apiService.get(`/Trip${queryParams}`);
+        return await apiService.get(`/Trip/monitoring${queryParams}`);
     },
 
     getTripById: async (id) => {
@@ -27,6 +26,10 @@ const tripService = {
     // Quản lý vé cho 1 chuyến cụ thể
     updateSeatStatus: async (tripId, seatId, statusData) => {
         return await apiService.put(`/Trip/${tripId}/Seats/${seatId}/Status`, statusData);
+    },
+
+    quickBook: async (data) => {
+        return await apiService.post('/Trip/quick-book', data);
     }
 };
 

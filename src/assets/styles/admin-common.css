@@ -283,6 +283,29 @@
   color: #2d3748;
 }
 
+.admin-btn-excel {
+  color: white;
+  background: #15803d;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 24px;
+  border-radius: var(--radius-md);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 6px -1px rgba(21, 128, 61, 0.2);
+}
+
+.admin-btn-excel:hover {
+  background-color: #166534;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(21, 128, 61, 0.3);
+}
+
 .admin-btn-icon {
   background: transparent;
   border: none;

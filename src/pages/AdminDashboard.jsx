@@ -26,8 +26,8 @@ const AdminDashboard = () => {
     const stats = [
         {
             title: 'Tổng vé đã bán',
-            value: '1,234',
-            change: '+12.5%',
+            value: '0',
+            change: '0%',
             trend: 'up',
             icon: (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -41,8 +41,8 @@ const AdminDashboard = () => {
         },
         {
             title: 'Doanh thu tháng này',
-            value: '₫45.2M',
-            change: '+8.2%',
+            value: '₫0',
+            change: '0%',
             trend: 'up',
             icon: (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -53,8 +53,8 @@ const AdminDashboard = () => {
         },
         {
             title: 'Khách hàng mới',
-            value: '856',
-            change: '+23.1%',
+            value: '0',
+            change: '0%',
             trend: 'up',
             icon: (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -66,8 +66,8 @@ const AdminDashboard = () => {
         },
         {
             title: 'Chuyến đi xuất bến',
-            value: '42',
-            change: '+5.4%',
+            value: '0',
+            change: '0%',
             trend: 'up',
             icon: (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -79,30 +79,22 @@ const AdminDashboard = () => {
         }
     ];
 
-    const recentActivities = [
-        { action: 'Vé điện tử thành công (#TK-202)', user: 'Nguyễn Văn A', time: '5 phút trước', type: 'booking' },
-        { action: 'Giao dịch qua VNPAY', user: 'Trần Thị B', time: '12 phút trước', type: 'payment' },
-        { action: 'Chuyển xe dự phòng 37B-999.00', user: 'Admin', time: '1 giờ trước', type: 'update' },
-        { action: 'Hủy vé sát giờ (#TK-105)', user: 'Phạm Thị D', time: '2 giờ trước', type: 'cancel' }
-    ];
+    const recentActivities = [];
 
     const revenueData = [
-        { date: '14/03', revenue: 15.2 },
-        { date: '15/03', revenue: 18.5 },
-        { date: '16/03', revenue: 12.0 },
-        { date: '17/03', revenue: 22.4 },
-        { date: '18/03', revenue: 28.1 },
-        { date: '19/03', revenue: 20.9 },
-        { date: '20/03', revenue: 35.6 },
+        { date: '14/03', revenue: 0 },
+        { date: '15/03', revenue: 0 },
+        { date: '16/03', revenue: 0 },
+        { date: '17/03', revenue: 0 },
+        { date: '18/03', revenue: 0 },
+        { date: '19/03', revenue: 0 },
+        { date: '20/03', revenue: 0 },
     ];
 
     const routePieData = [
-        { name: 'HN - Nghệ An', value: 45 },
-        { name: 'Nghệ An - HN', value: 35 },
-        { name: 'HN - Sầm Sơn', value: 10 },
-        { name: 'Khác', value: 10 },
+        { name: 'Chưa có dữ liệu', value: 100 },
     ];
-    const COLORS = ['#3182ce', '#38a169', '#dd6b20', '#a0aec0'];
+    const COLORS = ['#e2e8f0'];
 
     return (
         <div className="admin-page-container" style={{ height: '100%', overflowY: 'auto' }}>
@@ -208,19 +200,25 @@ const AdminDashboard = () => {
                             <span className="u-size-13 u-color-blue u-weight-600 u-cursor-pointer">Xem tất cả</span>
                         </div>
                         <div className="u-flex u-flex-column u-gap-15">
-                            {recentActivities.map((activity, index) => (
-                                <div key={index} className={`u-flex u-align-start u-gap-12 u-p-b-15 ${index < recentActivities.length - 1 ? 'u-border-b-dashed' : ''}`}>
-                                    <div style={{ 
-                                        width: '10px', height: '10px', borderRadius: '50%', marginTop: '5px',
-                                        background: activity.type === 'booking' ? '#3182ce' : activity.type === 'payment' ? '#38a169' : activity.type === 'cancel' ? '#e53e3e' : '#dd6b20'
-                                    }}></div>
-                                    <div className="u-flex-1">
-                                        <p className="u-size-13 u-weight-700 u-color-slate-800 u-m-b-2">{activity.action}</p>
-                                        <p className="u-size-12 u-color-slate-500">Bởi: <span className="u-weight-600">{activity.user}</span></p>
+                            {recentActivities.length > 0 ? (
+                                recentActivities.map((activity, index) => (
+                                    <div key={index} className={`u-flex u-align-start u-gap-12 u-p-b-15 ${index < recentActivities.length - 1 ? 'u-border-b-dashed' : ''}`}>
+                                        <div style={{ 
+                                            width: '10px', height: '10px', borderRadius: '50%', marginTop: '5px',
+                                            background: activity.type === 'booking' ? '#3182ce' : activity.type === 'payment' ? '#38a169' : activity.type === 'cancel' ? '#e53e3e' : '#dd6b20'
+                                        }}></div>
+                                        <div className="u-flex-1">
+                                            <p className="u-size-13 u-weight-700 u-color-slate-800 u-m-b-2">{activity.action}</p>
+                                            <p className="u-size-12 u-color-slate-500">Bởi: <span className="u-weight-600">{activity.user}</span></p>
+                                        </div>
+                                        <span className="u-size-11 u-color-slate-400 u-text-nowrap">{activity.time}</span>
                                     </div>
-                                    <span className="u-size-11 u-color-slate-400 u-text-nowrap">{activity.time}</span>
+                                ))
+                            ) : (
+                                <div className="u-text-center u-p-y-20 u-color-slate-400 u-size-14">
+                                    Chưa có hoạt động nào
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </Card>
 
