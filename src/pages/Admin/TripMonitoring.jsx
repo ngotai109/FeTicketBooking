@@ -54,7 +54,7 @@ const TripMonitoring = () => {
             setRoutes(Array.isArray(data) ? data : []);
         } catch (error) {
             toast.error('Lỗi khi tải danh sách tuyến đường');
-            setRoutes([{ routeId: 1, routeName: 'Hà Nội - Nghệ An' }, { routeId: 2, routeName: 'Nghệ An - Đà Nẵng' }]);
+            setRoutes([]);
         }
     };
 
@@ -68,26 +68,21 @@ const TripMonitoring = () => {
 
             const res = await tripService.getAllTrips(query);
             const data = res.data?.data || res.data || [];
-            if (Array.isArray(data) && data.length > 0) {
+            if (Array.isArray(data)) {
                 setTrips(data);
             } else {
-                generateMockTrips();
+                setTrips([]);
             }
         } catch (error) {
-            generateMockTrips();
+            console.error('Lỗi khi tải lịch trình:', error);
+            toast.error('Không thể tải lịch trình chuyến đi!');
+            setTrips([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const generateMockTrips = () => {
-        setTrips([
-            { tripId: 101, routeId: 1, routeName: 'Hà Nội - Nghệ An (Sáng)', departureTime: '08:00', arrivalTime: '14:00', busId: 5, busPlate: '37B-123.45', busType: '34', availableSeats: 12, totalSeats: 34, status: 0 },
-            { tripId: 102, routeId: 1, routeName: 'Hà Nội - Nghệ An (Chiều)', departureTime: '13:00', arrivalTime: '19:00', busId: 6, busPlate: '37B-678.90', busType: '22', availableSeats: 0, totalSeats: 22, status: 1 },
-            { tripId: 103, routeId: 2, routeName: 'Hà Nội - Nghệ An', departureTime: '16:00', arrivalTime: '19:30', busId: 7, busPlate: '29H-555.55', busType: '40', availableSeats: 25, totalSeats: 40, status: 0 },
-            { tripId: 104, routeId: 1, routeName: 'Nghệ An - Hà Nội', departureTime: '21:00', arrivalTime: '03:00', busId: 8, busPlate: '37B-999.99', busType: '34', availableSeats: 10, totalSeats: 34, status: 0 }
-        ]);
-    };
+
 
     const handleOpenTripDetail = async (trip) => {
         setSelectedTrip(trip);

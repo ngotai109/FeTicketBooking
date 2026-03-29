@@ -72,7 +72,6 @@ const News = () => {
 
     return (
         <div className="news-page">
-            {/* Page Header */}
             <div className="news-page-header">
                 <div className="news-page-header-content">
                     <span className="news-header-tag">BẢN TIN MỚI NHẤT</span>

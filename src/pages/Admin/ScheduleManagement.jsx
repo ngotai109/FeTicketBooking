@@ -71,11 +71,8 @@ const ScheduleManagement = () => {
                 throw new Error('No data');
             }
         } catch (error) {
-            // Mock data for display while backend is under construction
-            setSchedules([
-                { scheduleId: 1, routeId: 1, defaultBusId: 1, departureTime: '08:00', arrivalTime: '14:00', defaultTicketPrice: 200000, isActive: true },
-                { scheduleId: 2, routeId: 1, defaultBusId: 2, departureTime: '16:00', arrivalTime: '22:00', defaultTicketPrice: 200000, isActive: true }
-            ]);
+            console.error('Lỗi tải danh sách lịch trình:', error);
+            setSchedules([]);
         }
     };
 
@@ -125,6 +122,53 @@ const ScheduleManagement = () => {
         setIsModalOpen(true);
     };
 
+    const handleAutoCalcPrice = (newRouteId, newBusId) => {
+        let finalPrice = 0;
+        let routeFound = false;
+        
+        if (newRouteId) {
+            const route = routes.find(r => (r.routeId || r.RouteId).toString() === newRouteId);
+            if (route) {
+                finalPrice += (route.basePrice || route.BasePrice || 0);
+                routeFound = true;
+            }
+        }
+        
+        if (newBusId && routeFound) {
+            const bus = buses.find(b => (b.busId || b.BusId).toString() === newBusId);
+            if (bus) {
+                const limit = bus.totalSeats || bus.TotalSeats || bus.capacity || 0;
+                
+                // User specifies strictly 4 seeded types: 16, 22, 34, 40
+                if (limit === 16 || limit === 22) { 
+                    // VIP (16 Solati/Limousine, 22 Phòng VIP)
+                    finalPrice += 50000;
+                } else if (limit === 34) { 
+                    // Giường nằm cao cấp
+                    finalPrice += 30000;
+                } else if (limit === 40) {
+                    // Giường nằm thường (Giữ nguyên)
+                    finalPrice += 0;
+                }
+            }
+        }
+        
+        return routeFound ? finalPrice : '';
+    };
+
+    const handleFormChange = (field, value) => {
+        const newData = { ...formData, [field]: value };
+        
+        if (field === 'routeId' || field === 'defaultBusId') {
+            const calculatedPrice = handleAutoCalcPrice(newData.routeId, newData.defaultBusId);
+            if (calculatedPrice !== '') {
+                newData.defaultTicketPrice = calculatedPrice;
+            }
+        }
+        
+        setFormData(newData);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -137,10 +181,10 @@ const ScheduleManagement = () => {
 
             if (isEditMode) {
                 await scheduleService.updateSchedule(selectedScheduleId, dataToSubmit);
-                toast.success('Cập nhật lịch trình thành công!');
+                toast.success('Cập nhật chuyến thành công!');
             } else {
                 await scheduleService.createSchedule(dataToSubmit);
-                toast.success('Thêm lịch trình thành công!');
+                toast.success('Thêm chuyến mới thành công!');
             }
             setIsModalOpen(false);
             fetchSchedules();
@@ -244,7 +288,7 @@ const ScheduleManagement = () => {
                             onClick={() => handleOpenModal()}
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            Thêm Lịch trình
+                            Thêm Chuyến Mới
                         </button>
                         <button 
                             className="admin-btn-success"
@@ -323,7 +367,7 @@ const ScheduleManagement = () => {
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                title={isEditMode ? 'Cập Nhật Lịch Trình' : 'Thêm Lịch Trình Mới'}
+                title={isEditMode ? 'Cập Nhật Lịch Trình' : 'Thêm Chuyến Mới'}
                 width="500px"
             >
                 <form onSubmit={handleSubmit}>
@@ -334,7 +378,7 @@ const ScheduleManagement = () => {
                                 className="admin-form-select"
                                 required 
                                 value={formData.routeId} 
-                                onChange={(e) => setFormData({...formData, routeId: e.target.value})}
+                                onChange={(e) => handleFormChange('routeId', e.target.value)}
                             >
                                 <option value="">-- Chọn tuyến đường --</option>
                                 {routes.map(r => (
@@ -351,7 +395,7 @@ const ScheduleManagement = () => {
                                 className="admin-form-select"
                                 required 
                                 value={formData.defaultBusId} 
-                                onChange={(e) => setFormData({...formData, defaultBusId: e.target.value})}
+                                onChange={(e) => handleFormChange('defaultBusId', e.target.value)}
                             >
                                 <option value="">-- Chọn xe --</option>
                                 {buses.map(b => (

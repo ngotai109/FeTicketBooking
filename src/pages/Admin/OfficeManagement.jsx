@@ -39,7 +39,7 @@ const OfficeManagement = () => {
     useEffect(() => {
         fetchOffices();
         fetchProvinces();
-        fetchAllWards(); // Fetch all wards once
+        fetchAllWards();
     }, []);
 
     useEffect(() => {

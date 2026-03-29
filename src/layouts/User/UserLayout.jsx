@@ -52,7 +52,6 @@ const UserLayout = () => {
         setChatLoading(true);
 
         try {
-            // Chuẩn bị lịch sử chat để gửi lên BE
             const history = updatedMessages.map(m => ({
                 role: m.role === 'bot' ? 'assistant' : 'user',
                 content: m.text
@@ -85,7 +84,6 @@ const UserLayout = () => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     };
 
-    // Click outside to close chatbot
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (chatOpen && chatWidgetRef.current && !chatWidgetRef.current.contains(e.target)) {
@@ -116,7 +114,7 @@ const UserLayout = () => {
 
     const handleLogoClick = () => {
         navigate('/');
-        closeMenu(); // Close menu on logo click
+        closeMenu();
     };
 
     return (
@@ -245,7 +243,7 @@ const UserLayout = () => {
                     title="Facebook"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
-                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                     </svg>
                 </a>
                 <a
@@ -257,7 +255,7 @@ const UserLayout = () => {
                     style={{ background: 'linear-gradient(135deg, #f800af, #a200ff, #0078ff)' }}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="white">
-                        <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.908 1.438 5.504 3.686 7.21V22l3.37-1.85A11.3 11.3 0 0 0 12 20.486c5.523 0 10-4.144 10-9.243C22 6.145 17.523 2 12 2zm1.05 12.45-2.55-2.72-4.98 2.72 5.48-5.82 2.61 2.72 4.92-2.72-5.48 5.82z"/>
+                        <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.908 1.438 5.504 3.686 7.21V22l3.37-1.85A11.3 11.3 0 0 0 12 20.486c5.523 0 10-4.144 10-9.243C22 6.145 17.523 2 12 2zm1.05 12.45-2.55-2.72-4.98 2.72 5.48-5.82 2.61 2.72 4.92-2.72-5.48 5.82z" />
                     </svg>
                 </a>
             </div>
@@ -281,8 +279,8 @@ const UserLayout = () => {
                                 aria-label="Đóng"
                             >
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                                    <line x1="18" y1="6" x2="6" y2="18"/>
-                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
                                 </svg>
                             </button>
                         </div>
@@ -335,8 +333,8 @@ const UserLayout = () => {
                                 aria-label="Gửi"
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                                    <line x1="22" y1="2" x2="11" y2="13"/>
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                                    <line x1="22" y1="2" x2="11" y2="13" />
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
                                 </svg>
                             </button>
                         </div>

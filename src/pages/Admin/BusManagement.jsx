@@ -57,7 +57,7 @@ const BusManagement = () => {
 
     const fetchBusTypes = async () => {
         try {
-            const response = await busTypeService.getActiveBusTypes();
+            const response = await busTypeService.getAllBusTypes();
             setBusTypes(handleApiResponse(response));
         } catch (error) {
             console.error('Lỗi khi tải loại xe:', error);
@@ -80,7 +80,7 @@ const BusManagement = () => {
             setFormData({
                 plateNumber: '',
                 busName: '',
-                busTypeId: busTypes.length > 0 ? busTypes[0].busTypeId.toString() : '',
+                busTypeId: busTypes.find(t => t.isActive)?.busTypeId.toString() || '',
                 status: 0
             });
         }
@@ -130,6 +130,7 @@ const BusManagement = () => {
             };
 
             if (isEditing) {
+                payload.busId = currentBus.busId;
                 await busService.updateBus(currentBus.busId, payload);
                 toast.success('Cập nhật phương tiện thành công');
             } else {
@@ -312,18 +313,7 @@ const BusManagement = () => {
                                                     >
                                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleToggleActiveClick(bus)}
-                                                        className="admin-btn-icon"
-                                                        title={bus.status === 0 ? 'Khóa xe' : 'Mở xe'}
-                                                        style={{ color: bus.status === 0 ? '#e53e3e' : '#38a169' }}
-                                                    >
-                                                        {bus.status === 0 ? (
-                                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                                        ) : (
-                                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
-                                                        )}
-                                                    </button>
+
                                                 </div>
                                             </td>
                                         </tr>
@@ -474,12 +464,23 @@ const BusManagement = () => {
                                 value={formData.busTypeId}
                                 onChange={(e) => setFormData({ ...formData, busTypeId: e.target.value })}
                                 required
+                                disabled={isEditing}
                             >
                                 <option value="">-- Chọn loại xe --</option>
-                                {busTypes.map(t => (
-                                    <option key={t.busTypeId} value={t.busTypeId}>{t.typeName} ({t.defaultSeats} ghế)</option>
-                                ))}
+                                {busTypes.map(t => {
+                                    if (!t.isActive && formData.busTypeId !== t.busTypeId.toString()) return null;
+                                    return (
+                                        <option key={t.busTypeId} value={t.busTypeId.toString()}>
+                                            {t.typeName} ({t.defaultSeats} ghế) {!t.isActive ? '- Ngừng hoạt động' : ''}
+                                        </option>
+                                    );
+                                })}
                             </select>
+                            {isEditing && (
+                                <span className="u-size-12 u-color-slate-500 u-m-t-4" style={{ display: 'block' }}>
+                                    Không thể thay đổi Loại xe để bảo toàn cấu trúc ghế đã tạo.
+                                </span>
+                            )}
                         </div>
 
                         <div className="admin-form-group">
