@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import tripService from '../../services/trip.service';
 import routeService from '../../services/route.service';
+import scheduleService from '../../services/schedule.service';
+import busService from '../../services/bus.service';
 import { getBusLayout } from '../../constants/busLayouts';
-import { Badge, Card, Modal, Pagination } from '../../components/Common';
+import { Badge, Card, Modal, Pagination, ConfirmationModal } from '../../components/Common';
 import '../../assets/styles/AdminTripMonitoring.css';
 
 const TripMonitoring = () => {
@@ -14,6 +16,7 @@ const TripMonitoring = () => {
     // ---- State Data ----
     const [trips, setTrips] = useState([]);
     const [routes, setRoutes] = useState([]);
+    const [buses, setBuses] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // ---- State Detail & Seats ----
@@ -31,16 +34,22 @@ const TripMonitoring = () => {
         status: 1
     });
 
-    // ---- Auto Generate Trips ----
-    const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
-    const [generateForm, setGenerateForm] = useState({
-        startDate: new Date().toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0]
+    // ---- State Extra Trip (New Form) ----
+    const [isAddTripOpen, setIsAddTripOpen] = useState(false);
+    const [extraTripForm, setExtraTripForm] = useState({
+        routeId: '',
+        busId: '',
+        departureTime: '',
+        arrivalTime: '',
+        ticketPrice: ''
     });
-    const [generating, setGenerating] = useState(false);
+
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [tripToDelete, setTripToDelete] = useState(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 8; // Grid usually looks better with 8 or 12
+    const pageSize = 9;
 
     useEffect(() => {
         fetchInitialData();
@@ -58,12 +67,14 @@ const TripMonitoring = () => {
 
     const fetchInitialData = async () => {
         try {
-            const res = await routeService.getRoutes();
-            const data = res.data?.data || res.data || [];
-            setRoutes(Array.isArray(data) ? data : []);
+            const [routesRes, busesRes] = await Promise.all([
+                routeService.getRoutes(),
+                busService.getAllBuses()
+            ]);
+            setRoutes(routesRes.data?.data || routesRes.data || []);
+            setBuses(busesRes.data?.data || busesRes.data || []);
         } catch (error) {
-            toast.error('Lỗi khi tải danh sách tuyến đường');
-            setRoutes([]);
+            toast.error('Lỗi khi tải dữ liệu khởi tạo');
         }
     };
 
@@ -83,50 +94,81 @@ const TripMonitoring = () => {
                 setTrips([]);
             }
         } catch (error) {
-            console.error('Lỗi khi tải lịch trình:', error);
-            toast.error('Không thể tải lịch trình chuyến đi!');
             setTrips([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleGenerateTrips = async (e) => {
+    const handleAddExtraTrip = async (e) => {
         e.preventDefault();
-        setGenerating(true);
+        const { routeId, busId, departureTime, arrivalTime, ticketPrice } = extraTripForm;
+        
+        if (!routeId || !busId || !departureTime || !arrivalTime || !ticketPrice) {
+            return toast.warning('Vui lòng điền đầy đủ thông tin');
+        }
+
+        setIsProcessing(true);
         try {
-            await tripService.generateTrips(generateForm);
-            toast.success('Đã sinh chuyến xe tự động thành công!');
-            setIsGenerateModalOpen(false);
+            // Bước 1: Tạo Schedule mới (Lịch khung)
+            const scheduleRes = await scheduleService.createSchedule({
+                routeId: parseInt(routeId),
+                busId: parseInt(busId),
+                departureTime,
+                arrivalTime,
+                ticketPrice: parseFloat(ticketPrice)
+            });
+
+            const newScheduleId = scheduleRes.data?.data?.scheduleId || scheduleRes.data?.scheduleId;
+
+            if (!newScheduleId) throw new Error('Không thể tạo lịch trình khung');
+
+            // Bước 2: Tạo Trip cho ngày được chọn từ Schedule vừa tạo
+            await tripService.createTrip({
+                scheduleId: newScheduleId,
+                departureDate: filterDate
+            });
+
+            toast.success('Đã thêm chuyến tăng cường thành công!');
+            setIsAddTripOpen(false);
+            setExtraTripForm({ routeId: '', busId: '', departureTime: '', arrivalTime: '', ticketPrice: '' });
             fetchTrips();
-        } catch (error) {
-            toast.error(error.response?.data?.message || 'Sinh chuyến thất bại!');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Có lỗi khi thêm chuyến');
         } finally {
-            setGenerating(false);
+            setIsProcessing(false);
         }
     };
 
-
+    const handleDeleteTrip = async () => {
+        if (!tripToDelete) return;
+        setIsProcessing(true);
+        try {
+            await tripService.deleteTrip(tripToDelete.tripId);
+            toast.success('Đã xóa chuyến đi thành công!');
+            setIsDeleteModalOpen(false);
+            fetchTrips();
+        } catch (err) {
+            toast.error('Không thể xóa chuyến đi vì đã có khách đặt hoặc lỗi hệ thống.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
     const handleOpenTripDetail = async (trip) => {
         setSelectedTrip(trip);
         setIsSeatMapOpen(true);
-
         try {
             const res = await tripService.getTripSeats(trip.tripId || trip.TripId);
             const data = res.data?.data || res.data || [];
-            
-            // Map the API data to the format the seat map expects
-            const mappedSeats = data.map(s => ({
+            setTripSeats(data.map(s => ({
                 tripSeatId: s.tripSeatId,
                 seatNumber: s.seatNumber,
                 status: s.status,
                 floor: s.floor,
                 row: s.row,
                 column: s.column
-            }));
-            
-            setTripSeats(mappedSeats);
+            })));
         } catch (error) {
             toast.error('Không thể tải chi tiết sơ đồ ghế!');
         }
@@ -134,7 +176,8 @@ const TripMonitoring = () => {
 
     const handleSeatClick = (seat) => {
         if (seat.status === 2 || seat.status === 1) {
-            toast.info(`Ghế ${seat.seatNumber}: ${seat.status === 2 ? 'Đã Thanh toán' : 'Đang giữ chỗ'}`);
+            const label = seat.status === 2 ? 'Đã Thanh toán' : 'Đang giữ chỗ';
+            toast.info(`Ghế ${seat.seatNumber}: ${label}`);
         } else if (seat.status === 3) {
             toast.error(`Ghế ${seat.seatNumber} đang bị khóa hỏng!`);
         } else {
@@ -148,7 +191,7 @@ const TripMonitoring = () => {
         switch (status) {
             case 1: return { type: 'warning', label: 'Đang Giữ' };
             case 2: return { type: 'danger', label: 'Đã Bán' };
-            case 3: return { type: 'info', label: 'Bị Khóa' }; // Grayish
+            case 3: return { type: 'info', label: 'Bị Khóa' };
             default: return { type: 'info', label: 'Còn Trống' };
         }
     };
@@ -164,24 +207,22 @@ const TripMonitoring = () => {
 
     return (
         <div className="admin-page-container">
-            {/* Header handled by AdminLayout */}
-            
-            <div className="admin-toolbar u-m-b-20" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '16px', borderRadius: '12px' }}>
+            <div className="admin-toolbar u-m-b-20">
                 <div className="u-flex u-align-center u-gap-12">
-                    <span className="u-size-13 u-weight-600 u-color-slate-600">Ngày đi:</span>
+                    <span className="u-size-13 u-weight-700 u-color-slate-500">Ngày đi:</span>
                     <input
                         type="date"
                         className="admin-form-input"
-                        style={{ width: '160px', padding: '6px 10px' }}
+                        style={{ width: '150px' }}
                         value={filterDate}
                         onChange={(e) => setFilterDate(e.target.value)}
                     />
                 </div>
                 <div className="u-flex u-align-center u-gap-12">
-                    <span className="u-size-13 u-weight-600 u-color-slate-600">Tuyến đường:</span>
+                    <span className="u-size-13 u-weight-700 u-color-slate-500">Tuyến:</span>
                     <select
                         className="admin-form-select"
-                        style={{ width: '220px', padding: '6px 10px' }}
+                        style={{ width: '200px' }}
                         value={selectedRoute}
                         onChange={(e) => setSelectedRoute(e.target.value)}
                     >
@@ -191,32 +232,32 @@ const TripMonitoring = () => {
                         ))}
                     </select>
                 </div>
-                <div className="u-m-l-auto u-flex u-gap-12 u-align-center">
+                
+                <div className="u-m-l-auto u-flex u-gap-12">
                     <button 
-                        className="admin-btn-primary" 
-                        onClick={() => setIsGenerateModalOpen(true)}
-                        style={{ padding: '6px 12px', fontSize: '13px' }}
+                        className="admin-btn-add" 
+                        style={{ height: '36px', fontSize: '12px', fontWeight: '700' }}
+                        onClick={() => setIsAddTripOpen(true)}
                     >
-                        <span>⚡ Sinh Chuyến Tự Động</span>
+                        + TĂNG CƯỜNG XE
                     </button>
-                    <Badge type="info" style={{ padding: '6px 12px' }}>
-                        Tổng số: {trips.length} chuyến
+                    <Badge type="info" style={{ padding: '8px 16px', borderRadius: '8px' }}>
+                        {trips.length} chuyến
                     </Badge>
                 </div>
             </div>
 
             {loading ? (
-                <div className="trip-monitoring-loading-container admin-loading">
+                <div className="admin-loading" style={{ margin: '100px 0' }}>
                     <div className="loader"></div>
-                    <p className="trip-monitoring-loading-text">Đang tải lịch trình...</p>
                 </div>
             ) : trips.length === 0 ? (
-                <Card className="trip-monitoring-empty-state">
-                    <p>Không có chuyến nào được tìm thấy cho bộ lọc này.</p>
+                <Card padding="60px" className="u-text-center u-color-slate-400">
+                    <p>Hôm nay không có chuyến nào. "Tăng cường xe" hoặc sang màn Lịch trình để sinh tự động.</p>
                 </Card>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '14px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
                         {trips
                             .filter(t => selectedRoute === 'all' || (t.routeId || t.RouteId)?.toString() === selectedRoute)
                             .slice((currentPage - 1) * pageSize, currentPage * pageSize)
@@ -226,64 +267,173 @@ const TripMonitoring = () => {
                                 const isFull = trip.availableSeats === 0;
 
                                 return (
-                                    <Card
-                                        key={trip.tripId}
-                                        className={`admin-trip-card ${isFull ? 'full' : 'available'}`}
-                                        onClick={() => handleOpenTripDetail(trip)}
-                                        interactive
-                                        padding="16px"
-                                    >
-                                        <div className="admin-trip-info-row">
-                                            <h3 className="admin-trip-route" style={{ fontSize: '13px', fontWeight: 700 }}>{trip.routeName}</h3>
-                                            {getTripStatusBadge(trip.status)}
-                                        </div>
+                                    <div key={trip.tripId} style={{ position: 'relative' }}>
+                                        <Card
+                                            className={`admin-trip-card ${isFull ? 'full' : 'available'}`}
+                                            onClick={() => handleOpenTripDetail(trip)}
+                                            padding="0"
+                                        >
+                                            <div className="admin-trip-card-header">
+                                                <div className="admin-trip-info-row">
+                                                    <h3 className="admin-trip-route">{trip.routeName}</h3>
+                                                    {getTripStatusBadge(trip.status)}
+                                                </div>
+                                            </div>
 
-                                        <div className="admin-trip-time" style={{ fontSize: '13px', gap: '6px', margin: '4px 0' }}>
-                                            <span className="trip-monitoring-time-display" style={{ fontSize: '15px', fontWeight: 700 }}>{trip.departureTime}</span>
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                                            <span style={{ fontSize: '13px' }}>{trip.arrivalTime}</span>
-                                        </div>
+                                            <div className="admin-trip-time-section">
+                                                <div className="time-box">
+                                                    <span className="time-label">Xuất bến</span>
+                                                    <span className="time-val">{trip.departureTime}</span>
+                                                </div>
+                                                <div className="time-divider"></div>
+                                                <div className="time-box">
+                                                    <span className="time-label">Dự kiến</span>
+                                                    <span className="time-val" style={{ color: '#94a3b8' }}>{trip.arrivalTime}</span>
+                                                </div>
+                                            </div>
 
-                                        <div className="admin-trip-bus-info" style={{ padding: '8px 10px', fontSize: '12px' }}>
-                                            <div className="u-flex u-align-center u-gap-8">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-                                                <span className="trip-monitoring-bus-plate">{trip.busPlate}</span>
+                                            <div className="admin-trip-bus-details">
+                                                <div className="bus-info-dashed-box">
+                                                    <div className="bus-detail-item">
+                                                        <span>Biển số: {trip.busPlate}</span>
+                                                    </div>
+                                                    <div className="bus-detail-item">
+                                                        <span style={{ fontSize: '11px' }}>Loại xe: {trip.busType}</span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <Badge type="info">{trip.busType} chỗ</Badge>
-                                        </div>
 
-                                        <div>
-                                            <div className="admin-trip-info-row" style={{ marginBottom: '4px' }}>
-                                                <span className="admin-trip-stat-label">Tình trạng lấp đầy:</span>
-                                                <span className="admin-trip-stat-value" style={{ color: isFull ? '#e53e3e' : '#38a169' }}>
-                                                    {filledSeats} / {trip.totalSeats} ghế
-                                                </span>
+                                            <div className="admin-trip-progress-section">
+                                                <div className="progress-header">
+                                                    <span className="progress-label">Lấp đầy</span>
+                                                    <span className="progress-count">
+                                                        {filledSeats}/{trip.totalSeats} ghế
+                                                    </span>
+                                                </div>
+                                                <div className="admin-progress-outer">
+                                                    <div
+                                                        className="admin-progress-inner"
+                                                        style={{
+                                                            width: `${fillPercent}%`,
+                                                            background: isFull ? '#f43f5e' : '#3b82f6'
+                                                        }}
+                                                    ></div>
+                                                </div>
                                             </div>
-                                            <div className="admin-progress-container">
-                                                <div
-                                                    className="admin-progress-bar"
-                                                    style={{
-                                                        width: `${fillPercent}%`,
-                                                        background: isFull ? '#e53e3e' : '#3182ce'
-                                                    }}
-                                                ></div>
-                                            </div>
-                                            <div className="trip-monitoring-fill-percent">
-                                                {fillPercent}% lấp đầy
-                                            </div>
-                                        </div>
-                                    </Card>
+                                        </Card>
+                                        
+                                        {trip.status === 0 && (
+                                            <button 
+                                                className="trip-delete-btn"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setTripToDelete(trip);
+                                                    setIsDeleteModalOpen(true);
+                                                }}
+                                            >
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                            </button>
+                                        )}
+                                    </div>
                                 );
                             })}
                     </div>
                     <Pagination
                         currentPage={currentPage}
-                        totalItems={trips.filter(t => selectedRoute === 'all' || (t.routeId || t.RouteId)?.toString() === selectedRoute).length}
+                        totalItems={trips.length}
                         pageSize={pageSize}
                         onPageChange={setCurrentPage}
                     />
                 </div>
             )}
+
+            {/* Modal Add Extra Trip (Using the Form from Schedule Management) */}
+            <Modal
+                isOpen={isAddTripOpen}
+                onClose={() => setIsAddTripOpen(false)}
+                title="Thêm Chuyến Tăng Cường Mới"
+                width="520px"
+            >
+                <form onSubmit={handleAddExtraTrip} className="admin-form">
+                    <div className="admin-form-group u-m-b-16">
+                        <label className="admin-form-label">Tuyến đường:</label>
+                        <select 
+                            className="admin-form-select"
+                            value={extraTripForm.routeId}
+                            onChange={(e) => setExtraTripForm({...extraTripForm, routeId: e.target.value})}
+                        >
+                            <option value="">-- Chọn tuyến đường --</option>
+                            {routes.map(r => (
+                                <option key={r.routeId} value={r.routeId}>{r.routeName}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="admin-form-group u-m-b-16">
+                        <label className="admin-form-label">Xe tăng cường:</label>
+                        <select 
+                            className="admin-form-select"
+                            value={extraTripForm.busId}
+                            onChange={(e) => setExtraTripForm({...extraTripForm, busId: e.target.value})}
+                        >
+                            <option value="">-- Chọn xe --</option>
+                            {buses.map(b => (
+                                <option key={b.busId} value={b.busId}>{b.busPlate} ({b.busTypeName})</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="u-grid u-grid-2 u-gap-16 u-m-b-16">
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Giờ xuất bến:</label>
+                            <input 
+                                type="time" 
+                                className="admin-form-input"
+                                value={extraTripForm.departureTime}
+                                onChange={(e) => setExtraTripForm({...extraTripForm, departureTime: e.target.value})}
+                            />
+                        </div>
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Giờ đến (dự kiến):</label>
+                            <input 
+                                type="time" 
+                                className="admin-form-input"
+                                value={extraTripForm.arrivalTime}
+                                onChange={(e) => setExtraTripForm({...extraTripForm, arrivalTime: e.target.value})}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="admin-form-group u-m-b-24">
+                        <label className="admin-form-label">Giá vé tăng cường (VNĐ):</label>
+                        <input 
+                            type="number" 
+                            className="admin-form-input"
+                            placeholder="VD: 200000"
+                            value={extraTripForm.ticketPrice}
+                            onChange={(e) => setExtraTripForm({...extraTripForm, ticketPrice: e.target.value})}
+                        />
+                    </div>
+
+                    <div className="admin-form-actions">
+                        <button type="button" className="admin-btn-outline" onClick={() => setIsAddTripOpen(false)}>Hủy</button>
+                        <button type="submit" className="admin-btn-primary" disabled={isProcessing}>
+                            {isProcessing ? 'Đang thực hiện...' : 'Thêm Mới'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* Confirmation Modal for Delete */}
+            <ConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteTrip}
+                title="Hủy chuyến đi"
+                message={`Bạn có chắc muốn hủy chuyến "${tripToDelete?.routeName}" lúc ${tripToDelete?.departureTime}?`}
+                isDangerous={true}
+                isLoading={isProcessing}
+            />
 
             {/* Modal Detail Seat Map */}
             <Modal
@@ -295,9 +445,18 @@ const TripMonitoring = () => {
                 {selectedTrip && (
                     <>
                         <div className="trip-monitoring-modal-info">
-                            <span>🕒 Giờ đi: <strong className="trip-monitoring-departure-time">{selectedTrip.departureTime}</strong></span>
-                            <span>🚌 Xe: <strong>{selectedTrip.busPlate}</strong></span>
-                            <span>🏷️ Loại: <strong>{selectedTrip.busType} chỗ</strong></span>
+                            <div className="modal-info-item">
+                                <span className="modal-info-label">🕰️ Giờ xuất phát</span>
+                                <span className="modal-info-value">{selectedTrip.departureTime}</span>
+                            </div>
+                            <div className="modal-info-item">
+                                <span className="modal-info-label">🚌 Biển số xe</span>
+                                <span className="modal-info-value">{selectedTrip.busPlate}</span>
+                            </div>
+                            <div className="modal-info-item">
+                                <span className="modal-info-label">🏷️ Loại xe & Chỗ</span>
+                                <span className="modal-info-value">{selectedTrip.busType}</span>
+                            </div>
                         </div>
 
                         <div className="admin-layout-legend" style={{ marginBottom: '32px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: 'none' }}>
@@ -438,47 +597,6 @@ const TripMonitoring = () => {
                     <div className="admin-form-actions">
                         <button type="button" className="admin-btn-outline" onClick={() => setIsQuickBookingOpen(false)}>Hủy</button>
                         <button type="submit" className="admin-btn-primary">Xác nhận Lưu</button>
-                    </div>
-                </form>
-            </Modal>
-
-            {/* Modal Auto Generate Trips */}
-            <Modal
-                isOpen={isGenerateModalOpen}
-                onClose={() => setIsGenerateModalOpen(false)}
-                title="Sinh Chuyến Tự Động (Auto-Generate)"
-                width="400px"
-            >
-                <form onSubmit={handleGenerateTrips}>
-                    <p style={{ fontSize: '13px', color: '#4a5568', marginBottom: '16px' }}>
-                        Hệ thống sẽ lấy tự động các <strong>Lịch Trình</strong> đang hoạt động để chạy vòng lặp tạo ra các <strong>Chuyến Xe (Trips)</strong> tương ứng trong khoảng thời gian đã chọn, bao gồm cả sơ đồ ghế của chúng.
-                    </p>
-                    <div className="admin-form-group">
-                        <label className="admin-form-label">Từ ngày</label>
-                        <input 
-                            type="date" 
-                            className="admin-form-input" 
-                            required 
-                            value={generateForm.startDate} 
-                            onChange={e => setGenerateForm({ ...generateForm, startDate: e.target.value })} 
-                        />
-                    </div>
-                    <div className="admin-form-group">
-                        <label className="admin-form-label">Đến ngày</label>
-                        <input 
-                            type="date" 
-                            className="admin-form-input" 
-                            required 
-                            min={generateForm.startDate}
-                            value={generateForm.endDate} 
-                            onChange={e => setGenerateForm({ ...generateForm, endDate: e.target.value })} 
-                        />
-                    </div>
-                    <div className="admin-form-actions">
-                        <button type="button" className="admin-btn-outline" onClick={() => setIsGenerateModalOpen(false)} disabled={generating}>Hủy</button>
-                        <button type="submit" className="admin-btn-primary" disabled={generating}>
-                            {generating ? 'Đang tạo...' : 'Xác nhận tạo'}
-                        </button>
                     </div>
                 </form>
             </Modal>

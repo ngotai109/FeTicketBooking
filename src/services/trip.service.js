@@ -8,6 +8,10 @@ const tripService = {
     getTripById: async (id) => {
         return await apiService.get(`/Trip/${id}`);
     },
+
+    createTrip: async (payload) => {
+        return await apiService.post('/Trip', payload);
+    },
     
     // Auto-Generate Trips
     generateTrips: async (payload) => {
@@ -30,6 +34,10 @@ const tripService = {
 
     quickBook: async (data) => {
         return await apiService.post('/Trip/quick-book', data);
+    },
+
+    deleteTrip: async (id) => {
+        return await apiService.delete(`/Trip/${id}`);
     }
 };
 

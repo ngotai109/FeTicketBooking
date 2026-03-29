@@ -4,6 +4,7 @@ import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination } from 
 import scheduleService from '../../services/schedule.service';
 import routeService from '../../services/route.service';
 import busService from '../../services/bus.service';
+import tripService from '../../services/trip.service';
 
 const ScheduleManagement = () => {
     const [schedules, setSchedules] = useState([]);
@@ -28,10 +29,10 @@ const ScheduleManagement = () => {
     
     const [formData, setFormData] = useState({
         routeId: '',
-        defaultBusId: '',
+        busId: '',
         departureTime: '',
         arrivalTime: '',
-        defaultTicketPrice: '',
+        ticketPrice: '',
         isActive: true
     });
 
@@ -71,7 +72,7 @@ const ScheduleManagement = () => {
                 throw new Error('No data');
             }
         } catch (error) {
-            console.error('Lỗi tải danh sách lịch trình:', error);
+            console.error('Lỗi tải danh sách lịch trình:', error.response?.data || error.message);
             setSchedules([]);
         }
     };
@@ -80,15 +81,15 @@ const ScheduleManagement = () => {
         e.preventDefault();
         try {
             setIsGenerating(true);
-            await scheduleService.generateTrips({
-                fromDate: genDates.fromDate,
-                toDate: genDates.toDate
+            await tripService.generateTrips({
+                startDate: genDates.fromDate,
+                endDate: genDates.toDate
             });
 
-            toast.success(`Đã sinh chuyến tự động từ ${genDates.fromDate} đến ${genDates.toDate} thành công!`);
+            toast.success(`Đã sinh chuyến thực tế từ ${genDates.fromDate} đến ${genDates.toDate} thành công!`);
             setIsGeneratorOpen(false);
         } catch (err) {
-            toast.error('Trình tạo chuyến đang được nâng cấp ở Backend!');
+            toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi sinh chuyến tự động!');
             setIsGeneratorOpen(false);
         } finally {
             setIsGenerating(false);
@@ -101,10 +102,10 @@ const ScheduleManagement = () => {
             setSelectedScheduleId(schedule.scheduleId || schedule.ScheduleId);
             setFormData({
                 routeId: (schedule.routeId || schedule.RouteId || '').toString(),
-                defaultBusId: (schedule.defaultBusId || schedule.DefaultBusId || '').toString(),
+                busId: (schedule.busId || schedule.BusId || '').toString(),
                 departureTime: schedule.departureTime || schedule.DepartureTime || '',
                 arrivalTime: schedule.arrivalTime || schedule.ArrivalTime || '',
-                defaultTicketPrice: schedule.defaultTicketPrice || schedule.DefaultTicketPrice || '',
+                ticketPrice: schedule.ticketPrice || schedule.TicketPrice || '',
                 isActive: schedule.isActive !== undefined ? schedule.isActive : true
             });
         } else {
@@ -112,10 +113,10 @@ const ScheduleManagement = () => {
             setSelectedScheduleId(null);
             setFormData({
                 routeId: '',
-                defaultBusId: '',
+                busId: '',
                 departureTime: '',
                 arrivalTime: '',
-                defaultTicketPrice: '',
+                ticketPrice: '',
                 isActive: true
             });
         }
@@ -159,10 +160,10 @@ const ScheduleManagement = () => {
     const handleFormChange = (field, value) => {
         const newData = { ...formData, [field]: value };
         
-        if (field === 'routeId' || field === 'defaultBusId') {
-            const calculatedPrice = handleAutoCalcPrice(newData.routeId, newData.defaultBusId);
+        if (field === 'routeId' || field === 'busId') {
+            const calculatedPrice = handleAutoCalcPrice(newData.routeId, newData.busId);
             if (calculatedPrice !== '') {
-                newData.defaultTicketPrice = calculatedPrice;
+                newData.ticketPrice = calculatedPrice;
             }
         }
         
@@ -175,8 +176,8 @@ const ScheduleManagement = () => {
             const dataToSubmit = {
                 ...formData,
                 routeId: parseInt(formData.routeId),
-                defaultBusId: parseInt(formData.defaultBusId),
-                defaultTicketPrice: parseFloat(formData.defaultTicketPrice)
+                busId: parseInt(formData.busId),
+                ticketPrice: parseFloat(formData.ticketPrice)
             };
 
             if (isEditMode) {
@@ -189,7 +190,9 @@ const ScheduleManagement = () => {
             setIsModalOpen(false);
             fetchSchedules();
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại!');
+            console.error("Schedule Submit Error:", error.response?.data || error);
+            const detail = error.response?.data ? JSON.stringify(error.response.data) : (error.message || 'Lỗi không xác định');
+            toast.error(`Thất bại: ${detail}`);
         }
     };
 
@@ -323,12 +326,12 @@ const ScheduleManagement = () => {
                                         <td className="u-weight-600 u-color-blue">{getRouteName(s.routeId)}</td>
                                         <td>
                                             <Badge type="info" className="u-size-12 u-weight-600 u-bg-transparent" style={{ border: '1px solid #e2e8f0', color: '#4a5568' }}>
-                                                {getBusPlate(s.defaultBusId)}
+                                                {getBusPlate(s.busId)}
                                             </Badge>
                                         </td>
                                         <td className="u-color-green u-weight-700">{s.departureTime}</td>
                                         <td className="u-color-red u-weight-700">{s.arrivalTime}</td>
-                                        <td className="u-weight-600">{s.defaultTicketPrice?.toLocaleString()} đ</td>
+                                        <td className="u-weight-600">{s.ticketPrice?.toLocaleString()} đ</td>
                                         <td className="u-text-center">
                                             <div className="u-flex u-gap-12 u-justify-center">
                                                 <button 
@@ -394,8 +397,8 @@ const ScheduleManagement = () => {
                             <select 
                                 className="admin-form-select"
                                 required 
-                                value={formData.defaultBusId} 
-                                onChange={(e) => handleFormChange('defaultBusId', e.target.value)}
+                                value={formData.busId} 
+                                onChange={(e) => handleFormChange('busId', e.target.value)}
                             >
                                 <option value="">-- Chọn xe --</option>
                                 {buses.map(b => (
@@ -419,7 +422,7 @@ const ScheduleManagement = () => {
 
                         <div className="admin-form-group">
                             <label className="admin-form-label">Giá vé mặc định (VNĐ):</label>
-                            <input type="number" className="admin-form-input" required min="0" value={formData.defaultTicketPrice} onChange={(e) => setFormData({...formData, defaultTicketPrice: e.target.value})} placeholder="VD: 200000" />
+                            <input type="number" className="admin-form-input" required min="0" value={formData.ticketPrice} onChange={(e) => setFormData({...formData, ticketPrice: e.target.value})} placeholder="VD: 200000" />
                         </div>
                     </div>
 

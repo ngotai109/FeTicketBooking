@@ -1,77 +1,186 @@
-/* Trip Monitoring Specific Styles */
+/* Trip Monitoring - Clean Minimalist Style */
 
-.trip-monitoring-header-controls {
+.admin-trip-card {
+    transition: all 0.2s ease;
+    border: 1px solid #f1f5f9;
+    background: #ffffff;
+    border-radius: 12px;
     display: flex;
-    gap: 12px;
-}
-
-.trip-monitoring-date-input, .trip-monitoring-route-select {
-    width: auto !important;
-    font-weight: 600;
-}
-
-.trip-monitoring-loading-container {
-    text-align: center;
-    padding: 100px;
-}
-
-.trip-monitoring-loading-text {
-    margin-top: 16px;
-    color: #718096;
-}
-
-.trip-monitoring-empty-state {
-    padding: 60px;
-    text-align: center;
-    color: #718096;
-    font-size: 15px;
-}
-
-.trip-monitoring-time-display {
-    color: #3182ce;
-    font-size: 15px;
-    font-weight: 700;
-}
-
-.trip-monitoring-bus-plate {
-    font-weight: 700;
-}
-
-.trip-monitoring-fill-percent {
-    text-align: right;
-    font-size: 11px;
-    margin-top: 4px;
-    font-weight: 700;
-    color: #718096;
-}
-
-.trip-monitoring-modal-info {
-    display: flex;
-    gap: 16px;
-    margin-top: 8px;
-    font-size: 13px;
-    color: #4a5568;
-    font-weight: 600;
-}
-
-.trip-monitoring-departure-time {
-    color: #e53e3e;
-}
-
-.trip-monitoring-seat-item-custom {
-    height: 54px !important;
-    font-size: 12px;
+    flex-direction: column;
+    height: 100%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    position: relative;
     cursor: pointer;
 }
 
-.trip-monitoring-quick-booking-seat {
-    color: #e53e3e;
+.admin-trip-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: #cbd5e1;
 }
 
-.trip-monitoring-status-active {
-    background: #fffaf0;
+.admin-trip-card.full { border-left: 4px solid #f43f5e; }
+.admin-trip-card.available { border-left: 4px solid #10b981; }
+
+.trip-delete-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 32px;
+    border-radius: 6px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #1a3a8f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 5;
+    padding: 0;
+    cursor: pointer;
 }
 
-.trip-monitoring-status-paid {
-    background: #f0fff4;
+.trip-delete-btn:hover {
+    background: #fee2e2;
+    color: #ef4444;
+    border-color: #fecaca;
 }
+
+.admin-trip-card-header {
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-right: 40px;
+}
+
+/* Remove Ticket Effects */
+.admin-trip-card-header::before, .admin-trip-card-header::after { display: none; }
+
+.admin-trip-route {
+    font-size: 14px;
+    font-weight: 700;
+    color: #334155;
+    margin: 0;
+}
+
+.admin-trip-time-section {
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    background: #fdfdfd;
+}
+
+.time-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.time-val {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.time-label {
+    font-size: 10px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.time-divider {
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+    margin: 0 12px;
+    max-width: 40px;
+}
+
+.admin-trip-bus-details {
+    padding: 0 16px 16px;
+}
+
+.bus-info-dashed-box {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bus-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #475569;
+    font-weight: 500;
+}
+
+.bus-detail-item svg {
+    color: #94a3b8;
+}
+
+.admin-trip-progress-section {
+    padding: 16px;
+    margin-top: auto;
+    border-top: 1px solid #f1f5f9;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.progress-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.progress-count {
+    font-size: 12px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.admin-progress-outer {
+    height: 6px;
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.admin-progress-inner {
+    height: 100%;
+    background: #3b82f6;
+    border-radius: 10px;
+}
+
+.trip-monitoring-fill-percent {
+    display: block;
+    margin-top: 6px;
+    font-size: 10px;
+    text-align: right;
+    color: #94a3b8;
+}
+
+/* Modal Enhancements */
+.trip-monitoring-modal-info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.modal-info-item { display: flex; flex-direction: column; gap: 4px; }
+.modal-info-label { font-size: 10px; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
+.modal-info-value { font-size: 14px; font-weight: 700; color: #1e293b; }
