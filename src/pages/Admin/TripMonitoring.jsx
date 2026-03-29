@@ -30,6 +30,15 @@ const TripMonitoring = () => {
         pickupPoint: '',
         status: 1
     });
+
+    // ---- Auto Generate Trips ----
+    const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+    const [generateForm, setGenerateForm] = useState({
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date().toISOString().split('T')[0]
+    });
+    const [generating, setGenerating] = useState(false);
+
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 8; // Grid usually looks better with 8 or 12
 
@@ -79,6 +88,21 @@ const TripMonitoring = () => {
             setTrips([]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleGenerateTrips = async (e) => {
+        e.preventDefault();
+        setGenerating(true);
+        try {
+            await tripService.generateTrips(generateForm);
+            toast.success('Đã sinh chuyến xe tự động thành công!');
+            setIsGenerateModalOpen(false);
+            fetchTrips();
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Sinh chuyến thất bại!');
+        } finally {
+            setGenerating(false);
         }
     };
 
@@ -167,7 +191,14 @@ const TripMonitoring = () => {
                         ))}
                     </select>
                 </div>
-                <div className="u-m-l-auto">
+                <div className="u-m-l-auto u-flex u-gap-12 u-align-center">
+                    <button 
+                        className="admin-btn-primary" 
+                        onClick={() => setIsGenerateModalOpen(true)}
+                        style={{ padding: '6px 12px', fontSize: '13px' }}
+                    >
+                        <span>⚡ Sinh Chuyến Tự Động</span>
+                    </button>
                     <Badge type="info" style={{ padding: '6px 12px' }}>
                         Tổng số: {trips.length} chuyến
                     </Badge>
@@ -407,6 +438,47 @@ const TripMonitoring = () => {
                     <div className="admin-form-actions">
                         <button type="button" className="admin-btn-outline" onClick={() => setIsQuickBookingOpen(false)}>Hủy</button>
                         <button type="submit" className="admin-btn-primary">Xác nhận Lưu</button>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* Modal Auto Generate Trips */}
+            <Modal
+                isOpen={isGenerateModalOpen}
+                onClose={() => setIsGenerateModalOpen(false)}
+                title="Sinh Chuyến Tự Động (Auto-Generate)"
+                width="400px"
+            >
+                <form onSubmit={handleGenerateTrips}>
+                    <p style={{ fontSize: '13px', color: '#4a5568', marginBottom: '16px' }}>
+                        Hệ thống sẽ lấy tự động các <strong>Lịch Trình</strong> đang hoạt động để chạy vòng lặp tạo ra các <strong>Chuyến Xe (Trips)</strong> tương ứng trong khoảng thời gian đã chọn, bao gồm cả sơ đồ ghế của chúng.
+                    </p>
+                    <div className="admin-form-group">
+                        <label className="admin-form-label">Từ ngày</label>
+                        <input 
+                            type="date" 
+                            className="admin-form-input" 
+                            required 
+                            value={generateForm.startDate} 
+                            onChange={e => setGenerateForm({ ...generateForm, startDate: e.target.value })} 
+                        />
+                    </div>
+                    <div className="admin-form-group">
+                        <label className="admin-form-label">Đến ngày</label>
+                        <input 
+                            type="date" 
+                            className="admin-form-input" 
+                            required 
+                            min={generateForm.startDate}
+                            value={generateForm.endDate} 
+                            onChange={e => setGenerateForm({ ...generateForm, endDate: e.target.value })} 
+                        />
+                    </div>
+                    <div className="admin-form-actions">
+                        <button type="button" className="admin-btn-outline" onClick={() => setIsGenerateModalOpen(false)} disabled={generating}>Hủy</button>
+                        <button type="submit" className="admin-btn-primary" disabled={generating}>
+                            {generating ? 'Đang tạo...' : 'Xác nhận tạo'}
+                        </button>
                     </div>
                 </form>
             </Modal>

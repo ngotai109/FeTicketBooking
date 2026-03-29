@@ -11,7 +11,7 @@ const tripService = {
     
     // Auto-Generate Trips
     generateTrips: async (payload) => {
-        return await apiService.post('/Trip/Generate', payload);
+        return await apiService.post('/Trip/generate', payload);
     },
 
     updateTrip: async (id, data) => {
