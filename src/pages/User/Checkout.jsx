@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../../assets/styles/Checkout.css';
 import { Card } from '../../components/Common';
+import bookingService from '../../services/booking.service';
 
 const Checkout = () => {
     const location = useLocation();
@@ -10,10 +11,49 @@ const Checkout = () => {
     
     // Safety check if user didn't come from Booking
     const trip = location.state?.trip || { 
-        departurePoint: 'BX Khách Nghệ An', arrivalPoint: 'BX Khách Hà Nội',
-        departureTime: '12:30', arrivalTime: '18:30', price: 490000 
+        departureOfficeName: 'Bến xe Miền Đông', arrivalOfficeName: 'Bến xe Nước Ngầm',
+        departureTime: '12:30', arrivalTime: '18:30', ticketPrice: 0 
     };
-    const selectedSeats = location.state?.selectedSeats || ['B1'];
+    const selectedSeats = location.state?.selectedSeats || [];
+    const [tripSeats, setTripSeats] = useState(location.state?.tripSeats || []);
+    const tripId = trip.tripId || trip.TripId || trip.id;
+    const ticketPrice = trip.ticketPrice || trip.TicketPrice || trip.price || 0;
+    
+    // Safety values for display
+    const depPt = trip.departureOfficeName || trip.DepartureOfficeName || trip.departurePoint || '--';
+    const arrPt = trip.arrivalOfficeName || trip.ArrivalOfficeName || trip.arrivalPoint || '--';
+    const depTime = trip.departureTime || trip.DepartureTime || '--:--';
+    const arrTime = trip.arrivalTime || trip.ArrivalTime || '--:--';
+
+    // Self-healing: If tripSeats is missing, fetch it!
+    useEffect(() => {
+        const fetchMissingSeats = async () => {
+            if (tripId && (!tripSeats || tripSeats.length === 0)) {
+                try {
+                    console.log("Đang nạp lại ghế cho chuyến:", tripId);
+                    const res = await bookingService.getTripSeats(tripId);
+                    const data = res.data?.data || res.data || [];
+                    console.log("Dữ liệu nạp được cho Checkout:", data);
+                    setTripSeats(data);
+                } catch (error) {
+                    console.error("Lỗi nạp ghế:", error);
+                }
+            }
+        };
+        fetchMissingSeats();
+    }, [tripId]);
+
+    // Map seat numbers to seat IDs
+    const selectedSeatIds = selectedSeats.map(num => {
+        const targetNum = num?.toString().trim().toUpperCase();
+        const seatObj = tripSeats.find(s => {
+            const sNum = (s.seatNumber || s.SeatNumber || '').toString().trim().toUpperCase();
+            return sNum === targetNum;
+        });
+        return seatObj?.tripSeatId || seatObj?.TripSeatId || null;
+    }).filter(id => id !== null);
+
+    const [isLoading, setIsLoading] = useState(false);
     
     const [customer, setCustomer] = useState({ phone: '0832696061', name: 'Ngô Khắc Tài', email: 'taitiktok37@gmail.com' });
     const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
@@ -46,14 +86,42 @@ const Checkout = () => {
         return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
 
-    const handleCheckout = () => {
-        if (paymentMethod === 'vnpay') {
-            const amount = selectedSeats.length * trip.price;
-            toast.info("Đang chuyển hướng sang Cổng thanh toán VNPay...");
-            setTimeout(() => navigate('/payment/vnpay', { state: { amount } }), 1500);
-        } else {
-            toast.success("Đặt vé thành công! Vui lòng thanh toán theo hướng dẫn.");
-            setTimeout(() => navigate('/lookup/ticket'), 2000);
+    const handleCheckout = async () => {
+        if (!customer.name || !customer.phone) {
+            toast.error("Vui lòng điền đủ thông tin!");
+            return;
+        }
+
+        if (selectedSeatIds.length === 0) {
+            toast.error(`Không tìm thấy dữ liệu ghế cho chuyến #${tripId}. Vui lòng quay lại đặt lại!`);
+            console.error("Lỗi khớp ghế Checkout:", { trip, tripId, selectedSeats, tripSeats });
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const bookingPayload = {
+                userId: null,
+                customerName: customer.name,
+                customerPhone: customer.phone,
+                customerEmail: customer.email,
+                tripSeatIds: selectedSeatIds
+            };
+
+            const res = await bookingService.createBooking(bookingPayload);
+
+            if (paymentMethod === 'vnpay') {
+                const amount = selectedSeats.length * ticketPrice;
+                toast.info("Đang chuyển hướng sang VNPay...");
+                setTimeout(() => navigate('/payment/vnpay', { state: { amount, bookingId: res.data.bookingId } }), 1500);
+            } else {
+                toast.success("Đặt vé thành công! Check Email nhé!");
+                setTimeout(() => navigate('/lookup/ticket'), 2000);
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Lỗi đặt vé!");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -170,23 +238,23 @@ const Checkout = () => {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '30px', marginBottom: '25px' }}>
                                 <div className="info-row">
                                     <div className="info-label">Tuyến</div>
-                                    <div className="info-value">{trip.departurePoint.includes(',') ? trip.departurePoint.split(',')[1].trim() : trip.departurePoint} - {trip.arrivalPoint.includes(',') ? trip.arrivalPoint.split(',')[1].trim() : trip.arrivalPoint}</div>
+                                    <div className="info-value">{(depPt.includes(',') ? depPt.split(',')[1].trim() : depPt)} - {(arrPt.includes(',') ? arrPt.split(',')[1].trim() : arrPt)}</div>
                                 </div>
                                 <div className="info-row">
                                     <div className="info-label">Giờ xuất bến</div>
-                                    <div className="info-value" style={{ color: '#3182ce' }}>{trip.departureTime} <span style={{ color: '#2d3748', fontWeight: 'normal' }}>ngày 25/03/2026</span></div>
+                                    <div className="info-value" style={{ color: '#3182ce' }}>{depTime} <span style={{ color: '#2d3748', fontWeight: 'normal' }}>ngày 30/03/2026</span></div>
                                 </div>
                                 <div className="info-row">
                                     <div className="info-label">Điểm đón</div>
-                                    <div className="info-value">{trip.departurePoint}</div>
+                                    <div className="info-value">{depPt}</div>
                                 </div>
                                 <div className="info-row">
                                     <div className="info-label">Thời gian đón</div>
-                                    <div className="info-value" style={{ color: '#3182ce' }}>{trip.departureTime} <span style={{ color: '#2d3748', fontWeight: 'normal' }}>ngày 25/03/2026</span></div>
+                                    <div className="info-value" style={{ color: '#3182ce' }}>{depTime} <span style={{ color: '#2d3748', fontWeight: 'normal' }}>ngày 30/03/2026</span></div>
                                 </div>
                                 <div className="info-row">
                                     <div className="info-label">Điểm đến</div>
-                                    <div className="info-value">{trip.arrivalPoint}</div>
+                                    <div className="info-value">{arrPt}</div>
                                 </div>
                                 <div className="info-row">
                                     <div className="info-label">Số ghế</div>
@@ -196,7 +264,7 @@ const Checkout = () => {
 
                             <div className="summary-row">
                                 <div style={{ color: '#718096' }}>Tổng tiền vé</div>
-                                <div style={{ fontWeight: 'bold', color: '#2d3748' }}>{(selectedSeats.length * trip.price).toLocaleString('vi-VN')} đ</div>
+                                <div style={{ fontWeight: 'bold', color: '#2d3748' }}>{(selectedSeats.length * ticketPrice).toLocaleString('vi-VN')} đ</div>
                             </div>
 
                             <div className="promo-row">
@@ -209,7 +277,7 @@ const Checkout = () => {
 
                             <div className="total-row">
                                 <div style={{ fontWeight: '500', color: '#4a5568' }}>Tổng tiền thanh toán</div>
-                                <div className="total-value">{(selectedSeats.length * trip.price).toLocaleString('vi-VN')} đ</div>
+                                <div className="total-value">{(selectedSeats.length * ticketPrice).toLocaleString('vi-VN')} đ</div>
                             </div>
 
                             <div className="u-flex u-align-center u-gap-8" style={{ marginBottom: '30px' }}>
@@ -221,9 +289,10 @@ const Checkout = () => {
                                 <button onClick={() => navigate('/booking')} className="btn-cancel">Huỷ</button>
                                 <button 
                                     onClick={handleCheckout} 
+                                    disabled={isLoading}
                                     className={`btn-checkout ${paymentMethod === 'vnpay' ? 'btn-checkout-vnpay' : 'btn-checkout-later'}`}
                                 >
-                                    {paymentMethod === 'vnpay' ? 'Thanh toán VNPay' : 'Trả sau'}
+                                    {isLoading ? 'ĐANG XỬ LÝ...' : (paymentMethod === 'vnpay' ? 'Thanh toán VNPay' : 'Trả sau')}
                                 </button>
                             </div>
                         </Card>

@@ -12,7 +12,7 @@ const tripService = {
     createTrip: async (payload) => {
         return await apiService.post('/Trip', payload);
     },
-    
+
     // Auto-Generate Trips
     generateTrips: async (payload) => {
         return await apiService.post('/Trip/generate', payload);
@@ -38,6 +38,12 @@ const tripService = {
 
     deleteTrip: async (id) => {
         return await apiService.delete(`/Trip/${id}`);
+    },
+
+    searchTrips: async (data) => {
+        // Convert date format from YYYY-MM-DD to YYYY/MM/DD
+        const formattedDate = data.date ? data.date.replace(/-/g, '/') : data.date;
+        return await apiService.get(`/Trip/search?departure=${data.departure}&destination=${data.destination}&date=${formattedDate}`);
     }
 };
 

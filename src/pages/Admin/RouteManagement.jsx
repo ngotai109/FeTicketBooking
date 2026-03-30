@@ -213,20 +213,8 @@ const RouteManagement = () => {
 
             if (!map[pName]) map[pName] = [];
 
-            const lowerPName = pName.toLowerCase();
-            const isHanoi = lowerPName.includes('hà nội');
-            const isNgheAn = lowerPName.includes('nghệ an');
-
-            const wName = ward ? ward.wardName : '';
-            let label = '';
-
-            if (isHanoi) {
-                label = o.officeName;
-            } else if (isNgheAn) {
-                label = wName || o.officeName;
-            } else {
-                label = `${wName ? wName + ' - ' : ''}${o.officeName}`;
-            }
+            // Chỉ hiển thị tên office (không mix ward name)
+            const label = o.officeName;
 
             map[pName].push({
                 value: o.officeId.toString(),

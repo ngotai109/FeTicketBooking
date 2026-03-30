@@ -14,7 +14,11 @@ const UserLayout = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // ── Chatbot widget state ──────────────────────────────────
-    const [chatOpen, setChatOpen] = useState(true);
+    const [chatOpen, setChatOpen] = useState(() => {
+        // Khôi phục trạng thái chatbot từ localStorage
+        const saved = localStorage.getItem('chatbot-open');
+        return saved ? JSON.parse(saved) : false;
+    });
     const [chatMessages, setChatMessages] = useState([
         {
             id: 1,
@@ -36,6 +40,11 @@ const UserLayout = () => {
             chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
         }
     }, [chatMessages]);
+
+    // Lưu trạng thái chatOpen vào localStorage
+    useEffect(() => {
+        localStorage.setItem('chatbot-open', JSON.stringify(chatOpen));
+    }, [chatOpen]);
 
     const sendMessage = async (text) => {
         const msg = text || chatInput.trim();
