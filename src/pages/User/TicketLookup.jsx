@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
+import bookingService from '../../services/booking.service';
 import '../../assets/styles/TicketLookup.css';
 import step1Img from '../../assets/images/check-ticket-1.png';
 import step2Img from '../../assets/images/check-ticket-2.png';
@@ -9,29 +11,35 @@ const TicketLookup = () => {
     const [lookupResult, setLookupResult] = useState(null);
     const [isSearching, setIsSearching] = useState(false);
 
-    const handleLookup = (e) => {
+    const handleLookup = async (e) => {
         e.preventDefault();
+        if (!ticketCode || !phoneNumber) {
+            toast.error("Vui lòng nhập đầy đủ thông tin!");
+            return;
+        }
+
         setIsSearching(true);
-        
-        // Mock lookup logic
-        setTimeout(() => {
-            if (phoneNumber === '0123456789' || ticketCode === 'DSL123') {
-                setLookupResult({
-                    code: 'DSL123456',
-                    customer: 'Nguyễn Văn A',
-                    phone: '0123456789',
-                    route: 'Hà Nội - Vinh',
-                    date: '25/03/2026',
-                    time: '08:00',
-                    seat: 'A12',
-                    status: 'Đã thanh toán',
-                    price: '350.000đ'
-                });
-            } else {
-                setLookupResult('NOT_FOUND');
-            }
+        try {
+            const res = await bookingService.lookupTicket(ticketCode, phoneNumber);
+            const data = res.data;
+            
+            setLookupResult({
+                code: `DSL${data.bookingId.toString().padStart(6, '0')}`,
+                customer: data.customerName,
+                phone: data.customerPhone,
+                route: data.routeName,
+                date: data.departureTime.split(' ngày ')[1],
+                time: data.departureTime.split(' ngày ')[0],
+                seat: data.tickets.map(t => t.seatNumber).join(', '),
+                status: data.status === 0 ? 'Chờ thanh toán' : (data.status === 1 ? 'Đã xác nhận' : 'Đã hủy'),
+                price: `${data.totalPrice.toLocaleString('vi-VN')}đ`
+            });
+        } catch (error) {
+            console.error(error);
+            setLookupResult('NOT_FOUND');
+        } finally {
             setIsSearching(false);
-        }, 1200);
+        }
     };
 
     return (

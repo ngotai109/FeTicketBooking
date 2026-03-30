@@ -18,6 +18,9 @@ const bookingService = {
     },
     getTripSeats: async (tripId) => {
         return await apiService.get(`/Trip/${tripId}/seats`);
+    },
+    lookupTicket: async (code, phone) => {
+        return await apiService.get(`/Booking/lookup?code=${code}&phone=${phone}`);
     }
 };
 

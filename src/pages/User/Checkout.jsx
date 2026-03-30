@@ -55,7 +55,11 @@ const Checkout = () => {
 
     const [isLoading, setIsLoading] = useState(false);
     
-    const [customer, setCustomer] = useState({ phone: '0832696061', name: 'Ngô Khắc Tài', email: 'taitiktok37@gmail.com' });
+    const [customer, setCustomer] = useState({ 
+        phone: localStorage.getItem('userPhone') || '', 
+        name: localStorage.getItem('userName') || '', 
+        email: '' // Luôn để trống để khách hàng tự điền theo yêu cầu
+    });
     const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
     const [paymentMethod, setPaymentMethod] = useState('cash'); // 'cash' or 'vnpay'
 
