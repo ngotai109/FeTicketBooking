@@ -21,6 +21,7 @@ import VNPayMock from "../pages/User/VNPayMock";
 import AboutUs from "../pages/User/AboutUs";
 import OfficeSystem from "../pages/User/OfficeSystem";
 import TicketLookup from "../pages/User/TicketLookup";
+import TicketResult from "../pages/User/TicketResult";
 import CargoTransport from "../pages/User/CargoTransport";
 import PassengerTransport from "../pages/User/PassengerTransport";
 import News from "../pages/User/News";
@@ -39,6 +40,7 @@ export default function AppRoutes() {
         <Route path="about/our" element={<AboutUs />} />
         <Route path="about/history" element={<OfficeSystem />} />
         <Route path="lookup/ticket" element={<TicketLookup />} />
+        <Route path="lookup/result" element={<TicketResult />} />
         <Route path="services/cargo" element={<CargoTransport />} />
         <Route path="services/transport" element={<PassengerTransport />} />
         <Route path="news" element={<News />} />
