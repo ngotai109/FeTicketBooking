@@ -128,7 +128,7 @@ const ScheduleManagement = () => {
         let routeFound = false;
         
         if (newRouteId) {
-            const route = routes.find(r => (r.routeId || r.RouteId).toString() === newRouteId);
+            const route = routes.find(r => (r.routeId || r.RouteId)?.toString() === newRouteId);
             if (route) {
                 finalPrice += (route.basePrice || route.BasePrice || 0);
                 routeFound = true;
@@ -136,19 +136,19 @@ const ScheduleManagement = () => {
         }
         
         if (newBusId && routeFound) {
-            const bus = buses.find(b => (b.busId || b.BusId).toString() === newBusId);
+            const bus = buses.find(b => (b.busId || b.BusId)?.toString() === newBusId);
             if (bus) {
                 const limit = bus.totalSeats || bus.TotalSeats || bus.capacity || 0;
                 
-                // User specifies strictly 4 seeded types: 16, 22, 34, 40
-                if (limit === 16 || limit === 22) { 
-                    // VIP (16 Solati/Limousine, 22 Phòng VIP)
+                // Logic tính giá theo loại xe:
+                // - Xe <= 22 chỗ (Phòng VIP/Solati): + 50,000đ
+                // - Xe 34 chỗ (Giường nằm cao cấp): + 30,000đ
+                // - Xe 40 chỗ trở lên (Giường nằm thường): Giữ nguyên giá tuyến
+                if (limit <= 22) { 
                     finalPrice += 50000;
-                } else if (limit === 34) { 
-                    // Giường nằm cao cấp
+                } else if (limit > 22 && limit <= 34) { 
                     finalPrice += 30000;
-                } else if (limit === 40) {
-                    // Giường nằm thường (Giữ nguyên)
+                } else if (limit > 34) {
                     finalPrice += 0;
                 }
             }
@@ -412,17 +412,17 @@ const ScheduleManagement = () => {
                         <div className="u-flex u-gap-16">
                             <div className="admin-form-group" style={{ flex: 1 }}>
                                 <label className="admin-form-label">Giờ xuất bến:</label>
-                                <input type="time" className="admin-form-input" required value={formData.departureTime} onChange={(e) => setFormData({...formData, departureTime: e.target.value})} />
+                                <input type="time" className="admin-form-input" required value={formData.departureTime} onChange={(e) => handleFormChange('departureTime', e.target.value)} />
                             </div>
                             <div className="admin-form-group" style={{ flex: 1 }}>
                                 <label className="admin-form-label">Giờ đến (dự kiến):</label>
-                                <input type="time" className="admin-form-input" required value={formData.arrivalTime} onChange={(e) => setFormData({...formData, arrivalTime: e.target.value})} />
+                                <input type="time" className="admin-form-input" required value={formData.arrivalTime} onChange={(e) => handleFormChange('arrivalTime', e.target.value)} />
                             </div>
                         </div>
 
                         <div className="admin-form-group">
                             <label className="admin-form-label">Giá vé mặc định (VNĐ):</label>
-                            <input type="number" className="admin-form-input" required min="0" value={formData.ticketPrice} onChange={(e) => setFormData({...formData, ticketPrice: e.target.value})} placeholder="VD: 200000" />
+                            <input type="number" className="admin-form-input" required min="0" value={formData.ticketPrice} onChange={(e) => handleFormChange('ticketPrice', e.target.value)} placeholder="VD: 200000" />
                         </div>
                     </div>
 

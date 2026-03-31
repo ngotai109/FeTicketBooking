@@ -12,6 +12,7 @@ const TripMonitoring = () => {
     // ---- State Filter ----
     const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
     const [selectedRoute, setSelectedRoute] = useState('all');
+    const [selectedStatus, setSelectedStatus] = useState('all');
 
     // ---- State Data ----
     const [trips, setTrips] = useState([]);
@@ -63,7 +64,35 @@ const TripMonitoring = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [filterDate, selectedRoute]);
+    }, [filterDate, selectedRoute, selectedStatus]);
+
+    const getCalculatedStatus = (trip) => {
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        let status = trip.status;
+
+        if (filterDate === todayStr) {
+            const [depH, depM] = trip.departureTime.split(':');
+            const [arrH, arrM] = trip.arrivalTime.split(':');
+            
+            const depDate = new Date();
+            depDate.setHours(parseInt(depH), parseInt(depM), 0, 0);
+            
+            const arrDate = new Date();
+            arrDate.setHours(parseInt(arrH), parseInt(arrM), 0, 0);
+            
+            if (arrDate < depDate) arrDate.setDate(arrDate.getDate() + 1);
+
+            if (now < depDate) status = 0; 
+            else if (now >= depDate && now < arrDate) status = 1; 
+            else status = 2; 
+        } else if (filterDate < todayStr) {
+            status = 2;
+        } else {
+            status = 0;
+        }
+        return status;
+    };
 
     const fetchInitialData = async () => {
         try {
@@ -198,12 +227,19 @@ const TripMonitoring = () => {
 
     const getTripStatusBadge = (status) => {
         switch (status) {
-            case 0: return <Badge type="info">Sắp chạy</Badge>;
-            case 1: return <Badge type="warning">Đang đi</Badge>;
-            case 2: return <Badge type="success">Hoàn thành</Badge>;
+            case 0: return <Badge type="info">Sắp khởi hành</Badge>;
+            case 1: return <Badge type="warning">Đang di chuyển</Badge>;
+            case 2: return <Badge type="success">Đã hoàn thành</Badge>;
             default: return null;
         }
     };
+
+    const filteredTrips = trips
+        .filter(t => selectedRoute === 'all' || (t.routeId || t.RouteId)?.toString() === selectedRoute)
+        .filter(t => {
+            if (selectedStatus === 'all') return true;
+            return getCalculatedStatus(t).toString() === selectedStatus;
+        });
 
     return (
         <div className="admin-page-container">
@@ -232,6 +268,21 @@ const TripMonitoring = () => {
                         ))}
                     </select>
                 </div>
+
+                <div className="u-flex u-align-center u-gap-12">
+                    <span className="u-size-13 u-weight-700 u-color-slate-500">Trạng thái:</span>
+                    <select
+                        className="admin-form-select"
+                        style={{ width: '180px' }}
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                    >
+                        <option value="all">Tất cả trạng thái</option>
+                        <option value="0">Sắp khởi hành</option>
+                        <option value="1">Đang di chuyển</option>
+                        <option value="2">Đã hoàn thành</option>
+                    </select>
+                </div>
                 
                 <div className="u-m-l-auto u-flex u-gap-12">
                     <button 
@@ -242,7 +293,7 @@ const TripMonitoring = () => {
                         + TĂNG CƯỜNG XE
                     </button>
                     <Badge type="info" style={{ padding: '8px 16px', borderRadius: '8px' }}>
-                        {trips.length} chuyến
+                        {filteredTrips.length} chuyến
                     </Badge>
                 </div>
             </div>
@@ -251,32 +302,33 @@ const TripMonitoring = () => {
                 <div className="admin-loading" style={{ margin: '100px 0' }}>
                     <div className="loader"></div>
                 </div>
-            ) : trips.length === 0 ? (
+            ) : filteredTrips.length === 0 ? (
                 <Card padding="60px" className="u-text-center u-color-slate-400">
-                    <p>Hôm nay không có chuyến nào. "Tăng cường xe" hoặc sang màn Lịch trình để sinh tự động.</p>
+                    <p>Không tìm thấy chuyến nào phù hợp với bộ lọc.</p>
                 </Card>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
-                        {trips
-                            .filter(t => selectedRoute === 'all' || (t.routeId || t.RouteId)?.toString() === selectedRoute)
+                        {filteredTrips
                             .slice((currentPage - 1) * pageSize, currentPage * pageSize)
                             .map(trip => {
                                 const filledSeats = trip.totalSeats - trip.availableSeats;
                                 const fillPercent = Math.round((filledSeats / trip.totalSeats) * 100) || 0;
                                 const isFull = trip.availableSeats === 0;
 
+                                const displayStatus = getCalculatedStatus(trip);
+
                                 return (
                                     <div key={trip.tripId} style={{ position: 'relative' }}>
                                         <Card
-                                            className={`admin-trip-card ${isFull ? 'full' : 'available'}`}
+                                            className={`admin-trip-card status-${displayStatus} ${isFull ? 'full' : 'available'}`}
                                             onClick={() => handleOpenTripDetail(trip)}
                                             padding="0"
                                         >
                                             <div className="admin-trip-card-header">
                                                 <div className="admin-trip-info-row">
                                                     <h3 className="admin-trip-route">{trip.routeName}</h3>
-                                                    {getTripStatusBadge(trip.status)}
+                                                    {getTripStatusBadge(displayStatus)}
                                                 </div>
                                             </div>
 
@@ -322,7 +374,7 @@ const TripMonitoring = () => {
                                             </div>
                                         </Card>
                                         
-                                        {trip.status === 0 && (
+                                        {displayStatus === 0 && (
                                             <button 
                                                 className="trip-delete-btn"
                                                 onClick={(e) => {
@@ -340,7 +392,7 @@ const TripMonitoring = () => {
                     </div>
                     <Pagination
                         currentPage={currentPage}
-                        totalItems={trips.length}
+                        totalItems={filteredTrips.length}
                         pageSize={pageSize}
                         onPageChange={setCurrentPage}
                     />

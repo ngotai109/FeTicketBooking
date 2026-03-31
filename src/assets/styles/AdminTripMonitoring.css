@@ -18,8 +18,9 @@
     border-color: #cbd5e1;
 }
 
-.admin-trip-card.full { border-left: 4px solid #f43f5e; }
-.admin-trip-card.available { border-left: 4px solid #10b981; }
+.admin-trip-card.status-0 { border-left: 4px solid #3b82f6; } /* Sắp chạy - Blue */
+.admin-trip-card.status-1 { border-left: 4px solid #f59e0b; } /* Đang chạy - Orange */
+.admin-trip-card.status-2 { border-left: 4px solid #10b981; } /* Đã hoàn thành - Green */
 
 .trip-delete-btn {
     position: absolute;

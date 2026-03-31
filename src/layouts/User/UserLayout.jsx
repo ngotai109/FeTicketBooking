@@ -238,11 +238,21 @@ const UserLayout = () => {
             {/* ── Floating Social Buttons ─────────────────────── */}
             <div className="floating-social">
                 <a
-                    href="tel:1900xxxx"
+                    href="tel:0969037123"
                     className="social-btn phone"
-                    title="Gọi điện"
+                    title="Gọi hotline"
                 >
-                    📞
+                    <i className="fas fa-phone-alt"></i>
+                </a>
+                <a
+                    href="https://zalo.me/0969037123" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-btn zalo"
+                    title="Chat Zalo"
+                    style={{ background: '#0088ff' }}
+                >
+                    <span style={{ fontWeight: '900', fontSize: '14px' }}>Zalo</span>
                 </a>
                 <a
                     href="https://www.facebook.com/"
@@ -251,23 +261,20 @@ const UserLayout = () => {
                     className="social-btn facebook"
                     title="Facebook"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
-                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                    </svg>
+                    <i className="fab fa-facebook-f"></i>
                 </a>
                 <a
                     href="https://m.me/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="social-btn zalo"
+                    className="social-btn messenger"
                     title="Messenger"
-                    style={{ background: 'linear-gradient(135deg, #f800af, #a200ff, #0078ff)' }}
+                    style={{ background: 'linear-gradient(135deg, #00B2FF 0%, #006AFF 100%)' }}
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="white">
-                        <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.908 1.438 5.504 3.686 7.21V22l3.37-1.85A11.3 11.3 0 0 0 12 20.486c5.523 0 10-4.144 10-9.243C22 6.145 17.523 2 12 2zm1.05 12.45-2.55-2.72-4.98 2.72 5.48-5.82 2.61 2.72 4.92-2.72-5.48 5.82z" />
-                    </svg>
+                    <i className="fab fa-facebook-messenger"></i>
                 </a>
             </div>
+
 
             {/* ── Chatbot Widget ───────────────────────────────── */}
             <div className="chatbot-widget" ref={chatWidgetRef}>
