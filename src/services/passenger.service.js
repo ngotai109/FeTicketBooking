@@ -2,8 +2,7 @@ import apiService from './api';
 
 const passengerService = {
     getAllPassengers: async () => {
-        // This endpoint would return unique users who have the "User" role or are stored from bookings
-        return await apiService.get('/User/passengers');
+        return await apiService.get('/Booking/passengers');
     },
 
     getPassengerById: async (id) => {
