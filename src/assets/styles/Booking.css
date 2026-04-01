@@ -379,29 +379,86 @@
     flex-wrap: nowrap;
 }
 
-.filter-select {
-    padding: 0 12px;
+/* Custom Filter Dropdowns */
+.custom-filter-dropdown {
+    position: relative;
+    width: 180px;
+}
+
+.dropdown-trigger {
+    padding: 0 16px;
     border-radius: 10px;
     border: 1.5px solid #e2e8f0;
-    outline: none;
     background: #f8fafc;
     color: #475569;
     font-size: 14px;
+    font-weight: 500;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     cursor: pointer;
     transition: all 0.2s;
-    width: 170px; /* Cố định chiều rộng vừa đủ cho text */
-    height: 44px;
-    line-height: normal; /* Đảm bảo text căn giữa dọc */
 }
 
-.filter-select:hover {
+.dropdown-trigger:hover {
     border-color: #cbd5e1;
     background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.filter-select:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+.dropdown-trigger .arrow {
+    font-size: 10px;
+    color: #94a3b8;
+    transition: transform 0.2s;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+    list-style: none;
+    padding: 6px;
+    border: 1px solid #f1f5f9;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-menu li {
+    padding: 10px 14px;
+    font-size: 14px;
+    color: #334155;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.dropdown-menu li:hover {
+    background: #f1f5f9;
+    color: #2563eb;
+    padding-left: 18px;
+}
+
+.dropdown-menu li:first-child {
+    font-weight: 600;
+    color: #94a3b8;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 4px;
+}
+
+.dropdown-menu li:first-child:hover {
+    background: none;
+    color: #94a3b8;
+    padding-left: 14px;
 }
 
 .clear-filter-btn {
@@ -636,6 +693,18 @@
     background: #dc2626;
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(239, 68, 68, 0.45);
+}
+
+.select-seat-btn.expired {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.select-seat-btn.expired:hover {
+    transform: none;
+    background: #e2e8f0;
 }
 
 /* No Results State */

@@ -82,6 +82,16 @@ const Booking = () => {
     const [expandedTripId, setExpandedTripId] = useState(null);
     const [selectedSeats, setSelectedSeats] = useState([]);
 
+    // Filter states
+    const [timeFilter, setTimeFilter] = useState('');
+    const [priceFilter, setPriceFilter] = useState('');
+    const [busTypeFilter, setBusTypeFilter] = useState('');
+    
+    // Visibility states for custom dropdowns
+    const [showTimeFilter, setShowTimeFilter] = useState(false);
+    const [showPriceFilter, setShowPriceFilter] = useState(false);
+    const [showBusTypeFilter, setShowBusTypeFilter] = useState(false);
+
     const handleSearch = async () => {
         if (!departure || !destination) {
             toast.warning('Vui lòng chọn điểm đi và điểm đến');
@@ -131,6 +141,50 @@ const Booking = () => {
         };
         fetchTrips();
     }, [searchData]);
+
+    // Filter and Sort Logic
+    const filteredAndSortedTrips = [...trips].filter(trip => {
+        // Time Filter
+        if (timeFilter) {
+            const [hours] = (trip.departureTime || trip.DepartureTime || "00:00").split(':').map(Number);
+            if (timeFilter === '0-6' && (hours < 0 || hours >= 6)) return false;
+            if (timeFilter === '6-12' && (hours < 6 || hours >= 12)) return false;
+            if (timeFilter === '12-18' && (hours < 12 || hours >= 18)) return false;
+            if (timeFilter === '18-24' && (hours < 18 || hours >= 24)) return false;
+        }
+
+        // Price Filter
+        if (priceFilter) {
+            const price = trip.ticketPrice || trip.TicketPrice || 0;
+            if (priceFilter === 'under200' && price >= 200000) return false;
+            if (priceFilter === '200-500' && (price < 200000 || price > 500000)) return false;
+            if (priceFilter === 'above500' && price <= 500000) return false;
+        }
+
+        // Bus Type Filter
+        if (busTypeFilter) {
+            const type = (trip.busType || trip.type || "").toLowerCase();
+            if (busTypeFilter === 'limousine' && !type.includes('limousine')) return false;
+            if (busTypeFilter === 'sleeper' && !type.includes('giường nằm')) return false;
+        }
+
+        return true;
+    }).sort((a, b) => {
+        if (sortType === 'earliest') {
+            return (a.departureTime || a.DepartureTime || "").localeCompare(b.departureTime || b.DepartureTime || "");
+        }
+        if (sortType === 'price-asc') {
+            return (a.ticketPrice || a.TicketPrice || 0) - (b.ticketPrice || b.TicketPrice || 0);
+        }
+        return 0;
+    });
+
+    const clearFilters = () => {
+        setTimeFilter('');
+        setPriceFilter('');
+        setBusTypeFilter('');
+        setSortType('earliest');
+    };
 
     const toggleExpand = async (tripId) => {
         if (expandedTripId === tripId) {
@@ -299,25 +353,59 @@ const Booking = () => {
                 <div className="filter-sort-bar">
                     <div className="filter-group">
                         <div className="filter-controls">
-                            <select className="filter-select">
-                                <option value="">Khoảng Giờ đi</option>
-                                <option>00:00 - 06:00</option>
-                                <option>06:00 - 12:00</option>
-                                <option>12:00 - 18:00</option>
-                                <option>18:00 - 24:00</option>
-                            </select>
-                            <select className="filter-select">
-                                <option value="">Khoảng Giá vé</option>
-                                <option>Dưới 200,000 đ</option>
-                                <option>200,000 đ - 500,000 đ</option>
-                                <option>Từ 500,000 đ trở lên</option>
-                            </select>
-                            <select className="filter-select">
-                                <option value="">Loại Xe</option>
-                                <option>Xe Limousine VIP</option>
-                                <option>Xe Giường Nằm</option>
-                            </select>
-                            <button className="clear-filter-btn">Xóa lọc</button>
+                            {/* Custom Filter Dropdowns */}
+                            <div className="custom-filter-dropdown">
+                                <div className="dropdown-trigger" onClick={() => setShowTimeFilter(!showTimeFilter)}>
+                                    {timeFilter === '0-6' ? '00:00 - 06:00' :
+                                     timeFilter === '6-12' ? '06:00 - 12:00' :
+                                     timeFilter === '12-18' ? '12:00 - 18:00' :
+                                     timeFilter === '18-24' ? '18:00 - 24:00' : 'Khoảng Giờ đi'}
+                                    <span className="arrow">▾</span>
+                                </div>
+                                {showTimeFilter && (
+                                    <ul className="dropdown-menu">
+                                        <li onClick={() => { setTimeFilter(''); setShowTimeFilter(false); }}>Khoảng Giờ đi</li>
+                                        <li onClick={() => { setTimeFilter('0-6'); setShowTimeFilter(false); }}>00:00 - 06:00</li>
+                                        <li onClick={() => { setTimeFilter('6-12'); setShowTimeFilter(false); }}>06:00 - 12:00</li>
+                                        <li onClick={() => { setTimeFilter('12-18'); setShowTimeFilter(false); }}>12:00 - 18:00</li>
+                                        <li onClick={() => { setTimeFilter('18-24'); setShowTimeFilter(false); }}>18:00 - 24:00</li>
+                                    </ul>
+                                )}
+                            </div>
+
+                            <div className="custom-filter-dropdown">
+                                <div className="dropdown-trigger" onClick={() => setShowPriceFilter(!showPriceFilter)}>
+                                    {priceFilter === 'under200' ? 'Dưới 200,000 đ' :
+                                     priceFilter === '200-500' ? '200,000 đ - 500,000 đ' :
+                                     priceFilter === 'above500' ? 'Từ 500,000 đ trở lên' : 'Khoảng Giá vé'}
+                                    <span className="arrow">▾</span>
+                                </div>
+                                {showPriceFilter && (
+                                    <ul className="dropdown-menu">
+                                        <li onClick={() => { setPriceFilter(''); setShowPriceFilter(false); }}>Khoảng Giá vé</li>
+                                        <li onClick={() => { setPriceFilter('under200'); setShowPriceFilter(false); }}>Dưới 200,000 đ</li>
+                                        <li onClick={() => { setPriceFilter('200-500'); setShowPriceFilter(false); }}>200,000 đ - 500,000 đ</li>
+                                        <li onClick={() => { setPriceFilter('above500'); setShowPriceFilter(false); }}>Từ 500,000 đ trở lên</li>
+                                    </ul>
+                                )}
+                            </div>
+
+                            <div className="custom-filter-dropdown">
+                                <div className="dropdown-trigger" onClick={() => setShowBusTypeFilter(!showBusTypeFilter)}>
+                                    {busTypeFilter === 'limousine' ? 'Xe Limousine VIP' :
+                                     busTypeFilter === 'sleeper' ? 'Xe Giường Nằm' : 'Loại Xe'}
+                                    <span className="arrow">▾</span>
+                                </div>
+                                {showBusTypeFilter && (
+                                    <ul className="dropdown-menu">
+                                        <li onClick={() => { setBusTypeFilter(''); setShowBusTypeFilter(false); }}>Loại Xe</li>
+                                        <li onClick={() => { setBusTypeFilter('limousine'); setShowBusTypeFilter(false); }}>Xe Limousine VIP</li>
+                                        <li onClick={() => { setBusTypeFilter('sleeper'); setShowBusTypeFilter(false); }}>Xe Giường Nằm</li>
+                                    </ul>
+                                )}
+                            </div>
+
+                            <button className="clear-filter-btn" onClick={clearFilters}>Xóa lọc</button>
                         </div>
                     </div>
 
@@ -341,8 +429,8 @@ const Booking = () => {
                             <div className="no-results">
                                 <h2 className="u-size-24 u-weight-700 u-m-b-16">⏳ Đang tìm kiếm...</h2>
                             </div>
-                        ) : trips.length > 0 ? (
-                            trips.map(trip => (
+                        ) : filteredAndSortedTrips.length > 0 ? (
+                            filteredAndSortedTrips.map(trip => (
                                 <div key={trip.tripId || trip.id} className="trip-card">
                                     <div className="trip-main-info">
                                         <div className="trip-image">
@@ -370,12 +458,35 @@ const Booking = () => {
                                         <div className="trip-pricing">
                                             <div className="price-value">{(trip.ticketPrice || trip.TicketPrice || 0).toLocaleString('vi-VN')} đ</div>
                                             <div className="seat-status">Còn {trip.availableSeats ?? trip.AvailableSeats ?? 0} chỗ trống</div>
-                                            <button
-                                                className={`select-seat-btn ${expandedTripId === (trip.tripId || trip.id) ? 'active' : ''}`}
-                                                onClick={() => toggleExpand(trip.tripId || trip.id)}
-                                            >
-                                                {expandedTripId === (trip.tripId || trip.id) ? 'Đóng ▴' : 'Chọn chỗ ▾'}
-                                            </button>
+                                            {(() => {
+                                                const now = new Date();
+                                                const todayStr = now.toLocaleDateString('en-CA'); // YYYY-MM-DD
+                                                const isToday = date === todayStr;
+                                                const isPastDate = date < todayStr;
+                                                
+                                                const [h, m] = (trip.departureTime || trip.DepartureTime || "00:00").split(':');
+                                                const tripTime = new Date();
+                                                tripTime.setHours(parseInt(h), parseInt(m), 0, 0);
+                                                
+                                                const isExpired = isPastDate || (isToday && now > tripTime);
+
+                                                if (isExpired) {
+                                                    return (
+                                                        <button className="select-seat-btn expired" disabled>
+                                                            Đã khởi hành
+                                                        </button>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <button
+                                                        className={`select-seat-btn ${expandedTripId === (trip.tripId || trip.id) ? 'active' : ''}`}
+                                                        onClick={() => toggleExpand(trip.tripId || trip.id)}
+                                                    >
+                                                        {expandedTripId === (trip.tripId || trip.id) ? 'Đóng ▴' : 'Chọn chỗ ▾'}
+                                                    </button>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
 
@@ -413,7 +524,7 @@ const Booking = () => {
                                                             <span className="total-label">Tạm tính:</span>
                                                             <span className="total-value">{(selectedSeats.length * (trip.ticketPrice || trip.TicketPrice || trip.price || 0)).toLocaleString('vi-VN')} đ</span>
                                                         </div>
-                                                        <button 
+                                                        <button
                                                             className="select-seat-btn active"
                                                             onClick={() => {
                                                                 const tId = trip.tripId || trip.TripId || trip.id;
@@ -421,11 +532,13 @@ const Booking = () => {
                                                                     toast.error("Không tìm thấy mã chuyến xe!");
                                                                     return;
                                                                 }
-                                                                navigate('/checkout', { state: { 
-                                                                    trip: { ...trip, tripId: tId }, 
-                                                                    selectedSeats, 
-                                                                    tripSeats 
-                                                                }});
+                                                                navigate('/checkout', {
+                                                                    state: {
+                                                                        trip: { ...trip, tripId: tId },
+                                                                        selectedSeats,
+                                                                        tripSeats
+                                                                    }
+                                                                });
                                                             }}
                                                         >
                                                             Tiếp tục đặt vé
