@@ -132,6 +132,9 @@ const Booking = () => {
                     date: searchData.date
                 });
                 setTrips(res.data?.data || res.data || []);
+                setExpandedTripId(null);
+                setSelectedSeats([]);
+                setTripSeats([]);
             } catch (error) {
                 console.error('Error fetching trips:', error);
                 setTrips([]);
