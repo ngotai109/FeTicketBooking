@@ -2,7 +2,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const api = axios.create({
-    baseURL: 'https://localhost:7000/api/',
+    baseURL: 'https://donghuongsonglamserver-hzd6fkenhtgghhbr.southeastasia-01.azurewebsites.net/api/',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -62,7 +62,7 @@ api.interceptors.response.use(
                 return Promise.reject(error);
             }
             try {
-                const response = await axios.post('https://localhost:7000/api/Auth/refresh_token', {
+                const response = await axios.post('https://donghuongsonglamserver-hzd6fkenhtgghhbr.southeastasia-01.azurewebsites.net/api/Auth/refresh_token', {
                     refreshToken: refreshToken
                 });
 

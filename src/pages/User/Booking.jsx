@@ -219,7 +219,8 @@ const Booking = () => {
     };
 
     const renderSeatMap = (trip) => {
-        const layout = getBusLayout(trip.busType || '34');
+        // Ưu tiên dùng số lượng ghế thực tế để lấy layout, sau đó mới dùng type name
+        const layout = getBusLayout(trip.totalSeats || trip.TotalSeats || trip.busType || '34');
         return (
             <div className="seat-map-card">
                 <div className="seat-legend">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../../assets/styles/Checkout.css';
@@ -91,8 +92,23 @@ const Checkout = () => {
     };
 
     const handleCheckout = async () => {
-        if (!customer.name || !customer.phone) {
-            toast.error("Vui lòng điền đủ thông tin!");
+        // 1. Validate Họ tên
+        if (!customer.name || customer.name.trim().length < 2) {
+            toast.error("Vui lòng nhập họ tên hợp lệ!");
+            return;
+        }
+        
+        // 2. Validate Số điện thoại (Định dạng VN)
+        const phoneRegex = /^(0|84)(3|5|7|8|9)([0-9]{8})$/;
+        if (!phoneRegex.test(customer.phone)) {
+            toast.error("Số điện thoại không hợp lệ (Yêu cầu 10 số)!");
+            return;
+        }
+
+        // 3. Validate Email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!customer.email || !emailRegex.test(customer.email)) {
+            toast.error("Vui lòng nhập Email đúng định dạng!");
             return;
         }
 
@@ -113,11 +129,20 @@ const Checkout = () => {
             };
 
             const res = await bookingService.createBooking(bookingPayload);
+            const bookingId = res.data.bookingId;
 
             if (paymentMethod === 'vnpay') {
-                const amount = selectedSeats.length * ticketPrice;
-                toast.info("Đang chuyển hướng sang VNPay...");
-                setTimeout(() => navigate('/payment/vnpay', { state: { amount, bookingId: res.data.bookingId } }), 1500);
+                try {
+                    toast.info("Đang tạo mã QR thanh toán PayOS...");
+                    // Gọi API Backend của mình để tạo link thanh toán thật
+                    const response = await axios.post(`http://localhost:5000/api/Payment/create-payos-link/${bookingId}`);
+                    if (response.data.checkoutUrl) {
+                        // Chuyển hướng khách sang trang thanh toán của PayOS
+                        window.location.href = response.data.checkoutUrl;
+                    }
+                } catch (payError) {
+                    toast.error("Không thể tạo link thanh toán PayOS. Vui lòng thử lại!");
+                }
             } else {
                 toast.success("Đặt vé thành công! Check Email nhé!");
                 setTimeout(() => navigate('/lookup/ticket'), 2000);

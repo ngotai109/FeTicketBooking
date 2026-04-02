@@ -403,7 +403,7 @@ const ScheduleManagement = () => {
                                 <option value="">-- Chọn xe --</option>
                                 {buses.map(b => (
                                     <option key={b.busId || b.BusId} value={b.busId || b.BusId}>
-                                        {b.plateNumber || b.PlateNumber || b.licensePlate} ({b.totalSeats || b.TotalSeats || b.capacity} chỗ)
+                                        {b.plateNumber || b.PlateNumber || b.licensePlate} ({b.defaultSeats || b.DefaultSeats || b.totalSeats || b.TotalSeats || 40} chỗ)
                                     </option>
                                 ))}
                             </select>

@@ -95,5 +95,23 @@ export const BUS_LAYOUTS = {
 };
 
 export const getBusLayout = (type) => {
-    return BUS_LAYOUTS[type.toString()] || BUS_LAYOUTS['40'];
+    if (!type) return BUS_LAYOUTS['34'];
+    
+    // Nếu type truyền vào là số (số lượng ghế)
+    const numSeats = parseInt(type);
+    if (!isNaN(numSeats)) {
+        if (numSeats <= 17) return BUS_LAYOUTS['16'];
+        if (numSeats >= 18 && numSeats <= 24) return BUS_LAYOUTS['22'];
+        if (numSeats >= 30 && numSeats <= 36) return BUS_LAYOUTS['34'];
+        if (numSeats >= 37) return BUS_LAYOUTS['40'];
+    }
+
+    // Fallback dự phòng: Nếu type truyền vào là chuỗi (tên loại xe)
+    const sType = type.toString().toLowerCase();
+    if (sType.includes('22')) return BUS_LAYOUTS['22'];
+    if (sType.includes('34')) return BUS_LAYOUTS['34'];
+    if (sType.includes('16')) return BUS_LAYOUTS['16'];
+    if (sType.includes('40')) return BUS_LAYOUTS['40'];
+    
+    return BUS_LAYOUTS['40'];
 };
