@@ -275,13 +275,27 @@ const Booking = () => {
                             <h4 className="floor-title">Tầng 2</h4>
                             <div className="seat-grid" style={{ gridTemplateColumns: `repeat(${layout.columns}, 54px)` }}>
                                 {layout.floor2.map(seat => {
+                                    const targetNum = seat.seatNumber?.toString().trim().toUpperCase();
+                                    const apiSeat = tripSeats.find(s => {
+                                        const sNum = (s.seatNumber || s.SeatNumber || '').toString().trim().toUpperCase();
+                                        return sNum === targetNum;
+                                    });
                                     const isSelected = selectedSeats.includes(seat.seatNumber);
+                                    let statusClass = 'empty';
+
+                                    if (isSelected) statusClass = 'selecting';
+                                    else if (apiSeat) {
+                                        if (apiSeat.status === 1 || apiSeat.status === 'Booked') statusClass = 'sold';
+                                        else if (apiSeat.status === 2) statusClass = 'hold';
+                                    }
+
+                                    const isSelectable = statusClass === 'empty';
 
                                     return (
                                         <div
                                             key={seat.seatNumber}
-                                            onClick={() => handleSeatToggle(seat.seatNumber)}
-                                            className={`seat-item pointer ${isSelected ? 'selecting' : 'empty'}`}
+                                            onClick={() => isSelectable || isSelected ? handleSeatToggle(seat.seatNumber) : null}
+                                            className={`seat-item ${statusClass} ${isSelectable || isSelected ? 'pointer' : 'not-allowed'}`}
                                             style={{
                                                 gridRow: seat.row + 1,
                                                 gridColumn: seat.col + 1
@@ -535,7 +549,7 @@ const Booking = () => {
                                                                 }
                                                                 navigate('/checkout', {
                                                                     state: {
-                                                                        trip: { ...trip, tripId: tId },
+                                                                        trip: { ...trip, tripId: tId, departureDate: date },
                                                                         selectedSeats,
                                                                         tripSeats
                                                                     }

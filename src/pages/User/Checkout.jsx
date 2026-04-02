@@ -25,6 +25,32 @@ const Checkout = () => {
     const arrPt = trip.arrivalOfficeName || trip.ArrivalOfficeName || trip.arrivalPoint || '--';
     const depTime = trip.departureTime || trip.DepartureTime || '--:--';
     const arrTime = trip.arrivalTime || trip.ArrivalTime || '--:--';
+    const pickupTime = trip.pickupTime || trip.PickupTime || depTime; // Fallback to departure time if not set
+    const depDateRaw = trip.departureDate || trip.DepartureDate || '';
+    
+    const formatDate = (dateStr) => {
+        if (!dateStr) return 'Ngày không xác định';
+        try {
+            const dateObj = new Date(dateStr);
+            if (isNaN(dateObj.getTime())) {
+                // If it's pure YYYY-MM-DD, try to split
+                const parts = dateStr.includes('-') ? dateStr.split('-') : dateStr.split('/');
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) return `${parts[2]}/${parts[1]}/${parts[0]}`; // YYYY-MM-DD
+                    return dateStr; // Already in DD/MM/YYYY or something else
+                }
+                return dateStr;
+            }
+            const d = dateObj.getDate().toString().padStart(2, '0');
+            const m = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+            const y = dateObj.getFullYear();
+            return `${d}/${m}/${y}`;
+        } catch (e) {
+            return dateStr;
+        }
+    };
+
+    const depDateFormatted = formatDate(depDateRaw);
 
     // Self-healing: If tripSeats is missing, fetch it!
     useEffect(() => {
@@ -271,7 +297,7 @@ const Checkout = () => {
                                 </div>
                                 <div className="info-row">
                                     <div className="info-label">Giờ xuất bến</div>
-                                    <div className="info-value" style={{ color: '#3182ce' }}>{depTime} <span style={{ color: '#2d3748', fontWeight: 'normal' }}>ngày 30/03/2026</span></div>
+                                    <div className="info-value" style={{ color: '#3182ce' }}>{depTime} <span style={{ color: '#2d3748', fontWeight: 'normal' }}>ngày {depDateFormatted}</span></div>
                                 </div>
                                 <div className="info-row">
                                     <div className="info-label">Điểm đón</div>
@@ -279,7 +305,7 @@ const Checkout = () => {
                                 </div>
                                 <div className="info-row">
                                     <div className="info-label">Thời gian đón</div>
-                                    <div className="info-value" style={{ color: '#3182ce' }}>{depTime} <span style={{ color: '#2d3748', fontWeight: 'normal' }}>ngày 30/03/2026</span></div>
+                                    <div className="info-value" style={{ color: '#3182ce' }}>{pickupTime} <span style={{ color: '#2d3748', fontWeight: 'normal' }}>ngày {depDateFormatted}</span></div>
                                 </div>
                                 <div className="info-row">
                                     <div className="info-label">Điểm đến</div>
