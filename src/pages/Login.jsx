@@ -66,7 +66,7 @@ const Login = () => {
 
         setIsLoading(true);
         try {
-            const res = await fetch('https://localhost:7000/api/Auth/login', {
+            const res = await fetch('https://donghuongsonglamserver-hzd6fkenhtgghhbr.southeastasia-01.azurewebsites.net/api/Auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
