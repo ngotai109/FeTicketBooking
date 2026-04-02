@@ -311,7 +311,7 @@ const Checkout = () => {
 
                             <div className="u-flex u-align-center u-gap-8" style={{ marginBottom: '30px' }}>
                                 <input type="checkbox" defaultChecked />
-                                <span style={{ color: '#4a5568' }}>Tôi đồng ý quy định của <strong style={{ color: '#e53e3e' }}>LẠC HỒNG SUNRISE. Hotline: 1900 3088</strong></span>
+                                <span style={{ color: '#4a5568' }}>Tôi đồng ý quy định của <strong style={{ color: '#e53e3e' }}>ĐỒNG HƯƠNG SÔNG LAM. Hotline: 1900 3088</strong></span>
                             </div>
 
                             <div className="checkout-actions">

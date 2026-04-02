@@ -50,9 +50,9 @@ export default function AppRoutes() {
       <Route
         path="/admin"
         element={
-          // <ProtectedRoute>
-          <AdminLayout />
-          /* </ProtectedRoute> */
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
         }
       >
         <Route index element={<AdminDashboard />} />
