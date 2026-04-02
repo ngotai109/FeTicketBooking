@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import provinceService from '../../services/province.service';
 import wardService from '../../services/ward.service';
 import officeService from '../../services/office.service';
+import routeService from '../../services/route.service';
 import '../../assets/styles/Home.css';
 import bg3 from '../../assets/images/bg3.jpg';
 
@@ -18,6 +19,7 @@ const Home = () => {
     const [provinces, setProvinces] = useState([]);
     const [wards, setWards] = useState([]);
     const [offices, setOffices] = useState([]);
+    const [routes, setRoutes] = useState([]);
     const [departure, setDeparture] = useState('');
     const [destination, setDestination] = useState('');
     const [showDepList, setShowDepList] = useState(false);
@@ -42,7 +44,17 @@ const Home = () => {
                 console.error('Lỗi khi lấy danh sách địa điểm:', error);
             }
         };
+        const fetchRoutes = async () => {
+            try {
+                const res = await routeService.getRoutes();
+                setRoutes(res.data?.data || res.data || []);
+            } catch (error) {
+                console.error("Lỗi lấy tuyến đường:", error);
+            }
+        };
+
         fetchLocations();
+        fetchRoutes();
     }, []);
 
     const getGroupedOffices = () => {
@@ -235,149 +247,51 @@ const Home = () => {
                     </div>
 
                     <div className="routes-grid">
-                        <div className="route-card">
-                            <div className="route-image">
-                                <img src={bg3} alt="Hà Nội - Nghệ An" />
-                            </div>
-                            <div className="route-info">
-                                <div className="route-type">Cabin 22 phòng <span className="vip-tag">VIP</span></div>
-                                <div className="route-points">
-                                    <div className="point-item">
-                                        <span className="point-icon yellow">•</span>
-                                        <span>BX Nước Ngầm</span>
+                        {routes.filter(r => r.isActive !== false).slice(0, 6).map((route, index) => (
+                            <div key={route.routeId || index} className="route-card">
+                                <div className="route-image">
+                                    <img src={route.imageUrl || bg3} alt={route.routeName} />
+                                </div>
+                                <div className="route-info">
+                                    <div className="route-type">Xe Giường Nằm / Cabin <span className="vip-tag">VIP</span></div>
+                                    <div className="route-points">
+                                        <div className="point-item">
+                                            <span className="point-icon yellow">•</span>
+                                            <span>{(route.departureOfficeName || route.departureOffice?.officeName || 'Điểm đi')}</span>
+                                        </div>
+                                        <div className="route-connector">⇅</div>
+                                        <div className="point-item">
+                                            <span className="point-icon yellow">•</span>
+                                            <span>{(route.arrivalOfficeName || route.arrivalOffice?.officeName || 'Điểm đến')}</span>
+                                        </div>
                                     </div>
-                                    <div className="route-connector">⇅</div>
-                                    <div className="point-item">
-                                        <span className="point-icon yellow">•</span>
-                                        <span>Đà Nẵng</span>
+                                    <div className="route-footer">
+                                        <div className="route-price">{(route.basePrice || 0).toLocaleString('vi-VN')}đ</div>
+                                        <button 
+                                            className="book-now-btn"
+                                            onClick={() => {
+                                                const depName = route.departureOfficeName || route.departureOffice?.officeName;
+                                                const destName = route.arrivalOfficeName || route.arrivalOffice?.officeName;
+                                                if (depName && destName) {
+                                                    navigate('/booking', {
+                                                        state: { departure: depName, destination: destName, date: date }
+                                                    });
+                                                }
+                                            }}
+                                        >
+                                            Đặt vé
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="route-footer">
-                                    <div className="route-price">700.000đ</div>
-                                    <button className="book-now-btn">Đặt vé</button>
-                                </div>
                             </div>
-                        </div>
+                        ))}
 
-                        <div className="route-card">
-                            <div className="route-image">
-                                <img src={bg3} alt="Nghệ An - Hội An" />
+                        {/* Fallback if no routes found */}
+                        {routes.length === 0 && (
+                            <div style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '40px', color: '#64748b' }}>
+                                Đang cập nhật danh sách lộ trình phổ biến...
                             </div>
-                            <div className="route-info">
-                                <div className="route-type">Cabin 22 phòng <span className="vip-tag">VIP</span></div>
-                                <div className="route-points">
-                                    <div className="point-item">
-                                        <span className="point-icon yellow">•</span>
-                                        <span>BX Nước Ngầm</span>
-                                    </div>
-                                    <div className="route-connector">⇅</div>
-                                    <div className="point-item">
-                                        <span className="point-icon yellow">•</span>
-                                        <span>Hội An</span>
-                                    </div>
-                                </div>
-                                <div className="route-footer">
-                                    <div className="route-price">750.000đ</div>
-                                    <button className="book-now-btn">Đặt vé</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="route-card">
-                            <div className="route-image">
-                                <img src={bg3} alt="BX Nước Ngầm - Đà Nẵng" />
-                            </div>
-                            <div className="route-info">
-                                <div className="route-type">Limousine 34 giường <span className="vip-tag">VIP</span></div>
-                                <div className="route-points">
-                                    <div className="point-item">
-                                        <span className="point-icon yellow">•</span>
-                                        <span>BX Nước Ngầm</span>
-                                    </div>
-                                    <div className="route-connector">⇅</div>
-                                    <div className="point-item">
-                                        <span className="point-icon yellow">•</span>
-                                        <span>Đà Nẵng</span>
-                                    </div>
-                                </div>
-                                <div className="route-footer">
-                                    <div className="route-price">500.000đ</div>
-                                    <button className="book-now-btn">Đặt vé</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="route-card">
-                            <div className="route-image">
-                                <img src={bg3} alt="Hội An - BX Nước Ngầm" />
-                            </div>
-                            <div className="route-info">
-                                <div className="route-type">Limousine 34 giường <span className="vip-tag">VIP</span></div>
-                                <div className="route-points">
-                                    <div className="point-item">
-                                        <span className="point-icon yellow">•</span>
-                                        <span>BX Nước Ngầm</span>
-                                    </div>
-                                    <div className="route-connector">⇅</div>
-                                    <div className="point-item">
-                                        <span className="point-icon yellow">•</span>
-                                        <span>Hội An</span>
-                                    </div>
-                                </div>
-                                <div className="route-footer">
-                                    <div className="route-price">550.000đ</div>
-                                    <button className="book-now-btn">Đặt vé</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="route-card">
-                            <div className="route-image">
-                                <img src={bg3} alt="Đà Nẵng - Đà Lạt" />
-                            </div>
-                            <div className="route-info">
-                                <div className="route-type">Cabin 24 phòng <span className="vip-tag">VIP</span></div>
-                                <div className="route-points">
-                                    <div className="point-item">
-                                        <span className="point-icon yellow">•</span>
-                                        <span>Đà Nẵng</span>
-                                    </div>
-                                    <div className="route-connector">⇅</div>
-                                    <div className="point-item">
-                                        <span className="point-icon yellow">•</span>
-                                        <span>Đà Lạt</span>
-                                    </div>
-                                </div>
-                                <div className="route-footer">
-                                    <div className="route-price">Từ 650.000đ</div>
-                                    <button className="book-now-btn">Đặt vé</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="route-card">
-                            <div className="route-image">
-                                <img src={bg3} alt="Hội An - Đà Lạt" />
-                            </div>
-                            <div className="route-info">
-                                <div className="route-type">Cabin 24 phòng <span className="vip-tag">VIP</span></div>
-                                <div className="route-points">
-                                    <div className="point-item">
-                                        <span className="point-icon yellow">•</span>
-                                        <span>Hội An</span>
-                                    </div>
-                                    <div className="route-connector">⇅</div>
-                                    <div className="point-item">
-                                        <span className="point-icon yellow">•</span>
-                                        <span>Đà Lạt</span>
-                                    </div>
-                                </div>
-                                <div className="route-footer">
-                                    <div className="route-price">Từ 700.000đ</div>
-                                    <button className="book-now-btn">Đặt vé</button>
-                                </div>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </section>

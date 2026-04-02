@@ -452,7 +452,7 @@ const Booking = () => {
                                 <div key={trip.tripId || trip.id} className="trip-card">
                                     <div className="trip-main-info">
                                         <div className="trip-image">
-                                            <img src={trip.image || '/default-bus.png'} alt="Bus" onError={(e) => e.target.src = '/default-bus.png'} />
+                                            <img src={trip.image || bg3} alt="Bus" />
                                             <div className="trip-notice">KHUYẾN MÃI TỚI 20%</div>
                                         </div>
 
