@@ -8,6 +8,6 @@ export default defineConfig({
     port: 3000, // Giữ nguyên port 3000 giống CRA nếu bạn muốn
   },
   build: {
-    outDir: 'build', // CRA mặc định dùng build, Vite mặc định dùng dist. Ta để là build cho giống nhé.
+    outDir: 'dist', // Đã đổi sang 'dist' để khớp với mặc định của Vercel
   }
 });
