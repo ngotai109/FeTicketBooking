@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import paymentService from '../../services/payment.service';
 import { toast } from 'react-toastify';
-import '../../assets/styles/VNPayMock.css'; // Reuse existing styles or create new
+import '../../assets/styles/vnpay-mock.css'; // Updated for Case-sensitive Linux (Vercel)
 
 const VNPayReturn = () => {
     const location = useLocation();
