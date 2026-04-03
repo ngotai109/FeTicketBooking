@@ -5,6 +5,7 @@ import wardService from '../../services/ward.service';
 import officeService from '../../services/office.service';
 import routeService from '../../services/route.service';
 import '../../assets/styles/Home.css';
+import NetworkMap from '../../components/NetworkMap/NetworkMap';
 import bg3 from '../../assets/images/bg3.jpg';
 
 const LocationIcon = () => (
@@ -295,6 +296,14 @@ const Home = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Network Map Section */}
+            <section className="home-network-map-section">
+                <div className="container">
+                    <NetworkMap height="750px" showTitle={true} />
+                </div>
+            </section>
+
             {/* About Section */}
             <section className="home-about-section">
                 <div className="container">

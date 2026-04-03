@@ -577,11 +577,18 @@
 
 /* Popular Routes Section Styles - Left Aligned and Gray Background */
 .popular-routes-section {
-    padding: 60px 0;
+    padding: 80px 0;
     width: 100%;
     background-color: #f8fafc;
     /* Very light gray/blue background */
     border-top: 1px solid #f1f5f9;
+}
+
+/* Network Map Section - White Background for Alternating Effect */
+.home-network-map-section {
+    padding: 20px 0 80px 0; /* Giảm padding trên để gần với Section trước hơn */
+    background-color: #ffffff;
+    width: 100%;
 }
 
 .section-header {
@@ -731,11 +738,12 @@
     transform: scale(1.05);
 }
 
-/* About Section Background - White */
+/* About Section Background - Gray to alternate */
 .home-about-section {
     padding: 80px 0;
-    background-color: #ffffff;
+    background-color: #f8fafc;
     width: 100%;
+    border-top: 1px solid #f1f5f9;
 }
 
 @media (max-width: 1240px) {
