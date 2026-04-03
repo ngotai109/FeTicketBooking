@@ -1,0 +1,195 @@
+.schedule-lookup-container {
+    padding: 60px 0;
+    background-color: #f8fafc;
+    min-height: 80vh;
+}
+
+.schedule-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.schedule-title {
+    font-size: 36px;
+    font-weight: 850;
+    color: #1e293b;
+    margin-bottom: 30px;
+    letter-spacing: -0.02em;
+}
+
+.route-selector {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.route-tab {
+    padding: 12px 28px;
+    border: 2px solid #e2e8f0;
+    background: #fff;
+    border-radius: 12px;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.route-tab:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.route-tab.active {
+    background-color: #ef4444;
+    color: #fff;
+    border-color: #ef4444;
+    box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3);
+}
+
+/* Trips Grid Layout */
+.trips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.trip-card-simple {
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f5f9;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.trip-card-simple:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.trip-time-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.time-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.time-label {
+    font-size: 12px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.time-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.time-arrow {
+    font-size: 20px;
+    color: #cbd5e1;
+}
+
+.trip-middle-info {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.bus-type-badge {
+    background: #fef2f2;
+    color: #ef4444;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.bus-plate {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.trip-footer-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.price-tag {
+    font-size: 20px;
+    font-weight: 800;
+    color: #ef4444;
+}
+
+.seat-count {
+    font-size: 14px;
+    color: #059669;
+    font-weight: 600;
+}
+
+.btn-book-now-simple {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: filter 0.3s ease;
+}
+
+.btn-book-now-simple:hover {
+    filter: brightness(1.1);
+}
+
+.no-trips-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px;
+    background: #fff;
+    border-radius: 20px;
+    color: #64748b;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.schedule-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+    font-size: 18px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+@media (max-width: 640px) {
+    .trips-grid {
+        grid-template-columns: 1fr;
+    }
+    .schedule-title {
+        font-size: 28px;
+    }
+}

@@ -26,6 +26,7 @@ import CargoTransport from "../pages/User/CargoTransport";
 import PassengerTransport from "../pages/User/PassengerTransport";
 import News from "../pages/User/News";
 import Contact from "../pages/User/Contact";
+import ScheduleLookup from "../pages/User/ScheduleLookup";
 
 export default function AppRoutes() {
   return (
@@ -41,6 +42,7 @@ export default function AppRoutes() {
         <Route path="about/history" element={<OfficeSystem />} />
         <Route path="lookup/ticket" element={<TicketLookup />} />
         <Route path="lookup/result" element={<TicketResult />} />
+        <Route path="lookup/schedule" element={<ScheduleLookup />} />
         <Route path="services/cargo" element={<CargoTransport />} />
         <Route path="services/transport" element={<PassengerTransport />} />
         <Route path="news" element={<News />} />
@@ -66,7 +68,7 @@ export default function AppRoutes() {
         <Route path="bus-types" element={<BusTypeManagement />} />
         <Route path="passengers" element={<PassengerManagement />} />
       </Route>
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   );
 }
