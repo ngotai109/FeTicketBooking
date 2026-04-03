@@ -7,8 +7,8 @@ const NetworkMap = ({ height = "calc(100vh - 100px)", showTitle = false }) => {
     const [hanoiWards, setHanoiWards] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const [zoomLevel, setZoomLevel] = useState(2.2);
-    const [position, setPosition] = useState({ x: -250, y: -150 });
+    const [zoomLevel, setZoomLevel] = useState(1.1);
+    const [position, setPosition] = useState({ x: 80, y: 50 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
@@ -87,7 +87,7 @@ const NetworkMap = ({ height = "calc(100vh - 100px)", showTitle = false }) => {
     const handleMouseMove = (e) => { if (!isDragging) return; setPosition({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y }); };
     const handleMouseUp = () => setIsDragging(false);
     const handleWheel = (e) => { const scale = -e.deltaY * 0.001; setZoomLevel(prev => Math.min(Math.max(prev + scale, 0.4), 3)); };
-    const reset = () => { setZoomLevel(2.2); setPosition({ x: -250, y: -150 }); };
+    const reset = () => { setZoomLevel(1.1); setPosition({ x: 80, y: 50 }); };
 
     if (isLoading) return <div className="network-map-loading">Đang tối ưu góc nhìn toàn cảnh...</div>;
 
