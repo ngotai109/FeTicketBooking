@@ -6,10 +6,9 @@ import '../../assets/styles/NetworkMap.css';
 const NetworkMap = ({ height = "calc(100vh - 100px)", showTitle = false }) => {
     const [hanoiWards, setHanoiWards] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    
-    // ZOOM & PAN - ĐIỀU CHỈNH VỀ MỨC TOÀN CẢNH CÂN ĐỐI (ZOOM 0.75)
-    const [zoomLevel, setZoomLevel] = useState(0.75);
-    const [position, setPosition] = useState({ x: 40, y: 50 });
+
+    const [zoomLevel, setZoomLevel] = useState(2.2);
+    const [position, setPosition] = useState({ x: -250, y: -150 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
@@ -44,23 +43,25 @@ const NetworkMap = ({ height = "calc(100vh - 100px)", showTitle = false }) => {
                         wardName: w.wardName.startsWith("Quận") ? w.wardName : `Quận ${w.wardName}`
                     }));
                     setHanoiWards(formattedHn.length >= 3 ? formattedHn : [
-                        { wardId: 101, wardName: "Quận Cầu Giấy" }, 
-                        { wardId: 102, wardName: "Quận Hà Đông" }, 
+                        { wardId: 101, wardName: "Quận Cầu Giấy" },
+                        { wardId: 102, wardName: "Quận Hà Đông" },
                         { wardId: 103, wardName: "Quận Hoàng Mai" }
                     ]);
                 }
-            } catch (error) { setHanoiWards([
-                { wardId: 101, wardName: "Quận Cầu Giấy" }, { wardId: 102, wardName: "Quận Hà Đông" }, { wardId: 103, wardName: "Quận Hoàng Mai" }
-            ]); } 
+            } catch (error) {
+                setHanoiWards([
+                    { wardId: 101, wardName: "Quận Cầu Giấy" }, { wardId: 102, wardName: "Quận Hà Đông" }, { wardId: 103, wardName: "Quận Hoàng Mai" }
+                ]);
+            }
             finally { setIsLoading(false); }
         };
         fetchData();
     }, []);
 
     const hnNodes = [{ x: 100, y: 150 }, { x: 220, y: 270 }, { x: 380, y: 270 }];
-    const ninhBinhEnd = { x: 565, y: 270 };      
-    const thanhHoaEnd = { x: 1150, y: 270 };    
-    
+    const ninhBinhEnd = { x: 565, y: 270 };
+    const thanhHoaEnd = { x: 1150, y: 270 };
+
     const getNaNodes = () => {
         let nodes = [];
         const HORIZONTAL_SPACING = 150;
@@ -86,7 +87,7 @@ const NetworkMap = ({ height = "calc(100vh - 100px)", showTitle = false }) => {
     const handleMouseMove = (e) => { if (!isDragging) return; setPosition({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y }); };
     const handleMouseUp = () => setIsDragging(false);
     const handleWheel = (e) => { const scale = -e.deltaY * 0.001; setZoomLevel(prev => Math.min(Math.max(prev + scale, 0.4), 3)); };
-    const reset = () => { setZoomLevel(0.75); setPosition({ x: 40, y: 50 }); };
+    const reset = () => { setZoomLevel(2.2); setPosition({ x: -250, y: -150 }); };
 
     if (isLoading) return <div className="network-map-loading">Đang tối ưu góc nhìn toàn cảnh...</div>;
 
@@ -98,7 +99,7 @@ const NetworkMap = ({ height = "calc(100vh - 100px)", showTitle = false }) => {
                     <p className="section-subtitle">Chuyên nghiệp - An toàn - Phủ rộng</p>
                 </div>
             )}
-            
+
             <div className="network-map-wrapper" style={{ height }} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
                 <div className="map-legend-layer">
                     <h4 className="legend-title">CHÚ GIẢI LỘ TRÌNH</h4>
@@ -110,7 +111,7 @@ const NetworkMap = ({ height = "calc(100vh - 100px)", showTitle = false }) => {
 
                 <div className="map-main-container" onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onWheel={handleWheel} style={{ cursor: isDragging ? 'grabbing' : 'grab' }}>
                     <div className="map-canvas-plane" style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${zoomLevel})`, transformOrigin: '0 0' }}>
-                        <svg viewBox="0 0 2800 2800" className="network-svg-element">
+                        <svg viewBox="0 0 2400 1600" className="network-svg-element">
                             <path d={`M ${hnNodes[0].x} ${hnNodes[0].y} L ${hnNodes[1].x} ${hnNodes[1].y} L ${hnNodes[2].x} ${hnNodes[2].y}`} stroke="#ef4444" strokeWidth="14" fill="none" strokeLinejoin="round" />
                             <path d={`M ${hnNodes[2].x} ${hnNodes[2].y} L ${ninhBinhEnd.x} ${ninhBinhEnd.y}`} stroke="#2563eb" strokeWidth="14" fill="none" />
                             <path d={`M ${ninhBinhEnd.x} ${ninhBinhEnd.y} L ${thanhHoaEnd.x} ${thanhHoaEnd.y}`} stroke="#f59e0b" strokeWidth="14" fill="none" />

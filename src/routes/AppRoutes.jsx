@@ -27,6 +27,7 @@ import PassengerTransport from "../pages/User/PassengerTransport";
 import News from "../pages/User/News";
 import Contact from "../pages/User/Contact";
 import ScheduleLookup from "../pages/User/ScheduleLookup";
+import VNPayReturn from "../pages/User/VNPayReturn";
 
 export default function AppRoutes() {
   return (
@@ -38,6 +39,7 @@ export default function AppRoutes() {
         <Route path="booking" element={<Booking />} />
         <Route path="checkout" element={<Checkout />} />
         <Route path="payment/vnpay" element={<VNPayMock />} />
+        <Route path="payment/vnpay-return" element={<VNPayReturn />} />
         <Route path="about/our" element={<AboutUs />} />
         <Route path="about/history" element={<OfficeSystem />} />
         <Route path="lookup/ticket" element={<TicketLookup />} />

@@ -3,8 +3,9 @@ import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../../assets/styles/Checkout.css';
-import { Card } from '../../components/Common';
+import Card from '../../components/Common/Card';
 import bookingService from '../../services/booking.service';
+import paymentService from '../../services/payment.service';
 
 const Checkout = () => {
     const location = useLocation();
@@ -156,18 +157,29 @@ const Checkout = () => {
 
             const res = await bookingService.createBooking(bookingPayload);
             const bookingId = res.data.bookingId;
+            const totalAmount = selectedSeats.length * ticketPrice;
 
             if (paymentMethod === 'vnpay') {
                 try {
-                    toast.info("Đang tạo mã QR thanh toán PayOS...");
-                    // Gọi API Backend của mình để tạo link thanh toán thật
-                    const response = await axios.post(`http://localhost:5000/api/Payment/create-payos-link/${bookingId}`);
-                    if (response.data.checkoutUrl) {
-                        // Chuyển hướng khách sang trang thanh toán của PayOS
-                        window.location.href = response.data.checkoutUrl;
+                    toast.info("Đang chuyển hướng sang cổng thanh toán VNPay...");
+                    
+                    const paymentData = {
+                        orderId: bookingId,
+                        fullName: customer.name,
+                        amount: totalAmount,
+                        description: `Thanh toán vé xe cho ${customer.name} - ${selectedSeats.join(', ')}`
+                    };
+
+                    const payRes = await paymentService.createVNPayPayment(paymentData);
+                    
+                    if (payRes.data?.paymentUrl) {
+                        window.location.href = payRes.data.paymentUrl;
+                    } else {
+                        throw new Error("Không lấy được link thanh toán.");
                     }
                 } catch (payError) {
-                    toast.error("Không thể tạo link thanh toán PayOS. Vui lòng thử lại!");
+                    console.error("Lỗi VNPay:", payError);
+                    toast.error("Không thể kết nối cổng thanh toán VNPay. Vui lòng thử lại!");
                 }
             } else {
                 toast.success("Đặt vé thành công! Check Email nhé!");
