@@ -131,3 +131,28 @@
   font-size: 18px;
   color: #64748b;
 }
+
+@media (max-width: 768px) {
+  .network-map-page {
+    height: 500px;
+    border-radius: 0;
+  }
+  .map-legend-ui {
+    bottom: unset;
+    top: 10px;
+    left: 10px;
+    padding: 12px;
+    margin-bottom: 0;
+    border-radius: 12px;
+    min-width: 140px;
+  }
+  .map-controls {
+    bottom: 50px;
+    right: 10px;
+  }
+  .control-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}

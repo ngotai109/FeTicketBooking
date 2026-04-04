@@ -480,6 +480,11 @@
 }
 
 @media (max-width: 992px) {
+    .hero-search-section {
+        margin-top: -40px;
+        padding-bottom: 20px;
+    }
+
     .search-form {
         flex-wrap: wrap;
     }

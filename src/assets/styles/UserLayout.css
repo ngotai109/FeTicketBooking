@@ -280,6 +280,16 @@ body {
   object-position: center top;
 }
 
+@media (max-width: 768px) {
+  .user-hero-background {
+    background: #fdf220;
+  }
+  .hero-banner-img {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+}
+
 .user-main {
   flex: 1;
   position: relative;
@@ -446,7 +456,17 @@ body {
 
 @media (max-width: 576px) {
   .user-logo-title {
-    font-size: 16px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-logo-title {
+    font-size: 13px;
+  }
+  .user-logo-img {
+    width: 32px;
+    height: 32px;
   }
 }
 
@@ -538,8 +558,17 @@ body {
 
 @media (max-width: 768px) {
   .floating-social {
-    left: 15px;
-    bottom: 50px;
+    left: 10px;
+    bottom: 30px;
+    gap: 12px;
+  }
+  .social-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.2rem;
+  }
+  .social-btn.zalo span {
+    font-size: 11px !important;
   }
 }
 

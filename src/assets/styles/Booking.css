@@ -985,3 +985,70 @@
         width: 100%;
     }
 }
+
+@media (max-width: 992px) {
+    .modifier-inputs {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .mod-input {
+        flex: 1 1 calc(50% - 10px);
+    }
+    .mod-swap {
+        display: none; /* Hide swap on mobile for space */
+    }
+    .mod-search-btn {
+        width: 100%;
+        margin-top: 10px;
+    }
+    .booking-content {
+        grid-template-columns: 1fr;
+    }
+    .filter-sidebar {
+        display: none; /* Hidden by default on mobile, suggest adding a toggle later */
+    }
+}
+
+@media (max-width: 768px) {
+    .trip-main-info {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        text-align: center;
+    }
+    .trip-image img {
+        height: 200px;
+    }
+    .trip-timeline {
+        align-items: center;
+    }
+    .trip-pricing {
+        border-left: none;
+        border-top: 1px dashed #e2e8f0;
+        padding-top: 15px;
+        padding-left: 0;
+        align-items: center;
+    }
+    .price-value {
+        font-size: 24px;
+    }
+    .floor-container {
+        flex-direction: column;
+        gap: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .mod-input {
+        flex: 1 1 100%;
+    }
+    .time {
+        font-size: 18px;
+    }
+    .seat-grid {
+        gap: 8px;
+    }
+    .seat-item {
+        height: 30px;
+        font-size: 10px;
+    }
+}

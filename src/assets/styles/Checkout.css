@@ -112,6 +112,34 @@
     border-color: #3182ce;
 }
 
+@media (max-width: 600px) {
+    .checkout-form-field {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .checkout-field-label {
+        width: 100%;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    .checkout-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .checkout-timer {
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        justify-content: space-between;
+    }
+    .checkout-timer-value {
+        font-size: 20px;
+    }
+}
+
 .payment-method-list {
     display: flex;
     flex-direction: column;

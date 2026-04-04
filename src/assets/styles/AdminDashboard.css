@@ -692,13 +692,14 @@
 /* Responsive Design */
 @media (max-width: 1024px) {
     .sidebar {
-        width: 240px;
+        width: 80px;
     }
-
+    .sidebar h2, .sidebar span {
+        display: none;
+    }
     .main-content {
-        margin-left: 240px;
+        margin-left: 80px;
     }
-
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -707,18 +708,30 @@
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
-        transition: transform 0.3s ease;
+        width: 260px !important;
+        z-index: 1000;
     }
-
-    .sidebar.open {
+    .sidebar h2, .sidebar span {
+        display: block !important;
+    }
+    .admin-dashboard.collapsed .sidebar {
         transform: translateX(0);
     }
-
+    
     .main-content {
-        margin-left: 0;
-        padding: 20px;
+        margin-left: 0 !important;
+        padding: 10px;
     }
-
+    .top-header {
+        padding: 0 15px;
+    }
+    .page-title {
+        font-size: 16px;
+    }
+    .header-user-name {
+        display: none;
+    }
+    
     .dashboard-header {
         flex-direction: column;
         align-items: flex-start;
@@ -736,6 +749,16 @@
 
     .activity-time {
         align-self: flex-end;
+    }
+
+    /* Overlay when sidebar is open on mobile */
+    .admin-dashboard.collapsed::after {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        animation: fadeIn 0.3s;
     }
 }
 

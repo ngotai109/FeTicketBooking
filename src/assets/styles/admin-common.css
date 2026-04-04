@@ -57,6 +57,14 @@
   border: 1px solid var(--border-color);
 }
 
+@media (max-width: 768px) {
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+  }
+}
+
 .search-box {
   flex: 0 0 350px;
   max-width: 100%;
@@ -106,9 +114,19 @@
   opacity: 0.9;
 }
 
+.admin-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
 .admin-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 600px; /* Ensure table doesn't shrink too much */
 }
 
 .admin-table th {
@@ -598,6 +616,17 @@
 .u-gap-20 { gap: 20px; }
 
 .u-flex-column { display: flex; flex-direction: column; }
+
+@media (max-width: 768px) {
+  .u-flex:not(.u-flex-row-always) {
+    flex-direction: column !important;
+  }
+  .u-flex.u-gap-20 {
+    gap: 12px !important;
+  }
+}
+
+.u-flex-row-always { display: flex; flex-direction: row !important; }
 .u-text-right { text-align: right; }
 .u-text-center { text-align: center; }
 .u-text-nowrap { white-space: nowrap; }
