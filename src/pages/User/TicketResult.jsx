@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import bookingService from '../../services/booking.service';
 
 const TicketResult = () => {
     const location = useLocation();
@@ -23,6 +25,21 @@ const TicketResult = () => {
             if (userMain) userMain.style.padding = originalMainPadding;
         };
     }, []);
+
+    const handleRequestCancellation = async () => {
+        const reason = window.prompt("Vui lòng nhập lý do hủy vé:");
+        if (reason === null) return;
+        if (!reason.trim()) return toast.warning("Bạn cần nhập lý do để gửi yêu cầu!");
+
+        try {
+            await bookingService.requestCancellation(ticket.bookingId, reason);
+            toast.success("Yêu cầu hủy vé đã được gửi! Vui lòng chờ Admin xử lý.");
+            // Update local UI
+            navigate('/lookup/ticket');
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Không thể gửi yêu cầu hủy vé.");
+        }
+    };
 
     if (!ticket) {
         return (
@@ -63,14 +80,17 @@ const TicketResult = () => {
                                     <span style={{ color: '#64748b', fontSize: '15px' }}>{item.label}:</span>
                                     {item.isStatus ? (
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                            <span style={{ background: '#e8f5e9', color: '#2e7d32', padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: '700' }}>
+                                            <span style={{ background: item.value === 'Đã xác nhận' ? '#e8f5e9' : (item.value === 'Chờ hủy' ? '#fff7ed' : '#f1f5f9'), color: item.value === 'Đã xác nhận' ? '#2e7d32' : (item.value === 'Chờ hủy' ? '#c2410c' : '#64748b'), padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: '700' }}>
                                                 {item.value}
                                             </span>
-                                            <button 
-                                                style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '4px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
-                                            >
-                                                Yêu cầu hủy vé
-                                            </button>
+                                            {ticket.rawStatus === 1 && (
+                                                <button 
+                                                    onClick={handleRequestCancellation}
+                                                    style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '4px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                                                >
+                                                    Yêu cầu hủy vé
+                                                </button>
+                                            )}
                                         </div>
                                     ) : (
                                         <span style={{ fontWeight: '700', fontSize: item.isPrice ? '22px' : '16px', color: item.highlight ? '#2563eb' : (item.isPrice ? '#ef4444' : '#1e293b') }}>

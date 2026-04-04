@@ -190,7 +190,7 @@ const UserLayout = () => {
                             </span>
                             <div className="nav-dropdown-content">
                                 <NavLink to="/lookup/ticket" onClick={closeMenu}>Tra cứu vé xe</NavLink>
-                                <NavLink to="/lookup/schedule" onClick={closeMenu}>Lịch trình chạy</NavLink>
+                                <NavLink to="/lookup/schedule" onClick={closeMenu}>Bản đồ mạng lưới</NavLink>
                             </div>
                         </div>
                         <NavLink
@@ -245,7 +245,7 @@ const UserLayout = () => {
                     <i className="fas fa-phone-alt"></i>
                 </a>
                 <a
-                    href="https://zalo.me/0969037123" 
+                    href="https://zalo.me/0969037123"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="social-btn zalo"

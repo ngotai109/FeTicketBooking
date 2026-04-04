@@ -32,7 +32,9 @@ const TicketLookup = () => {
                 date: data.departureTime.split(' ngày ')[1],
                 time: data.departureTime.split(' ngày ')[0],
                 seat: data.tickets.map(t => t.seatNumber).join(', '),
-                status: data.status === 0 ? 'Chờ thanh toán' : (data.status === 1 ? 'Đã xác nhận' : 'Đã hủy'),
+                status: data.status === 0 ? 'Chờ thanh toán' : (data.status === 1 ? 'Đã xác nhận' : (data.status === 4 ? 'Chờ hủy' : 'Đã hủy')),
+                rawStatus: data.status,
+                bookingId: data.bookingId,
                 price: `${data.totalPrice.toLocaleString('vi-VN')}đ`
             };
 

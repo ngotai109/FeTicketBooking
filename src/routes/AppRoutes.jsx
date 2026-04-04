@@ -12,6 +12,7 @@ import ScheduleManagement from "../pages/Admin/ScheduleManagement";
 import TripMonitoring from "../pages/Admin/TripMonitoring";
 import BusTypeManagement from "../pages/Admin/BusTypeManagement";
 import PassengerManagement from "../pages/Admin/PassengerManagement";
+import CancellationManagement from "../pages/Admin/CancellationManagement";
 import ProtectedRoute from "./ProtectedRoute";
 import UserLayout from "../layouts/User/UserLayout";
 import Home from "../pages/User/Home";
@@ -69,6 +70,7 @@ export default function AppRoutes() {
         <Route path="trips" element={<TripMonitoring />} />
         <Route path="bus-types" element={<BusTypeManagement />} />
         <Route path="passengers" element={<PassengerManagement />} />
+        <Route path="cancellation" element={<CancellationManagement />} />
       </Route>
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
