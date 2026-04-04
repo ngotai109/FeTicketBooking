@@ -13,6 +13,8 @@ const CancellationManagement = () => {
     const [adminNote, setAdminNote] = useState('');
     const [processing, setProcessing] = useState(false);
     
+    const [viewMode, setViewMode] = useState('pending'); // 'pending' or 'history'
+    
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 8;
@@ -70,7 +72,12 @@ const CancellationManagement = () => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
     };
 
-    const filteredRequests = requests.filter(r => 
+    // Chọn danh sách hiển thị dựa trên viewMode
+    const displayList = viewMode === 'pending' 
+        ? requests 
+        : allBookings.filter(b => b.status === 2); // Status 2 là Cancelled
+
+    const filteredRequests = displayList.filter(r => 
         r.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         r.customerPhone?.includes(searchTerm) ||
         r.bookingId?.toString().includes(searchTerm)
@@ -85,7 +92,19 @@ const CancellationManagement = () => {
         <div className="admin-page-container">
             {/* Stats Overview */}
             <div className="u-flex u-gap-16 u-m-b-24">
-                <Card padding="16px" className="u-flex-1" style={{ border: '1px solid #edf2f7', borderLeft: '4px solid #ed8936' }}>
+                <Card 
+                    padding="16px" 
+                    className="u-flex-1" 
+                    style={{ 
+                        border: '1px solid #edf2f7', 
+                        borderLeft: '4px solid #ed8936',
+                        cursor: 'pointer',
+                        transform: viewMode === 'pending' ? 'scale(1.02)' : 'scale(1)',
+                        boxShadow: viewMode === 'pending' ? '0 4px 12px rgba(237, 137, 54, 0.1)' : 'none',
+                        transition: 'all 0.2s'
+                    }}
+                    onClick={() => { setViewMode('pending'); setCurrentPage(1); }}
+                >
                     <div className="u-flex u-justify-between u-align-center">
                         <div>
                             <p className="u-size-11 u-color-slate-500 u-weight-700 u-m-b-4">YÊU CẦU ĐANG CHỜ</p>
@@ -97,7 +116,19 @@ const CancellationManagement = () => {
                     </div>
                 </Card>
 
-                <Card padding="16px" className="u-flex-1" style={{ border: '1px solid #edf2f7', borderLeft: '4px solid #38a169' }}>
+                <Card 
+                    padding="16px" 
+                    className="u-flex-1" 
+                    style={{ 
+                        border: '1px solid #edf2f7', 
+                        borderLeft: '4px solid #38a169',
+                        cursor: 'pointer',
+                        transform: viewMode === 'history' ? 'scale(1.02)' : 'scale(1)',
+                        boxShadow: viewMode === 'history' ? '0 4px 12px rgba(56, 161, 105, 0.1)' : 'none',
+                        transition: 'all 0.2s'
+                    }}
+                    onClick={() => { setViewMode('history'); setCurrentPage(1); }}
+                >
                     <div className="u-flex u-justify-between u-align-center">
                         <div>
                             <p className="u-size-11 u-color-slate-500 u-weight-700 u-m-b-4">TỔNG LỊCH SỬ ĐÃ HỦY</p>
@@ -156,7 +187,9 @@ const CancellationManagement = () => {
                                             <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '50%', marginBottom: '16px' }}>
                                                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                                             </div>
-                                            <p className="u-color-slate-400 u-weight-600">Không có yêu cầu nào cần xử lý lúc này</p>
+                                            <p className="u-color-slate-400 u-weight-600">
+                                                {viewMode === 'pending' ? 'Không có yêu cầu nào cần xử lý lúc này' : 'Chưa có lịch sử hủy vé nào'}
+                                            </p>
                                         </div>
                                     </td>
                                 </tr>
@@ -192,15 +225,19 @@ const CancellationManagement = () => {
                                         </td>
                                         <td className="u-weight-700 u-color-blue-600">{formatPrice(item.totalPrice)}</td>
                                         <td>
-                                            <Badge type="warning" animate={true}>Yêu cầu hủy</Badge>
+                                            {viewMode === 'pending' ? (
+                                                <Badge type="warning" animate={true}>Yêu cầu hủy</Badge>
+                                            ) : (
+                                                <Badge type="danger">Đã hủy</Badge>
+                                            )}
                                         </td>
                                         <td className="u-text-center">
                                             <button 
-                                                className="admin-btn-primary" 
+                                                className={viewMode === 'pending' ? "admin-btn-primary" : "admin-btn-outline"}
                                                 style={{ padding: '6px 16px', fontSize: '12px', borderRadius: '20px' }}
                                                 onClick={() => handleOpenProcess(item.bookingId)}
                                             >
-                                                Xem & Xử lý
+                                                {viewMode === 'pending' ? 'Xem & Xử lý' : 'Xem chi tiết'}
                                             </button>
                                         </td>
                                     </tr>
@@ -288,26 +325,30 @@ const CancellationManagement = () => {
                                 onClick={() => setIsProcessModalOpen(false)}
                                 disabled={processing}
                             >
-                                Quay lại
+                                {selectedRequest.status === 4 ? 'Quay lại' : 'Đóng'}
                             </button>
-                            <button 
-                                className="admin-btn-danger" 
-                                style={{ padding: '10px 24px', borderRadius: '10px' }}
-                                onClick={() => handleProcess(false)}
-                                disabled={processing}
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="u-m-r-8"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                                {processing ? '...' : 'Từ chối hủy'}
-                            </button>
-                            <button 
-                                className="admin-btn-primary" 
-                                style={{ padding: '10px 24px', borderRadius: '10px', boxShadow: '0 4px 12px rgba(49, 130, 206, 0.3)' }}
-                                onClick={() => handleProcess(true)}
-                                disabled={processing}
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="u-m-r-8"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                {processing ? 'Đang duyệt...' : 'Phê duyệt Hủy & Hoàn tiền'}
-                            </button>
+                            {selectedRequest.status === 4 && (
+                                <>
+                                    <button 
+                                        className="admin-btn-danger" 
+                                        style={{ padding: '10px 24px', borderRadius: '10px' }}
+                                        onClick={() => handleProcess(false)}
+                                        disabled={processing}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="u-m-r-8"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        {processing ? '...' : 'Từ chối hủy'}
+                                    </button>
+                                    <button 
+                                        className="admin-btn-primary" 
+                                        style={{ padding: '10px 24px', borderRadius: '10px', boxShadow: '0 4px 12px rgba(49, 130, 206, 0.3)' }}
+                                        onClick={() => handleProcess(true)}
+                                        disabled={processing}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="u-m-r-8"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        {processing ? 'Đang duyệt...' : 'Phê duyệt Hủy & Hoàn tiền'}
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 )}
