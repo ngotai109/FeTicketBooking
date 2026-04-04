@@ -2,11 +2,15 @@ import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import bookingService from '../../services/booking.service';
+import { Modal } from '../../components/Common';
 
 const TicketResult = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { ticket } = location.state || {};
+    const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [reason, setReason] = React.useState('');
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
 
     useEffect(() => {
         const originalBg = document.body.style.background;
@@ -27,17 +31,18 @@ const TicketResult = () => {
     }, []);
 
     const handleRequestCancellation = async () => {
-        const reason = window.prompt("Vui lòng nhập lý do hủy vé:");
-        if (reason === null) return;
         if (!reason.trim()) return toast.warning("Bạn cần nhập lý do để gửi yêu cầu!");
 
         try {
+            setIsSubmitting(true);
             await bookingService.requestCancellation(ticket.bookingId, reason);
             toast.success("Yêu cầu hủy vé đã được gửi! Vui lòng chờ Admin xử lý.");
-            // Update local UI
+            setIsModalOpen(false);
             navigate('/lookup/ticket');
         } catch (error) {
             toast.error(error.response?.data?.message || "Không thể gửi yêu cầu hủy vé.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -85,7 +90,7 @@ const TicketResult = () => {
                                             </span>
                                             {ticket.rawStatus === 1 && (
                                                 <button 
-                                                    onClick={handleRequestCancellation}
+                                                    onClick={() => setIsModalOpen(true)}
                                                     style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '4px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
                                                 >
                                                     Yêu cầu hủy vé
@@ -208,6 +213,65 @@ const TicketResult = () => {
                     </div>
                 </div>
             </div>
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => !isSubmitting && setIsModalOpen(false)}
+                title="Xác nhận yêu cầu hủy vé"
+                width="500px"
+            >
+                <div style={{ padding: '10px 0' }}>
+                    <p style={{ margin: '0 0 15px', color: '#4a5568', fontSize: '14px', lineHeight: '1.5' }}>
+                        Bạn đang yêu cầu hủy vé cho mã đặt vé <strong>{ticket?.code}</strong>. 
+                        Vui lòng nhập lý do để Admin có thể xem xét và phê duyệt nhanh chóng.
+                    </p>
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#4a5568', marginBottom: '8px' }}>
+                            Lý do hủy:
+                        </label>
+                        <textarea
+                            style={{ 
+                                width: '100%', 
+                                padding: '12px', 
+                                borderRadius: '8px', 
+                                border: '1.5px solid #e2e8f0', 
+                                fontSize: '14px',
+                                outline: 'none',
+                                transition: 'border-color 0.2s',
+                                resize: 'none',
+                                boxSizing: 'border-box'
+                            }}
+                            rows="4"
+                            placeholder="Nhập lý do tại đây (ví dụ: Thay đổi kế hoạch, sai địa chỉ đón)..."
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                        />
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                        <button 
+                            className="admin-btn-outline"
+                            style={{ padding: '10px 20px', borderRadius: '8px' }}
+                            onClick={() => setIsModalOpen(false)}
+                            disabled={isSubmitting}
+                        >
+                            Đóng
+                        </button>
+                        <button 
+                            className="admin-btn-primary"
+                            style={{ 
+                                padding: '10px 24px', 
+                                borderRadius: '8px',
+                                background: '#dc2626',
+                                borderColor: '#dc2626',
+                                color: '#fff'
+                            }}
+                            onClick={handleRequestCancellation}
+                            disabled={isSubmitting || !reason.trim()}
+                        >
+                            {isSubmitting ? 'Đang gửi...' : 'Gửi yêu cầu'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 };
