@@ -200,6 +200,7 @@ const PassengerManagement = () => {
                         <table className="admin-table">
                             <thead>
                                 <tr>
+                                    <th className="u-text-center" style={{ width: '60px' }}>STT</th>
                                     <th>Hành khách</th>
                                     <th>Liên hệ</th>
                                     <th className="u-text-center">Số chuyến</th>
@@ -211,17 +212,19 @@ const PassengerManagement = () => {
                             </thead>
                             <tbody>
                                 {loading && passengers.length === 0 ? (
-                                    <tr><td colSpan="7" className="u-text-center u-p-40">Đang tải dữ liệu...</td></tr>
+                                    <tr><td colSpan="8" className="u-text-center u-p-40">Đang tải dữ liệu...</td></tr>
                                 ) : filteredPassengers.length === 0 ? (
-                                    <tr><td colSpan="7" className="u-text-center u-p-40">Không tìm thấy hành khách nào</td></tr>
+                                    <tr><td colSpan="8" className="u-text-center u-p-40">Không tìm thấy hành khách nào</td></tr>
                                 ) : (
-                                    filteredPassengers.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((p) => (
+                                    filteredPassengers.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((p, index) => (
                                         <tr key={p.id}>
+                                            <td className="u-text-center">
+                                                <div className="u-flex u-align-center u-justify-center u-rounded-full u-bg-slate-100 u-color-slate-600 u-weight-700" style={{ width: '32px', height: '32px', fontSize: '13px', margin: '0 auto' }}>
+                                                    {(currentPage - 1) * pageSize + index + 1}
+                                                </div>
+                                            </td>
                                             <td>
                                                 <div className="u-flex u-align-center u-gap-12">
-                                                    <div className="u-flex u-align-center u-justify-center u-rounded-full u-bg-slate-100 u-color-slate-600 u-weight-700" style={{ width: '36px', height: '36px', fontSize: '14px' }}>
-                                                        {p.fullName.charAt(0).toUpperCase()}
-                                                    </div>
                                                     <div className="u-flex-column">
                                                         <span className="u-weight-600 u-color-slate-800">{p.fullName}</span>
                                                         <span className="u-size-12 u-color-slate-500">ID: #{p.id}</span>
