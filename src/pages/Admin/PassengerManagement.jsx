@@ -101,11 +101,10 @@ const PassengerManagement = () => {
         return lastBookingDate.getMonth() === now.getMonth() && lastBookingDate.getFullYear() === now.getFullYear();
     }).length;
 
-    // Tính đặt vé trung bình
-    const averageBookings = totalPassengers > 0 
-        ? (passengers.reduce((sum, p) => sum + (p.totalBookings || 0), 0) / totalPassengers).toFixed(1)
-        : 0;
-
+    // Tính số hành khách đang hoạt động
+    const activePassengers = passengers.filter(p => p.status === 'Active').length;
+    const lockedPassengers = passengers.filter(p => p.status !== 'Active').length;
+    
     return (
         <div className="admin-page-container">
             {/* Stats Overview */}
@@ -132,12 +131,12 @@ const PassengerManagement = () => {
 
                 <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
                     <div className="u-flex u-justify-between u-align-start u-m-b-8">
-                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Đặt Vé TB/Người</h3>
-                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#805ad515', color: '#805ad5' }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                        <h3 className="u-size-13 u-color-slate-500 u-weight-600 u-m-0">Đang hoạt động</h3>
+                        <div className="u-flex u-align-center u-justify-center u-rounded-10" style={{ width: '28px', height: '28px', background: '#38a16915', color: '#38a169' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                         </div>
                     </div>
-                    <div className="u-size-22 u-weight-700 u-color-slate-800">{averageBookings}</div>
+                    <div className="u-size-22 u-weight-700 u-color-green-600">{activePassengers}</div>
                 </Card>
             </div>
 
@@ -200,13 +199,13 @@ const PassengerManagement = () => {
                         <table className="admin-table">
                             <thead>
                                 <tr>
-                                    <th className="u-text-center" style={{ width: '60px' }}>STT</th>
+                                    <th className="u-text-center" style={{ width: '80px' }}>STT</th>
                                     <th>Hành khách</th>
                                     <th>Liên hệ</th>
                                     <th className="u-text-center">Số chuyến</th>
-                                    <th>Chi tiêu</th>
-                                    <th>Gần nhất</th>
-                                    <th>Trạng thái</th>
+                                    <th className="u-text-right">Chi tiêu</th>
+                                    <th className="u-text-center">Gần nhất</th>
+                                    <th className="u-text-center">Trạng thái</th>
                                     <th className="u-text-center">Thao tác</th>
                                 </tr>
                             </thead>
@@ -219,34 +218,34 @@ const PassengerManagement = () => {
                                     filteredPassengers.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((p, index) => (
                                         <tr key={p.id}>
                                             <td className="u-text-center">
-                                                <div className="u-flex u-align-center u-justify-center u-rounded-full u-bg-slate-100 u-color-slate-600 u-weight-700" style={{ width: '32px', height: '32px', fontSize: '13px', margin: '0 auto' }}>
+                                                <div className="u-flex u-align-center u-justify-center u-rounded-full u-bg-slate-100 u-color-slate-600 u-weight-700" style={{ width: '30px', height: '30px', fontSize: '13px', margin: '0 auto', border: '1px solid #e2e8f0' }}>
                                                     {(currentPage - 1) * pageSize + index + 1}
                                                 </div>
                                             </td>
                                             <td>
                                                 <div className="u-flex u-align-center u-gap-12">
                                                     <div className="u-flex-column">
-                                                        <span className="u-weight-600 u-color-slate-800">{p.fullName}</span>
-                                                        <span className="u-size-12 u-color-slate-500">ID: #{p.id}</span>
+                                                        <span className="u-weight-700 u-color-slate-800" style={{ fontSize: '14.5px' }}>{p.fullName}</span>
+                                                        <span className="u-size-11 u-color-slate-400 u-weight-500">ID: #{p.id}</span>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div className="u-flex-column">
-                                                    <span className="u-size-14 u-color-slate-700 u-weight-500">{p.phoneNumber}</span>
+                                                    <span className="u-size-14 u-color-slate-700 u-weight-600">{p.phoneNumber}</span>
                                                     <span className="u-size-12 u-color-slate-500">{p.email}</span>
                                                 </div>
                                             </td>
                                             <td className="u-text-center">
-                                                <Badge type="info">{p.totalBookings}</Badge>
+                                                <Badge type="info" style={{ minWidth: '35px' }}>{p.totalBookings}</Badge>
                                             </td>
-                                            <td className="u-weight-600 u-color-slate-700">
+                                            <td className="u-text-right u-weight-700 u-color-blue-600" style={{ fontSize: '15px' }}>
                                                 {p.totalSpent.toLocaleString('vi-VN')} đ
                                             </td>
-                                            <td className="u-size-13 u-color-slate-600">
+                                            <td className="u-text-center u-size-13 u-color-slate-600 u-weight-500">
                                                 {p.lastBooking}
                                             </td>
-                                            <td>
+                                            <td className="u-text-center">
                                                 <Badge type={p.status === 'Active' ? 'success' : 'danger'}>
                                                     {p.status === 'Active' ? 'Hoạt động' : 'Bị khóa'}
                                                 </Badge>

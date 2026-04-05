@@ -85,7 +85,14 @@ const TicketResult = () => {
                                     <span style={{ color: '#64748b', fontSize: '15px' }}>{item.label}:</span>
                                     {item.isStatus ? (
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                            <span style={{ background: item.value === 'Đã xác nhận' ? '#e8f5e9' : (item.value === 'Chờ hủy' ? '#fff7ed' : '#f1f5f9'), color: item.value === 'Đã xác nhận' ? '#2e7d32' : (item.value === 'Chờ hủy' ? '#c2410c' : '#64748b'), padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: '700' }}>
+                                            <span style={{ 
+                                                background: item.value === 'Đã xác nhận' ? '#e8f5e9' : (item.value === 'Chờ hủy' ? '#fff7ed' : (item.value === 'Đã hủy' ? '#fef2f2' : '#f1f5f9')), 
+                                                color: item.value === 'Đã xác nhận' ? '#2e7d32' : (item.value === 'Chờ hủy' ? '#c2410c' : (item.value === 'Đã hủy' ? '#dc2626' : '#64748b')), 
+                                                padding: '4px 12px', 
+                                                borderRadius: '20px', 
+                                                fontSize: '13px', 
+                                                fontWeight: '700' 
+                                            }}>
                                                 {item.value}
                                             </span>
                                             {ticket.rawStatus === 1 && (
