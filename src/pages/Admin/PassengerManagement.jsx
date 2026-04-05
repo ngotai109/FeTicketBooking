@@ -23,6 +23,10 @@ const PassengerManagement = () => {
         fetchPassengers();
     }, []);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterStatus, filterMonth]);
+
     const fetchPassengers = async () => {
         try {
             setLoading(true);
