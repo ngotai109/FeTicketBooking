@@ -14,6 +14,8 @@ const PassengerManagement = () => {
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterMonth, setFilterMonth] = useState('all');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+    const [passengerHistory, setPassengerHistory] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10;
 
@@ -65,9 +67,19 @@ const PassengerManagement = () => {
         }
     };
 
-    const handleViewHistory = (passenger) => {
+    const handleViewHistory = async (passenger) => {
         setCurrentPassenger(passenger);
         setIsHistoryModalOpen(true);
+        setIsHistoryLoading(true);
+        try {
+            const response = await passengerService.getPassengerBookings(passenger.phoneNumber);
+            setPassengerHistory(handleApiResponse(response) || []);
+        } catch (error) {
+            toast.error('Lỗi khi tải lịch sử đặt vé');
+            setPassengerHistory([]);
+        } finally {
+            setIsHistoryLoading(false);
+        }
     };
 
     const filteredPassengers = passengers.filter(p => {
@@ -204,16 +216,15 @@ const PassengerManagement = () => {
                                     <th>Liên hệ</th>
                                     <th className="u-text-center">Số chuyến</th>
                                     <th className="u-text-right">Chi tiêu</th>
-                                    <th className="u-text-center">Gần nhất</th>
                                     <th className="u-text-center">Trạng thái</th>
                                     <th className="u-text-center">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading && passengers.length === 0 ? (
-                                    <tr><td colSpan="8" className="u-text-center u-p-40">Đang tải dữ liệu...</td></tr>
+                                    <tr><td colSpan="7" className="u-text-center u-p-40">Đang tải dữ liệu...</td></tr>
                                 ) : filteredPassengers.length === 0 ? (
-                                    <tr><td colSpan="8" className="u-text-center u-p-40">Không tìm thấy hành khách nào</td></tr>
+                                    <tr><td colSpan="7" className="u-text-center u-p-40">Không tìm thấy hành khách nào</td></tr>
                                 ) : (
                                     filteredPassengers.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((p, index) => (
                                         <tr key={p.id}>
@@ -241,9 +252,6 @@ const PassengerManagement = () => {
                                             </td>
                                             <td className="u-text-right u-weight-700 u-color-blue-600" style={{ fontSize: '15px' }}>
                                                 {p.totalSpent.toLocaleString('vi-VN')} đ
-                                            </td>
-                                            <td className="u-text-center u-size-13 u-color-slate-600 u-weight-500">
-                                                {p.lastBooking}
                                             </td>
                                             <td className="u-text-center">
                                                 <Badge type={p.status === 'Active' ? 'success' : 'danger'}>
@@ -292,12 +300,11 @@ const PassengerManagement = () => {
                 isDangerous={currentPassenger?.status === 'Active'}
             />
 
-            {/* Booking History Modal (Placeholder) */}
             <Modal
                 isOpen={isHistoryModalOpen}
                 onClose={() => setIsHistoryModalOpen(false)}
                 title={`Lịch sử đặt vé: ${currentPassenger?.fullName}`}
-                width="700px"
+                width="800px"
             >
                 <div className="u-flex-column u-gap-16">
                     <div className="u-flex u-justify-between u-align-center u-p-b-16" style={{ borderBottom: '1px solid #edf2f7' }}>
@@ -307,35 +314,54 @@ const PassengerManagement = () => {
                         </div>
                         <div className="u-flex-column u-text-right">
                             <span className="u-size-13 u-color-slate-500">Tổng chi tiêu</span>
-                            <span className="u-weight-700 u-color-green-600">{currentPassenger?.totalSpent.toLocaleString('vi-VN')} đ</span>
+                            <span className="u-weight-700 u-color-green-600">{currentPassenger?.totalSpent?.toLocaleString('vi-VN')} đ</span>
                         </div>
                     </div>
 
-                    <div className="table-container">
-                        <table className="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Mã vé</th>
-                                    <th>Ngày đi</th>
-                                    <th>Tuyến đường</th>
-                                    <th>Số tiền</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td className="u-weight-600">#LH-12345</td>
-                                    <td>25/03/2026</td>
-                                    <td>Hà Nội - Nghệ An</td>
-                                    <td>250.000 đ</td>
-                                </tr>
-                                <tr>
-                                    <td className="u-weight-600">#LH-12301</td>
-                                    <td>10/02/2026</td>
-                                    <td>Nghệ An - Đà Nẵng</td>
-                                    <td>450.000 đ</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div className="table-container" style={{ minHeight: '200px' }}>
+                        {isHistoryLoading ? (
+                            <div className="u-flex u-justify-center u-p-40">Đang tải lịch sử...</div>
+                        ) : passengerHistory.length === 0 ? (
+                            <div className="u-flex u-justify-center u-p-40 u-color-slate-400">Không có dữ liệu đặt vé</div>
+                        ) : (
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã vé</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Chuyến đi</th>
+                                        <th>Số tiền</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {passengerHistory.map(item => (
+                                        <tr key={item.bookingId}>
+                                            <td className="u-weight-600">DSL{item.bookingId.toString().padStart(6, '0')}</td>
+                                            <td className="u-size-13">{new Date(item.bookingDate).toLocaleDateString('vi-VN')}</td>
+                                            <td className="u-size-13">
+                                                <div className="u-flex-column">
+                                                    <span className="u-weight-500">{item.routeName}</span>
+                                                    <span className="u-color-slate-500 u-size-12">{item.departureTime}</span>
+                                                </div>
+                                            </td>
+                                            <td className="u-weight-600">{item.totalPrice.toLocaleString('vi-VN')} đ</td>
+                                            <td>
+                                                <Badge type={
+                                                    item.status === 1 ? 'success' : 
+                                                    item.status === 4 ? 'warning' : 
+                                                    item.status === 2 ? 'danger' : 'info'
+                                                }>
+                                                    {item.status === 1 ? 'Thành công' : 
+                                                     item.status === 4 ? 'Chờ hủy' : 
+                                                     item.status === 2 ? 'Đã hủy' : 'Chờ TT'}
+                                                </Badge>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </div>
                 <div className="admin-form-actions">
