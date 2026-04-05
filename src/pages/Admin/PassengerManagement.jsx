@@ -241,7 +241,6 @@ const PassengerManagement = () => {
                                                 <div className="u-flex u-align-center u-gap-12">
                                                     <div className="u-flex-column">
                                                         <span className="u-weight-700 u-color-slate-800" style={{ fontSize: '14.5px' }}>{p.fullName}</span>
-                                                        <span className="u-size-11 u-color-slate-400 u-weight-500">ID: #{p.id}</span>
                                                     </div>
                                                 </div>
                                             </td>
