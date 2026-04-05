@@ -72,7 +72,7 @@ const PassengerManagement = () => {
         setIsHistoryModalOpen(true);
         setIsHistoryLoading(true);
         try {
-            const response = await passengerService.getPassengerBookings(passenger.phoneNumber);
+            const response = await passengerService.getPassengerBookings(passenger.phoneNumber, passenger.fullName);
             setPassengerHistory(handleApiResponse(response) || []);
         } catch (error) {
             toast.error('Lỗi khi tải lịch sử đặt vé');

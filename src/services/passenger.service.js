@@ -17,8 +17,8 @@ const passengerService = {
         return await apiService.delete(`/User/${id}`);
     },
     
-    getPassengerBookings: async (phone) => {
-        return await apiService.get(`/Booking/passengers/${phone}/bookings`);
+    getPassengerBookings: async (phone, name) => {
+        return await apiService.get(`/Booking/passengers/${phone}/bookings?name=${encodeURIComponent(name)}`);
     }
 };
 
