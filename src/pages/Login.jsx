@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../assets/styles/Login.css';
 import { toast } from 'react-toastify';
 import logo from '../assets/images/logo.webp';
+import api from '../services/api';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -66,36 +67,28 @@ const Login = () => {
 
         setIsLoading(true);
         try {
-            const res = await fetch('https://donghuongsonglamserver-hzd6fkenhtgghhbr.southeastasia-01.azurewebsites.net/api/Auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
-
-            if (!res.ok) {
-                let message = 'Email hoặc mật khẩu không đúng';
-                try {
-                    const errorData = await res.json();
-                    message = errorData.message || message;
-                } catch (_) { }
-                setGeneralError(message);
-                setIsLoading(false);
-                return;
-            }
-
-            const data = await res.json();
+            const response = await api.post('Auth/login', formData);
+            const data = response.data;
+            
             localStorage.setItem('isAuthenticated', 'true');
             localStorage.setItem('token', data.token);
             localStorage.setItem('userEmail', formData.email);
-            toast.success('Đăng nhập thành công')
+            // Lưu thêm refreshToken nếu có
+            if (data.refreshToken) {
+                localStorage.setItem('refreshToken', data.refreshToken);
+            }
+            
+            toast.success('Đăng nhập thành công');
             setTimeout(() => {
-                navigate('/admin')
+                navigate('/admin');
             }, 3000);
         } catch (error) {
+            let message = 'Email hoặc mật khẩu không đúng';
+            if (error.response && error.response.data) {
+                message = error.response.data.message || message;
+            }
             toast.error('Đăng nhập thất bại');
-            setGeneralError('Không thể kết nối tới server');
+            setGeneralError(message);
         } finally {
             setIsLoading(false);
         }

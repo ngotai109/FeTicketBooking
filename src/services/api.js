@@ -2,7 +2,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const api = axios.create({
-    baseURL: 'https://donghuongsonglamserver-hzd6fkenhtgghhbr.southeastasia-01.azurewebsites.net/api/',
+    baseURL: 'https://localhost:7000/api/',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -42,7 +42,9 @@ api.interceptors.response.use(
     },
     async (error) => {
         const originalRequest = error.config;
-        if (error.response && error.response.status === 401 && !originalRequest._retry) {
+        
+        // Chỉ refresh token nếu là lỗi 401 và KHÔNG PHẢI request login
+        if (error.response && error.response.status === 401 && !originalRequest.url?.includes('login') && !originalRequest._retry) {
 
             if (isRefreshing) {
                 return new Promise(function (resolve, reject) {
@@ -62,7 +64,7 @@ api.interceptors.response.use(
                 return Promise.reject(error);
             }
             try {
-                const response = await axios.post('https://donghuongsonglamserver-hzd6fkenhtgghhbr.southeastasia-01.azurewebsites.net/api/Auth/refresh_token', {
+                const response = await axios.post(`${api.defaults.baseURL}Auth/refresh-token`, {
                     refreshToken: refreshToken
                 });
 
