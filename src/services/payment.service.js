@@ -8,6 +8,10 @@ const paymentService = {
     
     executeVNPayCallback: async (queryParams) => {
         return await apiService.get(`/Payment/vnpay-callback${queryParams}`);
+    },
+
+    createPayOSPayment: async (bookingId) => {
+        return await apiService.post('/Payment/payos', bookingId);
     }
 };
 
