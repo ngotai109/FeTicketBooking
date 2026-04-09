@@ -2,7 +2,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const api = axios.create({
-    baseURL: 'https://localhost:7000/api/',
+    // baseURL: 'https://localhost:7000/api/',
+    baseURL: 'https://bookingticketapi20260409215526-d8fqfpd2fpe4hqdj.southeastasia-01.azurewebsites.net/api/',
     headers: {
         'Content-Type': 'application/json',
     },
