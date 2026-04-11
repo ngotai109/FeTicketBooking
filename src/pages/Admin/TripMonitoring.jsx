@@ -4,6 +4,7 @@ import tripService from '../../services/trip.service';
 import routeService from '../../services/route.service';
 import scheduleService from '../../services/schedule.service';
 import busService from '../../services/bus.service';
+import driverService from '../../services/driver.service';
 import { getBusLayout } from '../../constants/busLayouts';
 import { Badge, Card, Modal, Pagination, ConfirmationModal } from '../../components/Common';
 import '../../assets/styles/AdminTripMonitoring.css';
@@ -18,6 +19,7 @@ const TripMonitoring = () => {
     const [trips, setTrips] = useState([]);
     const [routes, setRoutes] = useState([]);
     const [buses, setBuses] = useState([]);
+    const [drivers, setDrivers] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // ---- State Detail & Seats ----
@@ -96,12 +98,14 @@ const TripMonitoring = () => {
 
     const fetchInitialData = async () => {
         try {
-            const [routesRes, busesRes] = await Promise.all([
+            const [routesRes, busesRes, driversRes] = await Promise.all([
                 routeService.getRoutes(),
-                busService.getAllBuses()
+                busService.getAllBuses(),
+                driverService.getAllDrivers()
             ]);
             setRoutes(routesRes.data?.data || routesRes.data || []);
             setBuses(busesRes.data?.data || busesRes.data || []);
+            setDrivers(driversRes.data?.data || driversRes.data || []);
         } catch (error) {
             toast.error('Lỗi khi tải dữ liệu khởi tạo');
         }
@@ -352,6 +356,32 @@ const TripMonitoring = () => {
                                                     <div className="bus-detail-item">
                                                         <span style={{ fontSize: '11px' }}>Loại xe: {trip.busType}</span>
                                                     </div>
+                                                </div>
+                                                <div className="u-m-t-8 u-flex-column u-gap-4">
+                                                    <span className="u-size-11 u-weight-600 u-color-slate-500">Tài xế:</span>
+                                                    <select 
+                                                        className="admin-form-select u-size-12"
+                                                        style={{ padding: '4px 8px', height: 'auto' }}
+                                                        value={trip.driverId || ''}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        onChange={async (e) => {
+                                                            e.stopPropagation();
+                                                            const driverId = e.target.value;
+                                                            if (!driverId) return;
+                                                            try {
+                                                                await tripService.assignDriver(trip.tripId, driverId);
+                                                                toast.success('Đã gán tài xế!');
+                                                                fetchTrips();
+                                                            } catch (err) {
+                                                                toast.error('Gán tài xế thất bại');
+                                                            }
+                                                        }}
+                                                    >
+                                                        <option value="">-- Chọn tài xế --</option>
+                                                        {drivers.map(d => (
+                                                            <option key={d.driverId} value={d.driverId}>{d.fullName}</option>
+                                                        ))}
+                                                    </select>
                                                 </div>
                                             </div>
 

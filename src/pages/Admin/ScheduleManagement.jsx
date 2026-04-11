@@ -5,11 +5,13 @@ import scheduleService from '../../services/schedule.service';
 import routeService from '../../services/route.service';
 import busService from '../../services/bus.service';
 import tripService from '../../services/trip.service';
+import driverService from '../../services/driver.service';
 
 const ScheduleManagement = () => {
     const [schedules, setSchedules] = useState([]);
     const [routes, setRoutes] = useState([]);
     const [buses, setBuses] = useState([]);
+    const [drivers, setDrivers] = useState([]);
     const [loading, setLoading] = useState(true);
     
     // Generator states
@@ -30,6 +32,7 @@ const ScheduleManagement = () => {
     const [formData, setFormData] = useState({
         routeId: '',
         busId: '',
+        driverId: '',
         departureTime: '',
         arrivalTime: '',
         ticketPrice: '',
@@ -43,16 +46,19 @@ const ScheduleManagement = () => {
     const fetchInitialData = async () => {
         setLoading(true);
         try {
-            const [routesRes, busesRes] = await Promise.all([
+            const [routesRes, busesRes, driversRes] = await Promise.all([
                 routeService.getRoutes(),
-                busService.getAllBuses()
+                busService.getAllBuses(),
+                driverService.getAllDrivers()
             ]);
             
             const fetchedRoutes = routesRes.data?.data || routesRes.data || [];
             const fetchedBuses = busesRes.data?.data || busesRes.data || [];
+            const fetchedDrivers = driversRes.data?.data || driversRes.data || [];
             
             setRoutes(Array.isArray(fetchedRoutes) ? fetchedRoutes : []);
             setBuses(Array.isArray(fetchedBuses) ? fetchedBuses : []);
+            setDrivers(Array.isArray(fetchedDrivers) ? fetchedDrivers : []);
 
             fetchSchedules();
         } catch (error) {
@@ -103,6 +109,7 @@ const ScheduleManagement = () => {
             setFormData({
                 routeId: (schedule.routeId || schedule.RouteId || '').toString(),
                 busId: (schedule.busId || schedule.BusId || '').toString(),
+                driverId: (schedule.driverId || schedule.DriverId || '').toString(),
                 departureTime: schedule.departureTime || schedule.DepartureTime || '',
                 arrivalTime: schedule.arrivalTime || schedule.ArrivalTime || '',
                 ticketPrice: schedule.ticketPrice || schedule.TicketPrice || '',
@@ -114,6 +121,7 @@ const ScheduleManagement = () => {
             setFormData({
                 routeId: '',
                 busId: '',
+                driverId: '',
                 departureTime: '',
                 arrivalTime: '',
                 ticketPrice: '',
@@ -177,6 +185,7 @@ const ScheduleManagement = () => {
                 ...formData,
                 routeId: parseInt(formData.routeId),
                 busId: parseInt(formData.busId),
+                driverId: formData.driverId ? parseInt(formData.driverId) : null,
                 ticketPrice: parseFloat(formData.ticketPrice)
             };
 
@@ -404,6 +413,22 @@ const ScheduleManagement = () => {
                                 {buses.map(b => (
                                     <option key={b.busId || b.BusId} value={b.busId || b.BusId}>
                                         {b.plateNumber || b.PlateNumber || b.licensePlate} ({b.defaultSeats || b.DefaultSeats || b.totalSeats || b.TotalSeats || 40} chỗ)
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Tài xế mặc định:</label>
+                            <select 
+                                className="admin-form-select"
+                                value={formData.driverId} 
+                                onChange={(e) => handleFormChange('driverId', e.target.value)}
+                            >
+                                <option value="">-- Để trống nếu chưa gán --</option>
+                                {drivers.map(d => (
+                                    <option key={d.driverId} value={d.driverId}>
+                                        {d.fullName} ({d.phoneNumber})
                                     </option>
                                 ))}
                             </select>

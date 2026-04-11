@@ -22,6 +22,10 @@ const tripService = {
         return await apiService.put(`/Trip/${id}`, data);
     },
 
+    assignDriver: async (id, driverId) => {
+        return await apiService.patch(`/Trip/${id}/driver?driverId=${driverId}`);
+    },
+
     // Lấy danh sách ghế của chuyến (TripSeats)
     getTripSeats: async (tripId) => {
         return await apiService.get(`/Trip/${tripId}/Seats`);

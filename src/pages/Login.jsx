@@ -73,15 +73,26 @@ const Login = () => {
             localStorage.setItem('isAuthenticated', 'true');
             localStorage.setItem('token', data.token);
             localStorage.setItem('userEmail', formData.email);
-            // Lưu thêm refreshToken nếu có
+            localStorage.setItem('userRoles', JSON.stringify(data.roles));
+            
             if (data.refreshToken) {
                 localStorage.setItem('refreshToken', data.refreshToken);
             }
             
             toast.success('Đăng nhập thành công');
+            
+            const isDriver = data.roles.includes('Driver');
+            const isAdmin = data.roles.includes('Admin');
+
             setTimeout(() => {
-                navigate('/admin');
-            }, 3000);
+                if (isAdmin) {
+                    navigate('/admin');
+                } else if (isDriver) {
+                    navigate('/driver/schedule');
+                } else {
+                    navigate('/home');
+                }
+            }, 1000);
         } catch (error) {
             let message = 'Email hoặc mật khẩu không đúng';
             if (error.response && error.response.data) {

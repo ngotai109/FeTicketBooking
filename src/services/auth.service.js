@@ -23,6 +23,9 @@ const authService = {
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('isAuthenticated');
         localStorage.removeItem('userEmail');
+    },
+    changePassword: async (data) => {
+        return await apiService.post('Auth/change-password', data);
     }
 };
 

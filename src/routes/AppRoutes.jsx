@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/Login";
 import AdminDashboard from "../pages/AdminDashboard";
 import AdminLayout from "../layouts/Admin/AdminLayout";
+import DriverLayout from "../layouts/Driver/DriverLayout";
 import RouteManagement from "../pages/Admin/RouteManagement";
 import ProvinceManagement from "../pages/Admin/ProvinceManagement";
 import WardManagement from "../pages/Admin/WardManagement";
@@ -13,6 +14,10 @@ import TripMonitoring from "../pages/Admin/TripMonitoring";
 import BusTypeManagement from "../pages/Admin/BusTypeManagement";
 import PassengerManagement from "../pages/Admin/PassengerManagement";
 import CancellationManagement from "../pages/Admin/CancellationManagement";
+import DriverManagement from "../pages/Admin/DriverManagement";
+import DriverSchedule from "../pages/Driver/DriverSchedule";
+import DriverProfile from "../pages/Driver/DriverProfile";
+import ChangePassword from "../pages/Admin/ChangePassword";
 import ProtectedRoute from "./ProtectedRoute";
 import UserLayout from "../layouts/User/UserLayout";
 import Home from "../pages/User/Home";
@@ -35,6 +40,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      
       <Route path="/" element={<UserLayout />}>
         <Route index element={<Navigate to="/home" replace />} />
         <Route path="home" element={<Home />} />
@@ -52,8 +58,8 @@ export default function AppRoutes() {
         <Route path="services/transport" element={<PassengerTransport />} />
         <Route path="news" element={<News />} />
         <Route path="contact" element={<Contact />} />
-        {/* <Route path ="admin" element={ <AdminLayout />}/> */}
       </Route>
+
       <Route
         path="/admin"
         element={
@@ -73,7 +79,24 @@ export default function AppRoutes() {
         <Route path="bus-types" element={<BusTypeManagement />} />
         <Route path="passengers" element={<PassengerManagement />} />
         <Route path="cancellation" element={<CancellationManagement />} />
+        <Route path="drivers" element={<DriverManagement />} />
+        <Route path="change-password" element={<ChangePassword />} />
       </Route>
+
+      <Route
+        path="/driver"
+        element={
+          <ProtectedRoute>
+            <DriverLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="schedule" replace />} />
+        <Route path="schedule" element={<DriverSchedule />} />
+        <Route path="profile" element={<DriverProfile />} />
+        <Route path="change-password" element={<DriverProfile />} />
+      </Route>
+
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   );
