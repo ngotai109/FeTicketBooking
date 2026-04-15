@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination } from '../../components/Common';
+import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination, LoadingSpinner } from '../../components/Common';
 import { handleApiResponse } from '../../utils/common';
 
 import officeService from '../../services/office.service';
@@ -336,9 +336,7 @@ const OfficeManagement = () => {
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="6" className="u-text-center u-p-40 u-color-slate-500">
-                                            Đang tải dữ liệu...
-                                        </td>
+                                        <td colSpan="6"><LoadingSpinner message="Đang tải dữ liệu..." /></td>
                                     </tr>
                                 ) : filteredOffices.length === 0 ? (
                                     <tr>

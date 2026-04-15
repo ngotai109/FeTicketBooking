@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, Badge, Card, Modal, Pagination, CustomSelect } from '../../components/Common';
+import { ConfirmationModal, Badge, Card, Modal, Pagination, CustomSelect, LoadingSpinner } from '../../components/Common';
 import { handleApiResponse } from '../../utils/common';
 import passengerService from '../../services/passenger.service';
 
@@ -35,10 +35,10 @@ const PassengerManagement = () => {
         } catch (error) {
             // Mock data if API is not yet available
             setPassengers([
-                { id: '1', fullName: 'Ngô Khắc Tài', phoneNumber: '0832696061', email: 'taitiktok37@gmail.com', totalBookings: 12, totalSpent: 2850000, lastBooking: '2026-03-25', status: 'Active' },
-                { id: '2', fullName: 'Nguyễn Văn A', phoneNumber: '0912345678', email: 'vana@gmail.com', totalBookings: 5, totalSpent: 1200000, lastBooking: '2026-03-20', status: 'Active' },
-                { id: '3', fullName: 'Trần Thị B', phoneNumber: '0987654321', email: 'thib@yahoo.com', totalBookings: 1, totalSpent: 250000, lastBooking: '2026-02-15', status: 'Locked' },
-                { id: '4', fullName: 'Lê Văn C', phoneNumber: '0345678901', email: 'vanc@gmail.com', totalBookings: 8, totalSpent: 1950000, lastBooking: '2026-03-22', status: 'Active' }
+                { id: '1', fullName: 'Ngô Khắc Tài', phoneNumber: '0832696061', email: 'taitiktok37@gmail.com', totalBookings: 12, totalTickets: 24, totalSpent: 2850000, lastBooking: '2026-03-25', status: 'Active' },
+                { id: '2', fullName: 'Nguyễn Văn A', phoneNumber: '0912345678', email: 'vana@gmail.com', totalBookings: 5, totalTickets: 10, totalSpent: 1200000, lastBooking: '2026-03-20', status: 'Active' },
+                { id: '3', fullName: 'Trần Thị B', phoneNumber: '0987654321', email: 'thib@yahoo.com', totalBookings: 1, totalTickets: 1, totalSpent: 250000, lastBooking: '2026-02-15', status: 'Locked' },
+                { id: '4', fullName: 'Lê Văn C', phoneNumber: '0345678901', email: 'vanc@gmail.com', totalBookings: 8, totalTickets: 12, totalSpent: 1950000, lastBooking: '2026-03-22', status: 'Active' }
             ]);
         } finally {
             setLoading(false);
@@ -218,15 +218,17 @@ const PassengerManagement = () => {
                                     <th className="u-text-center" style={{ width: '80px' }}>STT</th>
                                     <th>Hành khách</th>
                                     <th>Liên hệ</th>
-                                    <th className="u-text-center">Số chuyến</th>
+                                    <th className="u-text-center">Số vé đặt</th>
                                     <th className="u-text-right">Chi tiêu</th>
                                     <th className="u-text-center">Trạng thái</th>
                                     <th className="u-text-center">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {loading && passengers.length === 0 ? (
-                                    <tr><td colSpan="7" className="u-text-center u-p-40">Đang tải dữ liệu...</td></tr>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan="7"><LoadingSpinner message="Đang tải dữ liệu..." /></td>
+                                    </tr>
                                 ) : filteredPassengers.length === 0 ? (
                                     <tr><td colSpan="7" className="u-text-center u-p-40">Không tìm thấy hành khách nào</td></tr>
                                 ) : (
@@ -251,7 +253,7 @@ const PassengerManagement = () => {
                                                 </div>
                                             </td>
                                             <td className="u-text-center">
-                                                <Badge type="info" style={{ minWidth: '35px' }}>{p.totalBookings}</Badge>
+                                                <Badge type="info" style={{ minWidth: '35px' }}>{p.totalTickets}</Badge>
                                             </td>
                                             <td className="u-text-right u-weight-700 u-color-blue-600" style={{ fontSize: '15px' }}>
                                                 {p.totalSpent.toLocaleString('vi-VN')} đ

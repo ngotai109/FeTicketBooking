@@ -2,15 +2,67 @@ import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import bookingService from '../../services/booking.service';
-import { Modal } from '../../components/Common';
+import { Modal, LoadingSpinner } from '../../components/Common';
 
 const TicketResult = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { ticket } = location.state || {};
+    const [ticketState, setTicketState] = React.useState(location.state?.ticket || null);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
     const [reason, setReason] = React.useState('');
     const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [isLoadingFromUrl, setIsLoadingFromUrl] = React.useState(false);
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const code = queryParams.get('code');
+        const phone = queryParams.get('phone');
+        const action = queryParams.get('action');
+        const ticketId = queryParams.get('ticketId');
+
+        const loadAndProcessTicket = async () => {
+            if (!ticketState && code && phone) {
+                setIsLoadingFromUrl(true);
+                try {
+                    const res = await bookingService.lookupTicket(code, phone);
+                    const data = res.data;
+                    
+                    const newTicket = {
+                        code: `DSL${data.bookingId.toString().padStart(6, '0')}`,
+                        customer: data.customerName,
+                        phone: data.customerPhone,
+                        route: data.routeName,
+                        date: data.departureTime.split(' ngày ')[1],
+                        time: data.departureTime.split(' ngày ')[0],
+                        seat: data.tickets.map(t => t.seatNumber).join(', '),
+                        status: data.status === 0 ? 'Chờ thanh toán' : (data.status === 1 ? 'Đã xác nhận' : (data.status === 4 ? 'Chờ hủy' : 'Đã hủy')),
+                        rawStatus: data.status,
+                        bookingId: data.bookingId,
+                        price: `${data.totalPrice.toLocaleString('vi-VN')}đ`
+                    };
+                    setTicketState(newTicket);
+                } catch (err) {
+                    toast.error('Không tìm thấy vé từ liên kết!');
+                } finally {
+                    setIsLoadingFromUrl(false);
+                }
+            }
+
+            if (action === 'confirmDropOff' && ticketId) {
+                try {
+                    await bookingService.confirmMidTripDropOff(ticketId);
+                    toast.success('Xác nhận xuống xe thành công! Cảm ơn bạn đã hợp tác.');
+                    
+                    // Remove action from URL to prevent duplicate calls on refresh
+                    navigate(location.pathname, { replace: true });
+                } catch (err) {
+                    toast.error(err.response?.data?.message || 'Lỗi khi xác nhận xuống xe hoặc bạn đã xác nhận rồi.');
+                }
+            }
+        };
+
+        loadAndProcessTicket();
+    }, [location.search]);
 
     useEffect(() => {
         const originalBg = document.body.style.background;
@@ -35,7 +87,7 @@ const TicketResult = () => {
 
         try {
             setIsSubmitting(true);
-            await bookingService.requestCancellation(ticket.bookingId, reason);
+            await bookingService.requestCancellation(ticketState.bookingId, reason);
             toast.success("Yêu cầu hủy vé đã được gửi! Vui lòng chờ Admin xử lý.");
             setIsModalOpen(false);
             navigate('/lookup/ticket');
@@ -46,7 +98,15 @@ const TicketResult = () => {
         }
     };
 
-    if (!ticket) {
+    if (isLoadingFromUrl) {
+        return (
+            <div style={{ background: '#fff', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <LoadingSpinner message="Đang tải thông tin vé..." />
+            </div>
+        );
+    }
+
+    if (!ticketState) {
         return (
             <div style={{ background: '#fff', textAlign: 'center', padding: '100px 20px', minHeight: '80vh' }}>
                 <div style={{ maxWidth: '600px', margin: '0 auto' }}>
@@ -72,14 +132,14 @@ const TicketResult = () => {
 
                         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', columnGap: '80px', rowGap: '0' }}>
                             {[
-                                { label: 'Mã vé', value: ticket.code, highlight: true },
-                                { label: 'Hành khách', value: ticket.customer },
-                                { label: 'Tuyến đường', value: ticket.route },
-                                { label: 'Ngày đi', value: ticket.date },
-                                { label: 'Giờ khởi hành', value: ticket.time },
-                                { label: 'Vị trí ghế', value: ticket.seat },
-                                { label: 'Trạng thái', value: ticket.status, isStatus: true },
-                                { label: 'Giá vé', value: ticket.price, isPrice: true }
+                                { label: 'Mã vé', value: ticketState.code, highlight: true },
+                                { label: 'Hành khách', value: ticketState.customer },
+                                { label: 'Tuyến đường', value: ticketState.route },
+                                { label: 'Ngày đi', value: ticketState.date },
+                                { label: 'Giờ khởi hành', value: ticketState.time },
+                                { label: 'Vị trí ghế', value: ticketState.seat },
+                                { label: 'Trạng thái', value: ticketState.status, isStatus: true },
+                                { label: 'Giá vé', value: ticketState.price, isPrice: true }
                             ].map((item, index) => (
                                 <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: '1px solid #f1f5f9' }}>
                                     <span style={{ color: '#64748b', fontSize: '15px' }}>{item.label}:</span>
@@ -95,7 +155,7 @@ const TicketResult = () => {
                                             }}>
                                                 {item.value}
                                             </span>
-                                            {ticket.rawStatus === 1 && (
+                                            {ticketState.rawStatus === 1 && (
                                                 <button 
                                                     onClick={() => setIsModalOpen(true)}
                                                     style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '4px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
@@ -228,7 +288,7 @@ const TicketResult = () => {
             >
                 <div style={{ padding: '10px 0' }}>
                     <p style={{ margin: '0 0 15px', color: '#4a5568', fontSize: '14px', lineHeight: '1.5' }}>
-                        Bạn đang yêu cầu hủy vé cho mã đặt vé <strong>{ticket?.code}</strong>. 
+                        Bạn đang yêu cầu hủy vé cho mã đặt vé <strong>{ticketState?.code}</strong>. 
                         Vui lòng nhập lý do để Admin có thể xem xét và phê duyệt nhanh chóng.
                     </p>
                     <div style={{ marginBottom: '20px' }}>

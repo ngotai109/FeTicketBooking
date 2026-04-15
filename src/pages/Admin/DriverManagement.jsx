@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, Badge, Card, Modal, Pagination } from '../../components/Common';
+import { ConfirmationModal, Badge, Card, Modal, Pagination, LoadingSpinner } from '../../components/Common';
 import { handleApiResponse } from '../../utils/common';
 import driverService from '../../services/driver.service';
 
@@ -111,12 +111,12 @@ const DriverManagement = () => {
     const handleDeleteConfirm = async () => {
         try {
             setIsSubmitting(true);
-            await driverService.deleteDriver(currentDriver.driverId);
-            toast.success('Xóa tài xế thành công');
+            const response = await driverService.deleteDriver(currentDriver.driverId);
+            toast.success(handleApiResponse(response)?.message || 'Thao tác thành công');
             fetchDrivers();
             setIsDeleteModalOpen(false);
         } catch (error) {
-            toast.error('Lỗi khi xóa tài xế');
+            toast.error('Lỗi khi thực hiện thao tác');
         } finally {
             setIsSubmitting(false);
         }
@@ -134,6 +134,7 @@ const DriverManagement = () => {
             case 1: return 'warning'; // OnTrip
             case 2: return 'secondary'; // OffDuty
             case 3: return 'danger'; // Retired
+            case 4: return 'danger'; // Locked
             default: return 'info';
         }
     };
@@ -144,6 +145,7 @@ const DriverManagement = () => {
             case 1: return 'Đang chạy chuyến';
             case 2: return 'Đang nghỉ';
             case 3: return 'Đã nghỉ việc';
+            case 4: return 'Đã khóa';
             default: return 'Không xác định';
         }
     };
@@ -210,8 +212,10 @@ const DriverManagement = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {loading && drivers.length === 0 ? (
-                                    <tr><td colSpan="6" className="u-text-center u-p-40">Đang tải dữ liệu...</td></tr>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan="6"><LoadingSpinner message="Đang tải dữ liệu..." /></td>
+                                    </tr>
                                 ) : filteredDrivers.length === 0 ? (
                                     <tr><td colSpan="6" className="u-text-center u-p-40">Không tìm thấy tài xế nào</td></tr>
                                 ) : (
@@ -256,10 +260,14 @@ const DriverManagement = () => {
                                                     <button
                                                         onClick={() => handleDeleteClick(driver)}
                                                         className="admin-btn-icon"
-                                                        title="Xóa"
-                                                        style={{ color: '#e53e3e' }}
+                                                        title={driver.status === 4 ? "Mở khóa" : "Khóa tài xế"}
+                                                        style={{ color: driver.status === 4 ? '#38a169' : '#e53e3e' }}
                                                     >
-                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                                        {driver.status === 4 ? (
+                                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
+                                                        ) : (
+                                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                                        )}
                                                     </button>
                                                 </div>
                                             </td>
@@ -368,6 +376,7 @@ const DriverManagement = () => {
                                 <option value="1">Đang chạy chuyến</option>
                                 <option value="2">Đang nghỉ</option>
                                 <option value="3">Đã nghỉ việc</option>
+                                <option value="4">Đã khóa</option>
                             </select>
                         </div>
                     </div>
@@ -440,10 +449,13 @@ const DriverManagement = () => {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleDeleteConfirm}
-                title="Xóa tài xế"
-                message={`Bạn có chắc chắn muốn xóa tài xế "${currentDriver?.fullName}"? Hành động này không thể hoàn tác.`}
-                confirmText="Xóa"
-                isDangerous={true}
+                title={currentDriver?.status === 4 ? "Mở khóa tài xế" : "Khóa tài xế"}
+                message={currentDriver?.status === 4 
+                    ? `Bạn có chắc chắn muốn mở khóa tài xế "${currentDriver?.fullName}"?`
+                    : `Bạn có chắc chắn muốn khóa tài xế "${currentDriver?.fullName}"? Tài xế này sẽ không thể đăng nhập hoặc tham gia chuyến đi.`
+                }
+                confirmText={currentDriver?.status === 4 ? "Mở khóa" : "Khóa"}
+                isDangerous={currentDriver?.status !== 4}
                 isLoading={isSubmitting}
             />
         </div>

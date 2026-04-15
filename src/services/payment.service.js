@@ -11,7 +11,7 @@ const paymentService = {
     },
 
     createPayOSPayment: async (bookingId) => {
-        return await apiService.post('/Payment/payos', bookingId);
+        return await apiService.post('/Payment/payos', { bookingId });
     }
 };
 

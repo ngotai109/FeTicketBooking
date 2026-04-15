@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination } from '../../components/Common';
+import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination, LoadingSpinner } from '../../components/Common';
 import { handleApiResponse, formatCurrency } from '../../utils/common';
 
 import routeService from '../../services/route.service';
@@ -360,7 +360,7 @@ const RouteManagement = () => {
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="7" className="u-text-center u-p-40">Đang tải dữ liệu...</td>
+                                        <td colSpan="7"><LoadingSpinner message="Đang tải dữ liệu..." /></td>
                                     </tr>
                                 ) : filteredRoutes.length === 0 ? (
                                     <tr>

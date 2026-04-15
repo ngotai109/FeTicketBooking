@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import bookingService from '../../services/booking.service';
-import { Badge, Card, Modal, Pagination, CustomSelect } from '../../components/Common';
+import { Badge, Card, Modal, Pagination, CustomSelect, LoadingSpinner } from '../../components/Common';
 import '../../assets/styles/AdminDashboard.css';
 
 const CancellationManagement = () => {
@@ -179,7 +179,7 @@ const CancellationManagement = () => {
                         </thead>
                         <tbody>
                             {loading ? (
-                                <tr><td colSpan="7" className="u-text-center u-p-v-60"><div className="loader u-m-inset-auto"></div></td></tr>
+                                <tr><td colSpan="7"><LoadingSpinner message="Đang tải danh sách yêu cầu hủy vé..." /></td></tr>
                             ) : filteredRequests.length === 0 ? (
                                 <tr>
                                     <td colSpan="7" className="u-text-center u-p-v-80">

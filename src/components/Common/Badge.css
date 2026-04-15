@@ -19,19 +19,19 @@
 }
 
 .admin-badge-success { 
-    background: #f0fff4; 
-    color: #2f855a; 
-    border: 1px solid #c6f6d5;
+    background: #ecfdf5; 
+    color: #059669; 
+    border: 1px solid #10b98130;
 }
 
 .admin-badge-warning { 
-    background: #fffaf0; 
-    color: #c05621; 
-    border: 1px solid #feebc8;
+    background: #fffbeb; 
+    color: #d97706; 
+    border: 1px solid #f59e0b30;
 }
 
 .admin-badge-danger { 
-    background: #fff5f5; 
-    color: #c53030; 
-    border: 1px solid #fed7d7;
+    background: #fef2f2; 
+    color: #dc2626; 
+    border: 1px solid #ef444430;
 }

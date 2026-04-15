@@ -5,8 +5,9 @@ import routeService from '../../services/route.service';
 import scheduleService from '../../services/schedule.service';
 import busService from '../../services/bus.service';
 import driverService from '../../services/driver.service';
+import bookingService from '../../services/booking.service';
 import { getBusLayout } from '../../constants/busLayouts';
-import { Badge, Card, Modal, Pagination, ConfirmationModal } from '../../components/Common';
+import { Badge, Card, Modal, Pagination, ConfirmationModal, LoadingSpinner } from '../../components/Common';
 import '../../assets/styles/AdminTripMonitoring.css';
 
 const TripMonitoring = () => {
@@ -20,6 +21,7 @@ const TripMonitoring = () => {
     const [routes, setRoutes] = useState([]);
     const [buses, setBuses] = useState([]);
     const [drivers, setDrivers] = useState([]);
+    const [midTripRequests, setMidTripRequests] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // ---- State Detail & Seats ----
@@ -44,7 +46,8 @@ const TripMonitoring = () => {
         busId: '',
         departureTime: '',
         arrivalTime: '',
-        ticketPrice: ''
+        ticketPrice: '',
+        driverId: ''
     });
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -56,6 +59,7 @@ const TripMonitoring = () => {
 
     useEffect(() => {
         fetchInitialData();
+        fetchMidTripRequests();
     }, []);
 
     useEffect(() => {
@@ -133,9 +137,30 @@ const TripMonitoring = () => {
         }
     };
 
+    const fetchMidTripRequests = async () => {
+        try {
+            const res = await bookingService.getMidTripRequests();
+            setMidTripRequests(res.data || []);
+        } catch (error) {
+            console.error('Lỗi khi tải danh sách yêu cầu xuống xe', error);
+        }
+    };
+
+    const handleApproveMidTrip = async (ticketId) => {
+        try {
+            toast.info('Đang gửi email xác nhận cho khách hàng...');
+            await bookingService.approveMidTripRequest(ticketId);
+            toast.success('Đã gửi email xác nhận thành công!');
+            // Reload requests
+            fetchMidTripRequests();
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Không thể thao tác. Vui lòng thử lại.');
+        }
+    };
+
     const handleAddExtraTrip = async (e) => {
         e.preventDefault();
-        const { routeId, busId, departureTime, arrivalTime, ticketPrice } = extraTripForm;
+        const { routeId, busId, departureTime, arrivalTime, ticketPrice, driverId } = extraTripForm;
         
         if (!routeId || !busId || !departureTime || !arrivalTime || !ticketPrice) {
             return toast.warning('Vui lòng điền đầy đủ thông tin');
@@ -149,7 +174,8 @@ const TripMonitoring = () => {
                 busId: parseInt(busId),
                 departureTime,
                 arrivalTime,
-                ticketPrice: parseFloat(ticketPrice)
+                ticketPrice: parseFloat(ticketPrice),
+                driverId: driverId ? parseInt(driverId) : null
             });
 
             const newScheduleId = scheduleRes.data?.data?.scheduleId || scheduleRes.data?.scheduleId;
@@ -164,7 +190,7 @@ const TripMonitoring = () => {
 
             toast.success('Đã thêm chuyến tăng cường thành công!');
             setIsAddTripOpen(false);
-            setExtraTripForm({ routeId: '', busId: '', departureTime: '', arrivalTime: '', ticketPrice: '' });
+            setExtraTripForm({ routeId: '', busId: '', departureTime: '', arrivalTime: '', ticketPrice: '', driverId: '' });
             fetchTrips();
         } catch (err) {
             toast.error(err.response?.data?.message || 'Có lỗi khi thêm chuyến');
@@ -302,9 +328,41 @@ const TripMonitoring = () => {
                 </div>
             </div>
 
+            {/* Mid-Trip Setup Alert Section */}
+            {midTripRequests.length > 0 && (
+                <div className="admin-alert-box u-m-b-24" style={{ backgroundColor: '#fffaf0', borderLeft: '4px solid #dd6b20', padding: '16px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                    <div className="u-flex u-align-center u-gap-12 u-m-b-12">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dd6b20" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        <h3 className="u-size-16 u-weight-700" style={{ color: '#c05621', margin: 0 }}>Có {midTripRequests.length} yêu cầu xuống dọc đường cần duyệt!</h3>
+                    </div>
+                    <div className="u-grid u-grid-2 u-gap-16">
+                        {midTripRequests.map(req => (
+                            <div key={req.ticketId} style={{ backgroundColor: '#fff', border: '1px solid #fbd38d', padding: '12px', borderRadius: '6px' }}>
+                                <div className="u-flex u-justify-between u-align-start u-m-b-8">
+                                    <div>
+                                        <div className="u-weight-700 u-size-14 u-color-slate-800">{req.customerName} - {req.customerPhone}</div>
+                                        <div className="u-size-12 u-color-slate-500">Chuyến: <b>{req.routeName}</b> | Biển số: <b>{req.busPlate}</b> | Ghế <b>{req.seatNumber}</b></div>
+                                    </div>
+                                    <button 
+                                        className="admin-btn-primary" 
+                                        style={{ backgroundColor: '#dd6b20', fontSize: '12px', padding: '6px 12px' }}
+                                        onClick={() => handleApproveMidTrip(req.ticketId)}
+                                    >
+                                        Duyệt & Gửi Mail
+                                    </button>
+                                </div>
+                                <div className="u-size-13" style={{ color: '#9c4221', backgroundColor: '#feebc8', padding: '6px 10px', borderRadius: '4px' }}>
+                                    <span className="u-weight-600">Điểm xuống thực tế:</span> {req.actualDropOffLocation}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {loading ? (
-                <div className="admin-loading" style={{ margin: '100px 0' }}>
-                    <div className="loader"></div>
+                <div className="u-p-80">
+                    <LoadingSpinner message="Đang tải danh sách chuyến xe..." />
                 </div>
             ) : filteredTrips.length === 0 ? (
                 <Card padding="60px" className="u-text-center u-color-slate-400">
@@ -359,29 +417,9 @@ const TripMonitoring = () => {
                                                 </div>
                                                 <div className="u-m-t-8 u-flex-column u-gap-4">
                                                     <span className="u-size-11 u-weight-600 u-color-slate-500">Tài xế:</span>
-                                                    <select 
-                                                        className="admin-form-select u-size-12"
-                                                        style={{ padding: '4px 8px', height: 'auto' }}
-                                                        value={trip.driverId || ''}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        onChange={async (e) => {
-                                                            e.stopPropagation();
-                                                            const driverId = e.target.value;
-                                                            if (!driverId) return;
-                                                            try {
-                                                                await tripService.assignDriver(trip.tripId, driverId);
-                                                                toast.success('Đã gán tài xế!');
-                                                                fetchTrips();
-                                                            } catch (err) {
-                                                                toast.error('Gán tài xế thất bại');
-                                                            }
-                                                        }}
-                                                    >
-                                                        <option value="">-- Chọn tài xế --</option>
-                                                        {drivers.map(d => (
-                                                            <option key={d.driverId} value={d.driverId}>{d.fullName}</option>
-                                                        ))}
-                                                    </select>
+                                                    <span className="u-size-13 u-weight-700 u-color-slate-800">
+                                                        {trip.driverName || 'Chưa gán'}
+                                                    </span>
                                                 </div>
                                             </div>
 
@@ -495,6 +533,20 @@ const TripMonitoring = () => {
                             value={extraTripForm.ticketPrice}
                             onChange={(e) => setExtraTripForm({...extraTripForm, ticketPrice: e.target.value})}
                         />
+                    </div>
+
+                    <div className="admin-form-group u-m-b-24">
+                        <label className="admin-form-label">Tài xế phụ trách:</label>
+                        <select 
+                            className="admin-form-select"
+                            value={extraTripForm.driverId}
+                            onChange={(e) => setExtraTripForm({...extraTripForm, driverId: e.target.value})}
+                        >
+                            <option value="">-- Chọn tài xế (nếu có) --</option>
+                            {drivers.map(d => (
+                                <option key={d.driverId} value={d.driverId}>{d.fullName}</option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="admin-form-actions">

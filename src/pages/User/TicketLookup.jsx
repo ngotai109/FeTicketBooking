@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import bookingService from '../../services/booking.service';
+import { LoadingSpinner } from '../../components/Common';
 import '../../assets/styles/TicketLookup.css';
 import step1Img from '../../assets/images/check-ticket-1.png';
 import step2Img from '../../assets/images/check-ticket-2.png';
@@ -76,7 +77,7 @@ const TicketLookup = () => {
                                 />
                             </div>
                             <button type="submit" className="check-ticket-btn" disabled={isSearching}>
-                                {isSearching ? <span className="loader small"></span> : 'KIỂM TRA VÉ'}
+                                {isSearching ? <LoadingSpinner size="small" message="" color="#ffffff" /> : 'KIỂM TRA VÉ'}
                             </button>
                         </div>
                     </form>

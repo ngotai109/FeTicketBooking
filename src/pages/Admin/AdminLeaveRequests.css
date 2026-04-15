@@ -1,0 +1,105 @@
+/* Admin Leave Requests Styles */
+
+.admin-page-container {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.admin-tab-group {
+    display: flex;
+    gap: 8px;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 10px;
+    width: fit-content;
+}
+
+.admin-tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.admin-tab-btn:hover {
+    color: #334155;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.admin-tab-btn.active {
+    background: white;
+    color: #1e3a8a;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.admin-reason-cell {
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #475569;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    background: #f8fafc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .search-box {
+        max-width: none !important;
+    }
+
+    .u-m-l-auto {
+        margin-left: 0 !important;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-form-select {
+        width: 100% !important;
+    }
+
+    .admin-tab-group {
+        width: 100%;
+        overflow-x: auto;
+    }
+}

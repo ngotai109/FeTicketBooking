@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../../assets/styles/vnpay-mock.css'; // Reusing styles
+import { LoadingSpinner } from '../../components/Common';
 
 const PayOSReturn = () => {
     const location = useLocation();
@@ -32,8 +33,7 @@ const PayOSReturn = () => {
         return (
             <div className="vnpay-mock-container">
                 <div className="vnpay-card">
-                    <div className="loading-spinner"></div>
-                    <h2>Đang xử lý kết quả...</h2>
+                    <LoadingSpinner message="Đang xử lý kết quả thanh toán..." />
                 </div>
             </div>
         );

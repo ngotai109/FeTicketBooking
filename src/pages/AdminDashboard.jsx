@@ -6,7 +6,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
 } from 'recharts';
-import { Card, Badge } from '../components/Common';
+import { Card, Badge, LoadingSpinner } from '../components/Common';
 import dashboardService from '../services/dashboard.service';
 import { handleApiResponse } from '../utils/common';
 
@@ -138,7 +138,13 @@ const AdminDashboard = () => {
 
     return (
         <div className="admin-page-container" style={{ height: '100%', overflowY: 'auto' }}>
-            
+            {loading && (
+                <div className="u-p-80-0">
+                    <LoadingSpinner message="Đang nạp dữ liệu thống kê..." />
+                </div>
+            )}
+            {!loading && (
+                <>
             {/* --- CARDS TỔNG QUAN --- */}
             <div className="u-flex u-gap-20 u-m-b-24">
                 {stats.map((stat, index) => (
@@ -314,9 +320,10 @@ const AdminDashboard = () => {
                     )}
                 </div>
             </Card>
+                </>
+            )}
         </div>
     );
 };
 
 export default AdminDashboard;
-

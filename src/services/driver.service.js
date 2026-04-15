@@ -27,6 +27,31 @@ const driverService = {
 
     getTripPassengers: async (tripId) => {
         return await apiService.get(`/Driver/my-trips/${tripId}/passengers`);
+    },
+
+    toggleBoard: async (ticketId) => {
+        return await apiService.patch(`/Driver/tickets/${ticketId}/toggle-board`);
+    },
+
+    toggleDropOff: async (ticketId) => {
+        return await apiService.patch(`/Driver/tickets/${ticketId}/toggle-dropoff`);
+    },
+
+    requestMidTripDropOff: async (ticketId, data) => {
+        return await apiService.post(`/Driver/tickets/${ticketId}/request-mid-trip-dropoff`, data);
+    },
+
+    submitLeaveRequest: async (data) => {
+        return await apiService.post('/Driver/leave-requests', data);
+    },
+    getMyLeaveRequests: async () => {
+        return await apiService.get('/Driver/leave-requests');
+    },
+    getAllLeaveRequests: async () => {
+        return await apiService.get('/Driver/all-leave-requests');
+    },
+    processLeaveRequest: async (requestId, payload) => {
+        return await apiService.post(`/Driver/leave-requests/${requestId}/process`, payload);
     }
 };
 

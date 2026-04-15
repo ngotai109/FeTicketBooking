@@ -89,7 +89,8 @@ const Checkout = () => {
         email: '' // Luôn để trống để khách hàng tự điền theo yêu cầu
     });
     const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
-    const [paymentMethod, setPaymentMethod] = useState('cash'); // 'cash' or 'vnpay'
+    const [paymentMethod, setPaymentMethod] = useState('payos'); // Default to 'payos'
+    const [payOSData, setPayOSData] = useState(null);
 
     useEffect(() => {
         if (!location.state) {
@@ -161,16 +162,17 @@ const Checkout = () => {
 
             if (paymentMethod === 'payos') {
                 try {
-                    toast.info("Đang chuyển hướng sang cổng thanh toán PayOS...");
+                    toast.info("Đang tạo mã QR thanh toán PayOS...");
                     const payRes = await paymentService.createPayOSPayment(bookingId);
-                    if (payRes.data?.paymentUrl) {
-                        window.location.href = payRes.data.paymentUrl;
+                    if (payRes.data?.checkoutUrl) {
+                        setPayOSData(payRes.data);
+                        toast.success("Đã tạo mã QR! Vui lòng quét mã để thanh toán.");
                     } else {
-                        throw new Error("Không lấy được link thanh toán PayOS.");
+                        throw new Error("Không lấy được thông tin thanh toán PayOS.");
                     }
                 } catch (err) {
                     console.error("Lỗi PayOS:", err);
-                    toast.error("Không thể kết nối cổng thanh toán PayOS.");
+                    toast.error("Không thể tạo mã thanh toán PayOS.");
                 }
             } else if (paymentMethod === 'vnpay') {
                 try {
@@ -195,8 +197,7 @@ const Checkout = () => {
                     toast.error("Không thể kết nối cổng thanh toán VNPay. Vui lòng thử lại!");
                 }
             } else {
-                toast.success("Đặt vé thành công! Check Email nhé!");
-                setTimeout(() => navigate('/lookup/ticket'), 2000);
+                toast.error("Vui lòng chọn phương thức thanh toán!");
             }
         } catch (error) {
             toast.error(error.response?.data?.message || "Lỗi đặt vé!");
@@ -225,18 +226,68 @@ const Checkout = () => {
                     {/* LEFT COLUMN */}
                     <div className="checkout-left-col">
                         
+                        {payOSData ? (
+                            <Card padding="30px" className="payos-qr-card animate-fade-in">
+                                <h3 className="checkout-section-title">Thanh toán QR-CODE</h3>
+                                <div className="qr-header" style={{ textAlign: 'left', marginBottom: '30px' }}>
+                                    <p className="qr-subtitle">Sử dụng ứng dụng Ngân hàng bất kỳ để quét mã VietQR</p>
+                                </div>
+                                
+                                <div className="qr-content-wrapper">
+                                    <div className="qr-image-box">
+                                        <img src={`https://img.vietqr.io/image/${payOSData.bin}-${payOSData.accountNumber}-compact2.png?amount=${payOSData.amount}&addInfo=${encodeURIComponent(payOSData.description)}`} alt="PayOS QR" />
+                                        <div className="qr-corner tr"></div>
+                                        <div className="qr-corner bl"></div>
+                                    </div>
+
+                                    <div className="qr-payment-info">
+                                        <div className="qr-info-item">
+                                            <span>Số tiền thanh toán:</span>
+                                            <div className="qr-amount">{payOSData.amount.toLocaleString('vi-VN')} đ</div>
+                                        </div>
+
+                                        <div className="qr-info-item">
+                                            <span>Nội dung:</span>
+                                            <div className="qr-copy-box">
+                                                <strong>{payOSData.description}</strong>
+                                                <button onClick={() => {navigator.clipboard.writeText(payOSData.description); toast.info("Đã chép nội dung!");}} className="copy-btn">Chép</button>
+                                            </div>
+                                        </div>
+
+                                        <div className="qr-info-item">
+                                            <span>Chủ tài khoản:</span>
+                                            <strong>{payOSData.accountName}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="qr-footer">
+                                    <div className="qr-status-waiting">
+                                        <div className="simple-spinner"></div>
+                                        <span>Đang chờ bạn quét mã...</span>
+                                    </div>
+                                    <div className="u-flex u-gap-12">
+                                        <button className="qr-external-btn" onClick={() => window.open(payOSData.checkoutUrl, '_blank')}>
+                                            ✈️ Mở trang PayOS
+                                        </button>
+                                        <button className="qr-cancel-btn" onClick={() => setPayOSData(null)}>Hủy & Chọn lại</button>
+                                    </div>
+                                </div>
+                            </Card>
+                        ) : (
+                            <>
                         {/* Thông tin khách hàng */}
                         <Card padding="30px">
                             <h3 className="checkout-section-title">Thông tin khách hàng</h3>
                             
                             <div className="checkout-customer-form">
                                 <div className="checkout-form-field">
-                                    <div className="checkout-field-label">Số điện thoại</div>
-                                    <input value={customer.phone} onChange={e => setCustomer({...customer, phone: e.target.value})} className="checkout-field-input" />
-                                </div>
-                                <div className="checkout-form-field">
                                     <div className="checkout-field-label">Họ tên</div>
                                     <input value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} className="checkout-field-input" />
+                                </div>
+                                <div className="checkout-form-field">
+                                    <div className="checkout-field-label">Số điện thoại</div>
+                                    <input value={customer.phone} onChange={e => setCustomer({...customer, phone: e.target.value})} className="checkout-field-input" />
                                 </div>
                                 <div className="checkout-form-field">
                                     <div className="checkout-field-label">Email</div>
@@ -250,22 +301,7 @@ const Checkout = () => {
                             <h3 className="checkout-section-title">Phương thức thanh toán</h3>
                             
                             <div className="payment-method-list">
-                                {/* Tùy chọn 1: Tiền mặt */}
-                                <div 
-                                    onClick={() => setPaymentMethod('cash')} 
-                                    className={`payment-method-item ${paymentMethod === 'cash' ? 'active-cash' : ''}`}
-                                >
-                                    {paymentMethod === 'cash' && (
-                                        <div className="payment-check-mark cash">
-                                            <span style={{ color: 'white', fontSize: '12px' }}>✓</span>
-                                        </div>
-                                    )}
-                                    <div className="payment-radio"></div>
-                                    <div>
-                                        <div className="payment-info-title">Tiền mặt</div>
-                                        <div className="payment-info-subtitle">💵 Thanh toán bằng tiền mặt</div>
-                                    </div>
-                                </div>
+
 
                                 {/* Tùy chọn 2: VNPay */}
                                 <div 
@@ -306,16 +342,9 @@ const Checkout = () => {
                             <div className="checkout-guide">
                                 <div className="guide-header">
                                     <span className="guide-icon">i</span>
-                                    {paymentMethod === 'cash' ? 'Hướng dẫn thanh toán (Chuyển khoản / Tại quầy)' : 'Thanh toán trực tuyến an toàn'}
+                                    Thanh toán trực tuyến an toàn
                                 </div>
-                                {paymentMethod === 'cash' ? (
-                                    <ul className="guide-list">
-                                        <li>- Thông tin số tài khoản ngân hàng:</li>
-                                        <li>- BIDV: <strong style={{ color: '#e53e3e' }}>51110000695613</strong> HOANG THI LINH chi nhánh Đô Lương.</li>
-                                        <li>- Nội dung chuyển khoản ghi đúng số điện thoại của quý khách để được xác nhận từ nhà xe nhanh nhất.</li>
-                                        <li style={{ marginTop: '10px', color: '#e53e3e', fontWeight: 'bold' }}>Hỗ trợ: 1900 3088</li>
-                                    </ul>
-                                ) : paymentMethod === 'payos' ? (
+                                {paymentMethod === 'payos' ? (
                                     <ul className="guide-list">
                                         <li>- Hệ thống sẽ tạo mã QR thanh toán riêng cho đơn hàng của bạn.</li>
                                         <li>- Bạn chỉ cần mở ứng dụng Ngân hàng và <strong>Quét mã QR</strong> để hoàn tất.</li>
@@ -330,6 +359,8 @@ const Checkout = () => {
                                 )}
                             </div>
                         </div>
+                        </>
+                        )}
 
                     </div>
 
@@ -370,13 +401,7 @@ const Checkout = () => {
                                 <div style={{ fontWeight: 'bold', color: '#2d3748' }}>{(selectedSeats.length * ticketPrice).toLocaleString('vi-VN')} đ</div>
                             </div>
 
-                            <div className="promo-row">
-                                <div style={{ color: '#718096' }}>Mã giảm giá</div>
-                                <div className="u-flex u-align-center u-gap-16">
-                                    <input placeholder="Nhập mã giảm giá" className="promo-input" />
-                                    <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>- 0 đ</span>
-                                </div>
-                            </div>
+
 
                             <div className="total-row">
                                 <div style={{ fontWeight: '500', color: '#4a5568' }}>Tổng tiền thanh toán</div>
@@ -388,16 +413,18 @@ const Checkout = () => {
                                 <span style={{ color: '#4a5568' }}>Tôi đồng ý quy định của <strong style={{ color: '#e53e3e' }}>ĐỒNG HƯƠNG SÔNG LAM. Hotline: 1900 3088</strong></span>
                             </div>
 
-                            <div className="checkout-actions">
-                                <button onClick={() => navigate('/booking')} className="btn-cancel">Huỷ</button>
-                                <button 
-                                    onClick={handleCheckout} 
-                                    disabled={isLoading}
-                                    className={`btn-checkout ${paymentMethod === 'vnpay' || paymentMethod === 'payos' ? 'btn-checkout-vnpay' : 'btn-checkout-later'}`}
-                                >
-                                    {isLoading ? 'ĐANG XỬ LÝ...' : (paymentMethod === 'payos' ? 'Thanh toán PayOS' : (paymentMethod === 'vnpay' ? 'Thanh toán VNPay' : 'Trả sau'))}
-                                </button>
-                            </div>
+                            {!payOSData && (
+                                <div className="checkout-actions">
+                                    <button onClick={() => navigate('/booking')} className="btn-cancel">Huỷ</button>
+                                    <button 
+                                        onClick={handleCheckout} 
+                                        disabled={isLoading}
+                                        className={`btn-checkout ${paymentMethod === 'vnpay' || paymentMethod === 'payos' ? 'btn-checkout-vnpay' : 'btn-checkout-later'}`}
+                                    >
+                                        {isLoading ? 'ĐANG XỬ LÝ...' : (paymentMethod === 'payos' ? 'Thanh toán PayOS' : 'Thanh toán VNPay')}
+                                    </button>
+                                </div>
+                            )}
                         </Card>
                     </div>
 

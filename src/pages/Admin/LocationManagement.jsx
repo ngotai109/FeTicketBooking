@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import locationService from '../../services/location.service';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, CustomSelect, Badge, Card, Pagination } from '../../components/Common';
+import { ConfirmationModal, CustomSelect, Badge, Card, Pagination, LoadingSpinner } from '../../components/Common';
 import { handleApiResponse } from '../../utils/common';
 
 const LocationManagement = () => {
@@ -141,7 +141,7 @@ const LocationManagement = () => {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="5" className="u-text-center u-p-40">Đang tải...</td>
+                                    <td colSpan="5"><LoadingSpinner message="Đang tải dữ liệu..." /></td>
                                 </tr>
                             ) : locations.length === 0 ? (
                                 <tr>

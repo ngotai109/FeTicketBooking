@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import provinceService from '../../services/province.service';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, CustomSelect, Badge, Card, Pagination } from '../../components/Common';
+import { ConfirmationModal, CustomSelect, Badge, Card, Pagination, LoadingSpinner } from '../../components/Common';
 import { handleApiResponse } from '../../utils/common';
 
 const ProvinceManagement = () => {
@@ -146,7 +146,9 @@ const ProvinceManagement = () => {
                             </thead>
                             <tbody>
                                 {loading ? (
-                                    <tr><td colSpan="4" className="u-text-center u-p-40">Đang tải dữ liệu...</td></tr>
+                                    <tr>
+                                        <td colSpan="4"><LoadingSpinner message="Đang tải dữ liệu..." /></td>
+                                    </tr>
                                 ) : filteredProvinces.length === 0 ? (
                                     <tr><td colSpan="4" className="u-text-center u-p-40">Không tìm thấy tỉnh thành nào</td></tr>
                                 ) : (

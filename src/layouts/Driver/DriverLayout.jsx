@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ConfirmationModal } from '../../components/Common';
+import driverService from '../../services/driver.service';
 
 import '../../assets/styles/DriverLayout.css';
 import logo from '../../assets/images/logo.webp';
@@ -20,9 +21,22 @@ const DriverLayout = () => {
         const fetchDriverInfo = async () => {
             try {
                 const res = await driverService.getAllDrivers();
-                const allDrivers = res.data?.data || res.data || [];
-                const userEmail = localStorage.getItem('userEmail');
-                const myInfo = allDrivers.find(d => d.email === userEmail);
+                const allDrivers = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+                const storedValue = localStorage.getItem('userEmail');
+                const normalizedStored = (storedValue || '').toLowerCase().trim();
+
+                let myInfo = allDrivers.find(d => {
+                    const driverEmail = (d.email || '').toLowerCase().trim();
+                    const driverPhone = (d.phoneNumber || '').toLowerCase().trim();
+                    return (driverEmail && driverEmail === normalizedStored) || 
+                           (driverPhone && driverPhone === normalizedStored);
+                });
+
+                // Fallback: If only one driver returned, assume it's me
+                if (!myInfo && allDrivers.length === 1) {
+                    myInfo = allDrivers[0];
+                }
+
                 if (myInfo) setDriverInfo(myInfo);
             } catch (error) {
                 console.error("Error fetching driver info in layout", error);
@@ -47,6 +61,7 @@ const DriverLayout = () => {
 
     const getPageTitle = () => {
         if (isActive('/driver/schedule')) return 'Lịch làm việc';
+        if (isActive('/driver/leave-requests')) return 'Yêu cầu nghỉ phép';
         if (isActive('/driver/profile') || isActive('/driver/change-password')) return 'Hồ sơ cá nhân';
         return 'Hệ Thống Điều Hành';
     };
@@ -76,6 +91,15 @@ const DriverLayout = () => {
                         {!isSidebarCollapsed && <span>Lịch làm việc</span>}
                     </Link>
                     
+                    <Link 
+                        to="/driver/leave-requests" 
+                        className={`driver-nav-item ${isActive('/driver/leave-requests') ? 'active' : ''}`}
+                        onClick={() => setIsMobileSidebarOpen(false)}
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        {!isSidebarCollapsed && <span>Xin nghỉ phép</span>}
+                    </Link>
+
                     <Link 
                         to="/driver/profile" 
                         className={`driver-nav-item ${isActive('/driver/profile') ? 'active' : ''}`}

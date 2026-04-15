@@ -4,6 +4,7 @@ import provinceService from '../../services/province.service';
 import wardService from '../../services/ward.service';
 import officeService from '../../services/office.service';
 import routeService from '../../services/route.service';
+import { LoadingSpinner } from '../../components/Common';
 import '../../assets/styles/Home.css';
 import NetworkMap from '../../components/NetworkMap/NetworkMap';
 import bg3 from '../../assets/images/bg3.jpg';
@@ -17,8 +18,6 @@ const LocationIcon = () => (
 );
 
 const Home = () => {
-    const [provinces, setProvinces] = useState([]);
-    const [wards, setWards] = useState([]);
     const [offices, setOffices] = useState([]);
     const [routes, setRoutes] = useState([]);
     const [departure, setDeparture] = useState('');
@@ -31,16 +30,11 @@ const Home = () => {
     useEffect(() => {
         const fetchLocations = async () => {
             try {
-                const [provinceRes, wardRes, officeRes] = await Promise.all([
-                    provinceService.getAllProvincesActive(),
-                    wardService.getAllWardsActive(),
-                    officeService.getAllOffices()
-                ]);
-
-                if (provinceRes && provinceRes.data) setProvinces(provinceRes.data);
-                if (wardRes && wardRes.data) setWards(wardRes.data);
-                if (officeRes && officeRes.data) setOffices(officeRes.data?.data || officeRes.data || []);
-
+                // Chỉ fetch offices vì đã có sẵn ProvinceName và WardName
+                const officeRes = await officeService.getAllOffices();
+                if (officeRes && officeRes.data) {
+                    setOffices(officeRes.data?.data || officeRes.data || []);
+                }
             } catch (error) {
                 console.error('Lỗi khi lấy danh sách địa điểm:', error);
             }
@@ -58,24 +52,14 @@ const Home = () => {
         fetchRoutes();
     }, []);
 
-    const getGroupedOffices = () => {
+    const groupedOffices = React.useMemo(() => {
         if (!offices.length) return [];
         const map = {};
 
         offices.forEach(o => {
-            let pId = o.provinceId ? parseInt(o.provinceId) : null;
-            const ward = wards.find(w => parseInt(w.wardId) === parseInt(o.wardId));
-            if (!pId && ward) pId = parseInt(ward.provinceId);
-
-            const province = provinces.find(p => parseInt(p.provinceId) === pId);
-            const pName = province ? province.provinceName : 'Văn phòng khác';
-
+            const pName = o.provinceName || 'Tỉnh/Thành phố khác';
             if (!map[pName]) map[pName] = [];
-
-            // Chỉ hiển thị office name (không mix ward)
-            const label = o.officeName;
-
-            map[pName].push({ id: o.officeId, name: label });
+            map[pName].push({ id: o.officeId, name: o.officeName });
         });
 
         return Object.keys(map).sort((a, b) => {
@@ -83,7 +67,7 @@ const Home = () => {
             if (b.toLowerCase().includes('hà nội')) return 1;
             return a.localeCompare(b);
         }).map(name => ({ label: name, items: map[name] }));
-    };
+    }, [offices]);
 
 
     const handleSearch = () => {
@@ -121,7 +105,7 @@ const Home = () => {
                                 </div>
                                 {showDepList && (
                                     <ul className="custom-select-list">
-                                        {getGroupedOffices().length > 0 ? getGroupedOffices().map(group => (
+                                        {groupedOffices.length > 0 ? groupedOffices.map(group => (
                                             <React.Fragment key={group.label}>
                                                 <li className="province-header">{group.label}</li>
                                                 {group.items.map(item => (
@@ -139,7 +123,10 @@ const Home = () => {
                                                 ))}
                                             </React.Fragment>
                                         )) : (
-                                            <li className="loading-item">Đang tải dữ liệu...</li>
+                                            <li className="loading-item">
+                                                <LoadingSpinner size="small" message="" />
+                                                <span className="u-size-12 u-color-slate-400">Đang tải dữ liệu...</span>
+                                            </li>
                                         )}
                                     </ul>
                                 )}
@@ -159,7 +146,7 @@ const Home = () => {
                                 </div>
                                 {showDestList && (
                                     <ul className="custom-select-list">
-                                        {getGroupedOffices().length > 0 ? getGroupedOffices().map(group => (
+                                        {groupedOffices.length > 0 ? groupedOffices.map(group => (
                                             <React.Fragment key={group.label}>
                                                 <li className="province-header">{group.label}</li>
                                                 {group.items.map(item => (
@@ -177,7 +164,10 @@ const Home = () => {
                                                 ))}
                                             </React.Fragment>
                                         )) : (
-                                            <li className="loading-item">Đang tải dữ liệu...</li>
+                                            <li className="loading-item">
+                                                <LoadingSpinner size="small" message="" />
+                                                <span className="u-size-12 u-color-slate-400">Đang tải dữ liệu...</span>
+                                            </li>
                                         )}
                                     </ul>
                                 )}

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation, Link, useNavigate as useRouteNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ConfirmationModal } from '../../components/Common';
+import bookingService from '../../services/booking.service';
 
 import '../../assets/styles/AdminDashboard.css';
 import '../../assets/styles/admin-common.css';
@@ -14,7 +15,26 @@ const AdminLayout = () => {
 
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [notifications, setNotifications] = useState({ dropOffRequests: 0, cancellationRequests: 0, totalCount: 0 });
+
+    React.useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const res = await bookingService.getAdminNotifications();
+                setNotifications(res.data);
+            } catch (error) {
+                console.error('Lỗi khi tải thông báo', error);
+            }
+        };
+
+        fetchNotifications();
+        
+        // Polling mỗi 30 giây để cập nhật số lượng thông báo
+        const intervalId = setInterval(fetchNotifications, 30000);
+        return () => clearInterval(intervalId);
+    }, []);
 
     const handleLogoutClick = () => {
         setIsProfileDropdownOpen(false);
@@ -50,14 +70,21 @@ const AdminLayout = () => {
         if (path.includes('/schedules')) return 'Quản lý chuyến đi';
         if (path.includes('/trips')) return 'Theo dõi Chuyến đi';
         if (path.includes('/cancellation')) return 'Duyệt yêu cầu hủy vé';
+        if (path.includes('/leave-approvals')) return 'Duyệt đổi lịch';
         if (path.includes('/drivers')) return 'Quản lý Tài xế';
         return 'Hệ thống Quản trị';
     };
 
     const userEmail = localStorage.getItem('userEmail') || 'Admin@gmail.com';
 
+    // Xử lý click outside cho dropdown
+    const handleMainClick = () => {
+        if (isProfileDropdownOpen) setIsProfileDropdownOpen(false);
+        if (isNotificationOpen) setIsNotificationOpen(false);
+    };
+
     return (
-        <div className={`admin-dashboard ${isSidebarCollapsed ? 'collapsed' : ''}`} onClick={() => isProfileDropdownOpen && setIsProfileDropdownOpen(false)}>
+        <div className={`admin-dashboard ${isSidebarCollapsed ? 'collapsed' : ''}`} onClick={handleMainClick}>
             <aside className="sidebar">
                 <div className="sidebar-header">
                     <div className="sidebar-logo">
@@ -79,6 +106,10 @@ const AdminLayout = () => {
                     <Link to="/admin/cancellation" className={`nav-item ${isActive('/admin/cancellation') ? 'active' : ''}`} title="Yêu cầu hủy vé">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
                         {!isSidebarCollapsed && <span>Quản lý vé hủy</span>}
+                    </Link>
+                    <Link to="/admin/leave-approvals" className={`nav-item ${isActive('/admin/leave-approvals') ? 'active' : ''}`} title="Duyệt đổi lịch">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                        {!isSidebarCollapsed && <span>Duyệt đổi lịch</span>}
                     </Link>
                     <Link to="/admin/passengers" className={`nav-item ${isActive('/admin/passengers') ? 'active' : ''}`} title="Hành khách">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -138,12 +169,79 @@ const AdminLayout = () => {
                         <button className="header-icon-btn" title="Chế độ tối">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
                         </button>
-                        <button className="header-icon-btn" title="Thông báo">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                            <span className="notification-badge"></span>
-                        </button>
+                        
+                        <div className="header-notification-container" style={{ position: 'relative' }}>
+                            <button className="header-icon-btn" title="Thông báo" onClick={(e) => { e.stopPropagation(); setIsNotificationOpen(!isNotificationOpen); setIsProfileDropdownOpen(false); }}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                                {notifications.totalCount > 0 && (
+                                    <span className="notification-badge" style={{ 
+                                        position: 'absolute',
+                                        top: '0px',
+                                        right: '0px',
+                                        background: '#e53e3e',
+                                        color: '#ffffff',
+                                        fontSize: '11px',
+                                        fontWeight: '800',
+                                        minWidth: '18px',
+                                        height: '18px',
+                                        borderRadius: '9px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        padding: '0 4px',
+                                        border: '2px solid white',
+                                        lineHeight: '1',
+                                        boxSizing: 'border-box'
+                                    }}>
+                                        {notifications.totalCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {isNotificationOpen && (
+                                <div className="notification-dropdown-menu" style={{ position: 'absolute', top: '100%', right: '0', background: 'white', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', borderRadius: '8px', zIndex: 1000, minWidth: '320px', padding: '0', overflow: 'hidden', border: '1px solid #eee' }}>
+                                    <div style={{ padding: '15px', borderBottom: '1px solid #edf2f7', fontWeight: 'bold', fontSize: '15px' }}>Thông báo mới</div>
+                                    <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                        {notifications.totalCount === 0 ? (
+                                            <div style={{ padding: '20px', textAlign: 'center', color: '#718096', fontSize: '14px' }}>Không có thông báo nào</div>
+                                        ) : (
+                                            <>
+                                                {notifications.dropOffRequests > 0 && (
+                                                    <div className="notification-item" onClick={() => navigate('/admin/trips')} style={{ padding: '15px', cursor: 'pointer', borderBottom: '1px solid #edf2f7', display: 'flex', alignItems: 'center', gap: '15px', transition: 'background 0.2s' }}>
+                                                        <div style={{ background: '#feebc8', color: '#dd6b20', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            <i className="fas fa-bus" style={{ fontSize: '16px' }}></i>
+                                                        </div>
+                                                        <div>
+                                                            <div style={{ fontWeight: '600', color: '#2d3748', fontSize: '14px' }}>Yêu cầu xuống xe dọc đường</div>
+                                                            <div style={{ fontSize: '13px', color: '#e53e3e', fontWeight: '600', marginTop: '4px' }}>Có {notifications.dropOffRequests} yêu cầu chờ bạn duyệt</div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {notifications.cancellationRequests > 0 && (
+                                                    <div className="notification-item" onClick={() => navigate('/admin/cancellation')} style={{ padding: '15px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '15px', transition: 'background 0.2s' }}>
+                                                        <div style={{ background: '#fee2e2', color: '#e53e3e', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            <i className="fas fa-ticket-alt" style={{ fontSize: '16px' }}></i>
+                                                        </div>
+                                                        <div>
+                                                            <div style={{ fontWeight: '600', color: '#2d3748', fontSize: '14px' }}>Yêu cầu hủy vé tự động</div>
+                                                            <div style={{ fontSize: '13px', color: '#e53e3e', fontWeight: '600', marginTop: '4px' }}>Có {notifications.cancellationRequests} yêu cầu chờ bạn duyệt</div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                    {notifications.totalCount > 0 && (
+                                        <div style={{ padding: '10px 15px', textAlign: 'center', background: '#f7fafc', borderTop: '1px solid #edf2f7', fontSize: '13px', color: '#718096', cursor: 'pointer' }} onClick={() => setIsNotificationOpen(false)}>
+                                            Đóng
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
                         <div className="header-user-profile-container" style={{ position: 'relative' }}>
-                            <div className="header-user-profile" onClick={(e) => { e.stopPropagation(); setIsProfileDropdownOpen(!isProfileDropdownOpen); }} title="Tài khoản">
+                            <div className="header-user-profile" onClick={(e) => { e.stopPropagation(); setIsProfileDropdownOpen(!isProfileDropdownOpen); setIsNotificationOpen(false); }} title="Tài khoản">
                                 <div className="header-user-avatar">
                                     {userEmail.charAt(0).toUpperCase()}
                                 </div>

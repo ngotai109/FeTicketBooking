@@ -9,14 +9,13 @@ import '../../assets/styles/Booking.css';
 import bg3 from '../../assets/images/bg3.jpg';
 import noScheduleImg from '../../assets/images/route-no-schedule-2.png';
 import { getBusLayout } from '../../constants/busLayouts';
+import { LoadingSpinner } from '../../components/Common';
 
 const Booking = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const searchData = location.state || { departure: '', destination: '', date: '' };
 
-    const [provinces, setProvinces] = useState([]);
-    const [wards, setWards] = useState([]);
     const [offices, setOffices] = useState([]);
     const [departure, setDeparture] = useState(searchData.departure);
     const [destination, setDestination] = useState(searchData.destination);
@@ -28,17 +27,8 @@ const Booking = () => {
     useEffect(() => {
         const fetchLocations = async () => {
             try {
-                const [provinceRes, wardRes, officeRes] = await Promise.all([
-                    provinceService.getAllProvincesActive(),
-                    wardService.getAllWardsActive(),
-                    officeService.getAllOffices()
-                ]);
-                if (provinceRes && provinceRes.data) {
-                    setProvinces(provinceRes.data);
-                }
-                if (wardRes && wardRes.data) {
-                    setWards(wardRes.data);
-                }
+                // Chỉ fetch offices vì đã có sẵn ProvinceName và WardName
+                const officeRes = await officeService.getAllOffices();
                 if (officeRes && officeRes.data) {
                     setOffices(officeRes.data?.data || officeRes.data || []);
                 }
@@ -49,24 +39,14 @@ const Booking = () => {
         fetchLocations();
     }, []);
 
-    const getGroupedOffices = () => {
+    const groupedOffices = React.useMemo(() => {
         if (!offices.length) return [];
         const map = {};
 
         offices.forEach(o => {
-            let pId = o.provinceId ? parseInt(o.provinceId) : null;
-            const ward = wards.find(w => parseInt(w.wardId) === parseInt(o.wardId));
-            if (!pId && ward) pId = parseInt(ward.provinceId);
-
-            const province = provinces.find(p => parseInt(p.provinceId) === pId);
-            const pName = province ? province.provinceName : 'Văn phòng khác';
-
+            const pName = o.provinceName || 'Tỉnh/Thành phố khác';
             if (!map[pName]) map[pName] = [];
-
-            // Chỉ hiển thị office name (không mix ward)
-            const label = o.officeName;
-
-            map[pName].push({ id: o.officeId, name: label });
+            map[pName].push({ id: o.officeId, name: o.officeName });
         });
 
         return Object.keys(map).sort((a, b) => {
@@ -74,7 +54,7 @@ const Booking = () => {
             if (b.toLowerCase().includes('hà nội')) return 1;
             return a.localeCompare(b);
         }).map(name => ({ label: name, items: map[name] }));
-    };
+    }, [offices]);
 
     const [trips, setTrips] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -326,7 +306,7 @@ const Booking = () => {
                             <div className="custom-select-display" onClick={() => setShowDepList(!showDepList)}>{departure || 'Chọn điểm đi'}</div>
                             {showDepList && (
                                 <ul className="custom-select-list">
-                                    {getGroupedOffices().length > 0 ? getGroupedOffices().map(group => (
+                                    {groupedOffices.length > 0 ? groupedOffices.map(group => (
                                         <React.Fragment key={group.label}>
                                             <li className="province-header">{group.label}</li>
                                             {group.items.map(item => (
@@ -345,7 +325,7 @@ const Booking = () => {
                             <div className="custom-select-display" onClick={() => setShowDestList(!showDestList)}>{destination || 'Chọn điểm đến'}</div>
                             {showDestList && (
                                 <ul className="custom-select-list">
-                                    {getGroupedOffices().length > 0 ? getGroupedOffices().map(group => (
+                                    {groupedOffices.length > 0 ? groupedOffices.map(group => (
                                         <React.Fragment key={group.label}>
                                             <li className="province-header">{group.label}</li>
                                             {group.items.map(item => (
@@ -445,7 +425,7 @@ const Booking = () => {
                             </div>
                         ) : isLoading ? (
                             <div className="no-results">
-                                <h2 className="u-size-24 u-weight-700 u-m-b-16">⏳ Đang tìm kiếm...</h2>
+                                <LoadingSpinner message="Đang tìm kiếm chuyến xe tốt nhất dành cho bạn..." />
                             </div>
                         ) : filteredAndSortedTrips.length > 0 ? (
                             filteredAndSortedTrips.map(trip => (

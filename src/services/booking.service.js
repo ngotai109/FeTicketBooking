@@ -27,6 +27,18 @@ const bookingService = {
     },
     processCancellation: async (id, approve, adminNote) => {
         return await apiService.post(`/Booking/${id}/process-cancellation`, { approve, adminNote });
+    },
+    getMidTripRequests: async () => {
+        return await apiService.get('/Booking/mid-trip-requests');
+    },
+    approveMidTripRequest: async (ticketId) => {
+        return await apiService.post(`/Booking/mid-trip-requests/${ticketId}/approve`);
+    },
+    confirmMidTripDropOff: async (ticketId) => {
+        return await apiService.post(`/Booking/mid-trip-requests/${ticketId}/confirm`);
+    },
+    getAdminNotifications: async () => {
+        return await apiService.get('/Booking/admin-notifications');
     }
 };
 

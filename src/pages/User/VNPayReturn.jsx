@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import paymentService from '../../services/payment.service';
 import { toast } from 'react-toastify';
 import '../../assets/styles/vnpay-mock.css'; // Updated for Case-sensitive Linux (Vercel)
+import { LoadingSpinner } from '../../components/Common';
 
 const VNPayReturn = () => {
     const location = useLocation();
@@ -37,9 +38,8 @@ const VNPayReturn = () => {
         return (
             <div className="vnpay-mock-container">
                 <div className="vnpay-card">
-                    <div className="loading-spinner"></div>
-                    <h2>Đang xác thực giao dịch...</h2>
-                    <p>Vui lòng không đóng trình duyệt.</p>
+                    <LoadingSpinner message="Đang xác thực giao dịch VNPay..." />
+                    <p style={{ marginTop: '16px', color: '#64748b' }}>Vui lòng không đóng trình duyệt.</p>
                 </div>
             </div>
         );
