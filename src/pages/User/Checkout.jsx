@@ -89,7 +89,7 @@ const Checkout = () => {
         email: '' // Luôn để trống để khách hàng tự điền theo yêu cầu
     });
     const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
-    const [paymentMethod, setPaymentMethod] = useState('cash'); // 'cash' or 'vnpay'
+    const [paymentMethod, setPaymentMethod] = useState('vnpay'); // 'vnpay' or 'payos'
 
     useEffect(() => {
         if (!location.state) {
@@ -250,22 +250,7 @@ const Checkout = () => {
                             <h3 className="checkout-section-title">Phương thức thanh toán</h3>
                             
                             <div className="payment-method-list">
-                                {/* Tùy chọn 1: Tiền mặt */}
-                                <div 
-                                    onClick={() => setPaymentMethod('cash')} 
-                                    className={`payment-method-item ${paymentMethod === 'cash' ? 'active-cash' : ''}`}
-                                >
-                                    {paymentMethod === 'cash' && (
-                                        <div className="payment-check-mark cash">
-                                            <span style={{ color: 'white', fontSize: '12px' }}>✓</span>
-                                        </div>
-                                    )}
-                                    <div className="payment-radio"></div>
-                                    <div>
-                                        <div className="payment-info-title">Tiền mặt</div>
-                                        <div className="payment-info-subtitle">💵 Thanh toán bằng tiền mặt</div>
-                                    </div>
-                                </div>
+
 
                                 {/* Tùy chọn 2: VNPay */}
                                 <div 
@@ -306,16 +291,9 @@ const Checkout = () => {
                             <div className="checkout-guide">
                                 <div className="guide-header">
                                     <span className="guide-icon">i</span>
-                                    {paymentMethod === 'cash' ? 'Hướng dẫn thanh toán (Chuyển khoản / Tại quầy)' : 'Thanh toán trực tuyến an toàn'}
+                                    {paymentMethod === 'payos' ? 'Thanh toán trực tuyến an toàn' : 'Thanh toán trực tuyến an toàn'}
                                 </div>
-                                {paymentMethod === 'cash' ? (
-                                    <ul className="guide-list">
-                                        <li>- Thông tin số tài khoản ngân hàng:</li>
-                                        <li>- BIDV: <strong style={{ color: '#e53e3e' }}>51110000695613</strong> HOANG THI LINH chi nhánh Đô Lương.</li>
-                                        <li>- Nội dung chuyển khoản ghi đúng số điện thoại của quý khách để được xác nhận từ nhà xe nhanh nhất.</li>
-                                        <li style={{ marginTop: '10px', color: '#e53e3e', fontWeight: 'bold' }}>Hỗ trợ: 1900 3088</li>
-                                    </ul>
-                                ) : paymentMethod === 'payos' ? (
+                                {paymentMethod === 'payos' ? (
                                     <ul className="guide-list">
                                         <li>- Hệ thống sẽ tạo mã QR thanh toán riêng cho đơn hàng của bạn.</li>
                                         <li>- Bạn chỉ cần mở ứng dụng Ngân hàng và <strong>Quét mã QR</strong> để hoàn tất.</li>
@@ -393,9 +371,9 @@ const Checkout = () => {
                                 <button 
                                     onClick={handleCheckout} 
                                     disabled={isLoading}
-                                    className={`btn-checkout ${paymentMethod === 'vnpay' || paymentMethod === 'payos' ? 'btn-checkout-vnpay' : 'btn-checkout-later'}`}
+                                    className="btn-checkout btn-checkout-vnpay"
                                 >
-                                    {isLoading ? 'ĐANG XỬ LÝ...' : (paymentMethod === 'payos' ? 'Thanh toán PayOS' : (paymentMethod === 'vnpay' ? 'Thanh toán VNPay' : 'Trả sau'))}
+                                    {isLoading ? 'ĐANG XỬ LÝ...' : (paymentMethod === 'payos' ? 'Thanh toán PayOS' : 'Thanh toán VNPay')}
                                 </button>
                             </div>
                         </Card>
