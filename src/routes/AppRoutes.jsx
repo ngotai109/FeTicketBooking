@@ -65,7 +65,7 @@ export default function AppRoutes() {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['Admin']}>
             <AdminLayout />
           </ProtectedRoute>
         }
@@ -89,7 +89,7 @@ export default function AppRoutes() {
       <Route
         path="/driver"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['Driver']}>
             <DriverLayout />
           </ProtectedRoute>
         }

@@ -19,6 +19,21 @@ const DriverSchedule = () => {
         fetchSchedule();
     }, []);
 
+    const handleViewPassengers = async (trip) => {
+        try {
+            setSelectedTrip(trip);
+            setIsPassengerModalOpen(true);
+            setLoadingPassengers(true);
+            const response = await api.get(`/Driver/my-trips/${trip.tripId}/passengers`, { skipLoading: true });
+            setPassengers(handleApiResponse(response));
+        } catch (error) {
+            toast.error('Không thể tải danh sách hành khách');
+            setIsPassengerModalOpen(false);
+        } finally {
+            setLoadingPassengers(false);
+        }
+    };
+
     const fetchSchedule = async () => {
         try {
             setLoading(true);
@@ -31,18 +46,26 @@ const DriverSchedule = () => {
         }
     };
 
-    const handleViewPassengers = async (trip) => {
+    const handleToggleBoard = async (ticketId) => {
         try {
-            setSelectedTrip(trip);
-            setIsPassengerModalOpen(true);
-            setLoadingPassengers(true);
-            const response = await api.get(`/Driver/trip-passengers/${trip.tripId}`, { skipLoading: true });
-            setPassengers(handleApiResponse(response));
+            await api.patch(`/Driver/tickets/${ticketId}/toggle-board`);
+            // Cập nhật lại danh sách tại chỗ để không load lại toàn bộ modal
+            setPassengers(prev => prev.map(p => 
+                p.ticketId === ticketId ? { ...p, isBoarded: !p.isBoarded } : p
+            ));
         } catch (error) {
-            toast.error('Không thể tải danh sách hành khách');
-            setIsPassengerModalOpen(false);
-        } finally {
-            setLoadingPassengers(false);
+            toast.error('Lỗi khi cập nhật trạng thái lên xe');
+        }
+    };
+
+    const handleToggleDropOff = async (ticketId) => {
+        try {
+            await api.patch(`/Driver/tickets/${ticketId}/toggle-dropoff`);
+            setPassengers(prev => prev.map(p => 
+                p.ticketId === ticketId ? { ...p, isDroppedOff: !p.isDroppedOff } : p
+            ));
+        } catch (error) {
+            toast.error('Lỗi khi cập nhật trạng thái xuống xe');
         }
     };
 
@@ -196,7 +219,7 @@ const DriverSchedule = () => {
                                     const dayIdx = index === 6 ? 0 : index + 1; // Map to 0-6 where 0 is Sunday
 
                                     return (
-                                        <div key={index} className={`day-column ${isToday ? 'is-today' : ''}`}>
+                                        <div key={index} className={`day-column ${isToday ? 'is-today' : ''} ${dayTrips.length > 0 ? 'has-trips' : ''}`}>
                                             <div className="day-header">
                                                 <div className="day-name">{dayNames[index]}</div>
                                                 <div className="day-date">{day.getDate().toString().padStart(2, '0')}/{(day.getMonth() + 1).toString().padStart(2, '0')}</div>
@@ -294,7 +317,8 @@ const DriverSchedule = () => {
                                         <th style={{ paddingLeft: '24px' }}>Ghế</th>
                                         <th>Hành khách</th>
                                         <th>Điểm đón</th>
-                                        <th>Thanh toán</th>
+                                        <th className="u-text-center">Lên xe</th>
+                                        <th className="u-text-center">Xuống xe</th>
                                         <th style={{ paddingRight: '24px' }}>Trạng thái</th>
                                     </tr>
                                 </thead>
@@ -307,11 +331,31 @@ const DriverSchedule = () => {
                                                 <div className="u-size-12 u-color-slate-500">{p.phoneNumber}</div>
                                             </td>
                                             <td>{p.pickUpPoint || 'Bến xe'}</td>
-                                            <td> {p.status === 'Confirmed' ? 'Đã thanh toán' : 'Tại quầy'} </td>
+                                            <td className="u-text-center">
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={p.isBoarded} 
+                                                    onChange={() => handleToggleBoard(p.ticketId)}
+                                                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                                                />
+                                            </td>
+                                            <td className="u-text-center">
+                                                <input 
+                                                    type="checkbox" 
+                                                    disabled={!p.isBoarded}
+                                                    checked={p.isDroppedOff} 
+                                                    onChange={() => handleToggleDropOff(p.ticketId)}
+                                                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                                                />
+                                            </td>
                                             <td style={{ paddingRight: '24px' }}>
-                                                <Badge type={p.status === 'Confirmed' ? 'success' : 'warning'}>
-                                                    {p.status === 'Confirmed' ? 'Đã xác nhận' : 'Chờ khách'}
-                                                </Badge>
+                                                {p.isDroppedOff ? (
+                                                    <Badge type="success">HOÀN THÀNH</Badge>
+                                                ) : p.isBoarded ? (
+                                                    <Badge type="warning">ĐANG TRÊN XE</Badge>
+                                                ) : (
+                                                    <Badge type="secondary">CHỜ KHÁCH</Badge>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}

@@ -689,6 +689,30 @@
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
 }
 
+.day-column.has-trips {
+  background: #f8fafc;
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+
+.day-column.has-trips .day-header {
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.day-column.has-trips .day-name {
+  color: #2d3748;
+  font-weight: 700;
+}
+
+.day-column.has-trips .day-date {
+  color: #718096;
+  opacity: 1;
+}
+
+.is-today .trip-time {
+  color: #ef4444 !important; /* Chỉ đỏ cho khung giờ của ngày hôm nay */
+}
+
 .day-header {
   text-align: center;
   padding-bottom: 12px;
@@ -724,8 +748,8 @@
 
 .trip-time {
   font-size: 11px;
-  font-weight: 700;
-  color: #718096;
+  font-weight: 800;
+  color: #718096; /* Trả lại màu xám cho các ngày khác */
   display: flex;
   align-items: center;
   gap: 4px;
