@@ -66,12 +66,11 @@ const DriverLeaveRequest = () => {
             if (myInfo) {
                 setDriverInfo(myInfo);
                 const [resReqs, resSchedule] = await Promise.all([
-                    api.get('LeaveRequest', { skipLoading: true }),
+                    api.get('Driver/leave-requests', { skipLoading: true }),
                     api.get('Driver/my-schedule', { skipLoading: true })
                 ]);
 
-                const allRequests = resReqs.data?.data || resReqs.data || [];
-                const myRequests = allRequests.filter(req => req.driverId === myInfo.id);
+                const myRequests = resReqs.data || [];
                 
                 const sorted = myRequests.sort((a, b) => new Date(b.createdDate || b.id) - new Date(a.createdDate || a.id));
                 setLeaveRequests(sorted);
@@ -128,7 +127,7 @@ const DriverLeaveRequest = () => {
                 tripId: formData.selectedTripId || null
             };
 
-            await api.post('LeaveRequest', payload);
+            await api.post('Driver/leave-requests', payload);
             toast.success('Gửi yêu cầu thành công!');
             setShowModal(false);
             setFormData({ requestType: 'FullDay', leaveDate: '', selectedTripId: '', reason: '', notes: '' });

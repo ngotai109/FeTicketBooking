@@ -51,6 +51,7 @@ const AdminLayout = () => {
         if (path.includes('/trips')) return 'Theo dõi Chuyến đi';
         if (path.includes('/cancellation')) return 'Duyệt yêu cầu hủy vé';
         if (path.includes('/drivers')) return 'Quản lý Tài xế';
+        if (path.includes('/leave-requests')) return 'Quản lý Đổi lịch / Nghỉ phép';
         return 'Hệ thống Quản trị';
     };
 
@@ -87,6 +88,10 @@ const AdminLayout = () => {
                     <Link to="/admin/drivers" className={`nav-item ${isActive('/admin/drivers') ? 'active' : ''}`} title="Tài xế">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         {!isSidebarCollapsed && <span>Quản lý Tài xế</span>}
+                    </Link>
+                    <Link to="/admin/leave-requests" className={`nav-item ${isActive('/admin/leave-requests') ? 'active' : ''}`} title="Yêu cầu đổi lịch">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        {!isSidebarCollapsed && <span>Yêu cầu đổi lịch</span>}
                     </Link>
                     <Link to="/admin/schedules" className={`nav-item ${isActive('/admin/schedules') ? 'active' : ''}`} title="Quản lý chuyến đi">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
