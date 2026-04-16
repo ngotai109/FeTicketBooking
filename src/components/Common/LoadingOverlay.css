@@ -1,0 +1,48 @@
+.global-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+}
+
+.loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.basic-spinner {
+    width: 40px;
+    height: 40px;
+    border: 2.5px solid transparent; /* Làm ẩn các cạnh khác */
+    border-top: 2.5px solid #2e78c6; /* Chỉ hiện cung tròn phía trên */
+    border-radius: 50%;
+    animation: spin-exact 0.7s linear infinite;
+}
+
+.loading-text {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+@keyframes spin-exact {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.local-loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 20px;
+}

@@ -17,6 +17,7 @@ import CancellationManagement from "../pages/Admin/CancellationManagement";
 import DriverManagement from "../pages/Admin/DriverManagement";
 import DriverSchedule from "../pages/Driver/DriverSchedule";
 import DriverProfile from "../pages/Driver/DriverProfile";
+import DriverLeaveRequest from "../pages/Driver/DriverLeaveRequest";
 import ChangePassword from "../pages/Admin/ChangePassword";
 import ProtectedRoute from "./ProtectedRoute";
 import UserLayout from "../layouts/User/UserLayout";
@@ -93,6 +94,7 @@ export default function AppRoutes() {
       >
         <Route index element={<Navigate to="schedule" replace />} />
         <Route path="schedule" element={<DriverSchedule />} />
+        <Route path="leave-request" element={<DriverLeaveRequest />} />
         <Route path="profile" element={<DriverProfile />} />
         <Route path="change-password" element={<DriverProfile />} />
       </Route>

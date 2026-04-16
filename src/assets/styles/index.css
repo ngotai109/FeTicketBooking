@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  --font-main: 'Inter', sans-serif;
-  --font-heading: 'Outfit', sans-serif;
+  --font-main: Godwit, NotoSansJP, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
+  --font-heading: Godwit, NotoSansJP, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
   --text-main: #1e293b;
   --text-muted: #64748b;
   --bg-main: #f8fafc;
@@ -143,4 +143,4 @@ body {
 .u-rounded-16 { border-radius: 16px !important; }
 .u-rounded-20 { border-radius: 20px !important; }
 .u-rounded-32 { border-radius: 32px !important; }
-isplay-none { display: none !important; }
+.display-none { display: none !important; }

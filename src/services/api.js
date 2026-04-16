@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { loadingEvent } from '../components/Common/LoadingOverlay';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'https://localhost:7000/api/',
@@ -25,6 +26,9 @@ const processQueue = (error, token = null) => {
 
 api.interceptors.request.use(
     (config) => {
+        if (!config.skipLoading) {
+            loadingEvent.show(); // Trigger global loading
+        }
         const token = localStorage.getItem('token');
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
@@ -32,19 +36,28 @@ api.interceptors.request.use(
         return config;
     },
     (error) => {
+        loadingEvent.hide();
         return Promise.reject(error);
     }
 );
 
 api.interceptors.response.use(
     (response) => {
+        if (!response.config.skipLoading) {
+            loadingEvent.hide(); // Hide global loading
+        }
         return response;
     },
     async (error) => {
         const originalRequest = error.config;
-        
+
         // Chỉ refresh token nếu là lỗi 401 và KHÔNG PHẢI request login
         if (error.response && error.response.status === 401 && !originalRequest.url?.includes('login') && !originalRequest._retry) {
+            
+            // Hide for the original failed request
+            if (!originalRequest.skipLoading) {
+                loadingEvent.hide();
+            }
 
             if (isRefreshing) {
                 return new Promise(function (resolve, reject) {
@@ -87,17 +100,20 @@ api.interceptors.response.use(
             }
         }
 
+        if (!error.config?.skipLoading) {
+            loadingEvent.hide(); // Hide global loading on other errors
+        }
         return Promise.reject(error);
     }
 );
 
-const handleLogout = () => {
+function handleLogout() {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userEmail');
     toast.error('Phiên đăng nhập hết hạn, vui lòng đăng nhập lại.');
     window.location.href = '/login';
-};
+}
 
 export default api;

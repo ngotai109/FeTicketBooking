@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ConfirmationModal } from '../../components/Common';
+import driverService from '../../services/driver.service';
 
 import '../../assets/styles/DriverLayout.css';
 import logo from '../../assets/images/logo.webp';
@@ -47,6 +48,7 @@ const DriverLayout = () => {
 
     const getPageTitle = () => {
         if (isActive('/driver/schedule')) return 'Lịch làm việc';
+        if (isActive('/driver/leave-request')) return 'Đổi lịch làm việc';
         if (isActive('/driver/profile') || isActive('/driver/change-password')) return 'Hồ sơ cá nhân';
         return 'Hệ Thống Điều Hành';
     };
@@ -74,6 +76,15 @@ const DriverLayout = () => {
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         {!isSidebarCollapsed && <span>Lịch làm việc</span>}
+                    </Link>
+
+                    <Link 
+                        to="/driver/leave-request" 
+                        className={`driver-nav-item ${isActive('/driver/leave-request') ? 'active' : ''}`}
+                        onClick={() => setIsMobileSidebarOpen(false)}
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 12h6"></path><path d="M9 16h6"></path><path d="M12 8h.01"></path></svg>
+                        {!isSidebarCollapsed && <span>Đổi lịch làm việc</span>}
                     </Link>
                     
                     <Link 

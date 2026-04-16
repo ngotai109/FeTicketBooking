@@ -89,7 +89,40 @@ const Checkout = () => {
         email: '' // Luôn để trống để khách hàng tự điền theo yêu cầu
     });
     const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
-    const [paymentMethod, setPaymentMethod] = useState('vnpay'); // 'vnpay' or 'payos'
+    const [paymentMethod, setPaymentMethod] = useState('payos'); // 'vnpay' or 'payos'
+
+    // Custom QR Modal State
+    const [showQRModal, setShowQRModal] = useState(false);
+    const [payosData, setPayosData] = useState(null);
+    const [currentBookingId, setCurrentBookingId] = useState(null);
+
+    // Polling payment status
+    useEffect(() => {
+        let pollInterval;
+        if (showQRModal && currentBookingId) {
+            pollInterval = setInterval(async () => {
+                try {
+                    const res = await bookingService.getBookingById(currentBookingId);
+                    // Log để debug: Bạn có thể nhấn F12 để xem trạng thái thực tế mà API trả về
+                    console.log(`[PAYMENT_POLLING] Checking Booking ${currentBookingId}:`, res.data);
+
+                    const booking = res.data?.data || res.data;
+                    
+                    // Kiểm tra kỹ trạng thái: Chỉ chuyển hướng khi status đúng bằng 1 (Confirmed)
+                    // Lưu ý: Phải đảm bảo booking.status là số 1, không phải chuỗi "1" hoặc undefined
+                    if (booking && (booking.status === 1 || booking.Status === 1)) { 
+                        clearInterval(pollInterval);
+                        setShowQRModal(false);
+                        toast.success("Hệ thống đã nhận được thanh toán!");
+                        setTimeout(() => navigate(`/payment/payos-return?status=PAID&orderCode=${payosData?.orderCode}`), 1000);
+                    }
+                } catch (err) {
+                    console.error("Lỗi kiểm tra trạng thái thanh toán:", err);
+                }
+            }, 3000); 
+        }
+        return () => clearInterval(pollInterval);
+    }, [showQRModal, currentBookingId, payosData, navigate]);
 
     useEffect(() => {
         if (!location.state) {
@@ -98,11 +131,15 @@ const Checkout = () => {
             return;
         }
 
-        const timer = setInterval(() => {
+        const timer = setInterval(async () => {
             setTimeLeft(prev => {
                 if (prev <= 1) {
                     clearInterval(timer);
-                    toast.warning("Hết thời gian giao dịch. Vui lòng đặt lại!");
+                    // Tự động hủy đơn hàng trên server khi hết hạn
+                    if (currentBookingId) {
+                        bookingService.updateBookingStatus(currentBookingId, 2).catch(e => console.error("Auto-cancel failed", e));
+                    }
+                    toast.warning("Hết thời gian giao dịch. Ghế đã được giải phóng!");
                     navigate('/booking');
                     return 0;
                 }
@@ -110,7 +147,25 @@ const Checkout = () => {
             });
         }, 1000);
         return () => clearInterval(timer);
-    }, [location, navigate]);
+    }, [location, navigate, currentBookingId]);
+
+    const handleCancelPayment = async () => {
+        if (!currentBookingId) {
+            setPayosData(null);
+            return;
+        }
+
+        try {
+            await bookingService.updateBookingStatus(currentBookingId, 2); // 2 = Cancelled
+            toast.info("Ghế đã được giải phóng. Bạn có thể chọn chuyến khác.");
+            setPayosData(null);
+            setCurrentBookingId(null);
+        } catch (error) {
+            console.error("Lỗi khi hủy đơn hàng:", error);
+            // Vẫn cho quay lại dù lỗi mạng
+            setPayosData(null);
+        }
+    };
 
     const formatTime = (seconds) => {
         const m = Math.floor(seconds / 60);
@@ -161,16 +216,20 @@ const Checkout = () => {
 
             if (paymentMethod === 'payos') {
                 try {
-                    toast.info("Đang chuyển hướng sang cổng thanh toán PayOS...");
                     const payRes = await paymentService.createPayOSPayment(bookingId);
-                    if (payRes.data?.paymentUrl) {
-                        window.location.href = payRes.data.paymentUrl;
+                    if (payRes.data) {
+                        setPayosData(payRes.data);
+                        setCurrentBookingId(bookingId);
+                        setShowQRModal(true);
+                        toast.success("Đã tạo mã QR thanh toán!");
+                        return;
                     } else {
-                        throw new Error("Không lấy được link thanh toán PayOS.");
+                        throw new Error("Không lấy được dữ liệu thanh toán PayOS.");
                     }
                 } catch (err) {
                     console.error("Lỗi PayOS:", err);
                     toast.error("Không thể kết nối cổng thanh toán PayOS.");
+                    return;
                 }
             } else if (paymentMethod === 'vnpay') {
                 try {
@@ -187,16 +246,20 @@ const Checkout = () => {
                     
                     if (payRes.data?.paymentUrl) {
                         window.location.href = payRes.data.paymentUrl;
+                        return; // Dừng thực thi để đợi chuyển hướng
                     } else {
                         throw new Error("Không lấy được link thanh toán.");
                     }
                 } catch (payError) {
                     console.error("Lỗi VNPay:", payError);
                     toast.error("Không thể kết nối cổng thanh toán VNPay. Vui lòng thử lại!");
+                    return;
                 }
-            } else {
-                toast.success("Đặt vé thành công! Check Email nhé!");
+            } else if (paymentMethod === 'cash') {
+                toast.success("Đặt vé thành công! Vui lòng thanh toán tại quầy.");
                 setTimeout(() => navigate('/lookup/ticket'), 2000);
+            } else {
+                toast.warning("Vui lòng chọn phương thức thanh toán!");
             }
         } catch (error) {
             toast.error(error.response?.data?.message || "Lỗi đặt vé!");
@@ -224,91 +287,148 @@ const Checkout = () => {
                     
                     {/* LEFT COLUMN */}
                     <div className="checkout-left-col">
-                        
-                        {/* Thông tin khách hàng */}
-                        <Card padding="30px">
-                            <h3 className="checkout-section-title">Thông tin khách hàng</h3>
-                            
-                            <div className="checkout-customer-form">
-                                <div className="checkout-form-field">
-                                    <div className="checkout-field-label">Số điện thoại</div>
-                                    <input value={customer.phone} onChange={e => setCustomer({...customer, phone: e.target.value})} className="checkout-field-input" />
-                                </div>
-                                <div className="checkout-form-field">
-                                    <div className="checkout-field-label">Họ tên</div>
-                                    <input value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} className="checkout-field-input" />
-                                </div>
-                                <div className="checkout-form-field">
-                                    <div className="checkout-field-label">Email</div>
-                                    <input value={customer.email} onChange={e => setCustomer({...customer, email: e.target.value})} className="checkout-field-input" />
-                                </div>
-                            </div>
-                        </Card>
-
-                        {/* Phương thức thanh toán */}
-                        <div>
-                            <h3 className="checkout-section-title">Phương thức thanh toán</h3>
-                            
-                            <div className="payment-method-list">
-
-
-                                {/* Tùy chọn 2: VNPay */}
-                                <div 
-                                    onClick={() => setPaymentMethod('vnpay')} 
-                                    className={`payment-method-item ${paymentMethod === 'vnpay' ? 'active-vnpay' : ''}`}
-                                >
-                                    {paymentMethod === 'vnpay' && (
-                                        <div className="payment-check-mark vnpay">
-                                            <span style={{ color: 'white', fontSize: '12px' }}>✓</span>
+                        {!payosData ? (
+                            <>
+                                {/* Thông tin khách hàng */}
+                                <Card padding="30px">
+                                    <h3 className="checkout-section-title">Thông tin khách hàng</h3>
+                                    
+                                    <div className="checkout-customer-form">
+                                        <div className="checkout-form-field">
+                                            <div className="checkout-field-label">Họ tên</div>
+                                            <input value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} className="checkout-field-input" />
                                         </div>
-                                    )}
-                                    <div className="payment-radio"></div>
-                                    <div>
-                                        <div className="payment-info-title">Cổng thanh toán điện tử VNPay</div>
-                                        <div className="payment-info-subtitle">💳 Quét mã QR qua ứng dụng ngân hàng hoặc thẻ ATM</div>
+                                        <div className="checkout-form-field">
+                                            <div className="checkout-field-label">Số điện thoại</div>
+                                            <input value={customer.phone} onChange={e => setCustomer({...customer, phone: e.target.value})} className="checkout-field-input" />
+                                        </div>
+                                        <div className="checkout-form-field">
+                                            <div className="checkout-field-label">Email</div>
+                                            <input value={customer.email} onChange={e => setCustomer({...customer, email: e.target.value})} className="checkout-field-input" />
+                                        </div>
+                                    </div>
+                                </Card>
+
+                                {/* Phương thức thanh toán */}
+                                <div>
+                                    <h3 className="checkout-section-title">Phương thức thanh toán</h3>
+                                    
+                                        {/* Tùy chọn 1: PayOS (Mặc định mới) */}
+                                        <div 
+                                            onClick={() => setPaymentMethod('payos')} 
+                                            className={`payment-method-item ${paymentMethod === 'payos' ? 'active-payos' : ''}`}
+                                        >
+                                            {paymentMethod === 'payos' && (
+                                                <div className="payment-check-mark payos">
+                                                    <span style={{ color: 'white', fontSize: '12px' }}>✓</span>
+                                                </div>
+                                            )}
+                                            <div className="payment-radio"></div>
+                                            <div>
+                                                <div className="payment-info-title">Thanh toán PayOS (QR Code)</div>
+                                                <div className="payment-info-subtitle">⚡ Thanh toán nhanh qua QR-Code ngân hàng</div>
+                                            </div>
+                                        </div>
+
+                                        {/* Tùy chọn 2: VNPay */}
+                                        <div 
+                                            onClick={() => setPaymentMethod('vnpay')} 
+                                            className={`payment-method-item ${paymentMethod === 'vnpay' ? 'active-vnpay' : ''}`}
+                                        >
+                                            {paymentMethod === 'vnpay' && (
+                                                <div className="payment-check-mark vnpay">
+                                                    <span style={{ color: 'white', fontSize: '12px' }}>✓</span>
+                                                </div>
+                                            )}
+                                            <div className="payment-radio"></div>
+                                            <div>
+                                                <div className="payment-info-title">Cổng thanh toán điện tử VNPay</div>
+                                                <div className="payment-info-subtitle">💳 Quét mã QR qua ứng dụng ngân hàng hoặc thẻ ATM</div>
+                                            </div>
+                                        </div>
+
+                                    {/* Conditional Guide block */}
+                                    <div className="checkout-guide">
+                                        <div className="guide-header">
+                                            <span className="guide-icon">i</span>
+                                            {paymentMethod === 'payos' ? 'Thanh toán trực tuyến an toàn' : 'Thanh toán trực tuyến an toàn'}
+                                        </div>
+                                        {paymentMethod === 'payos' ? (
+                                            <ul className="guide-list">
+                                                <li>- Hệ thống sẽ tạo mã QR thanh toán riêng cho đơn hàng của bạn.</li>
+                                                <li>- Bạn chỉ cần mở ứng dụng Ngân hàng và <strong>Quét mã QR</strong> để hoàn tất.</li>
+                                                <li>- Giao dịch an toàn, bảo mật và được xác nhận tự động.</li>
+                                            </ul>
+                                        ) : (
+                                            <ul className="guide-list">
+                                                <li>- Hệ thống sẽ chuyển tiếp bạn đến cổng thanh toán bảo mật Vnpay.</li>
+                                                <li>- Bạn có thể dùng <strong>Internet Banking</strong>, <strong>Mobile Banking</strong> hoặc quét mã QR tiện lợi.</li>
+                                                <li>- Giao dịch được xử lý và kiểm duyệt tức thời. Vé điện tử sẽ ngay lập tức được gửi vào email.</li>
+                                            </ul>
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            /* GIAO DIỆN HIỂN THỊ MÃ QR THAY CHO FORM */
+                            <Card className="qr-inline-card">
+                                <div className="qr-compact-header">
+                                    <h3 className="qr-modal-title" style={{ fontSize: '18px' }}>Quét mã chuyển khoản</h3>
+                                </div>
+
+                                <div className="qr-code-container">
+                                    <img 
+                                        src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(payosData.qrCode)}&size=200x200&ecc=M`}
+                                        alt="Payment QR Code" 
+                                    />
+                                </div>
+
+                                <div className="qr-payment-info">
+                                    <div className="qr-info-item">
+                                        <span className="qr-info-label">Ngân hàng</span>
+                                        <span className="qr-info-value">BIDV</span>
+                                    </div>
+                                    <div className="qr-info-item">
+                                        <span className="qr-info-label">Chủ tài khoản</span>
+                                        <span className="qr-info-value">{payosData.accountName || "NGO KHAC TAI"}</span>
+                                    </div>
+                                    <div className="qr-info-item">
+                                        <span className="qr-info-label">Số tài khoản</span>
+                                        <div className="qr-info-value-wrap">
+                                            <span className="qr-info-value" style={{ color: '#3182ce' }}>{payosData.accountNumber}</span>
+                                            <button className="qr-copy-btn" onClick={() => {
+                                                navigator.clipboard.writeText(payosData.accountNumber);
+                                                toast.info("Đã chép số tài khoản");
+                                            }}>Chép</button>
+                                        </div>
+                                    </div>
+                                    <div className="qr-info-item">
+                                        <span className="qr-info-label">Nội dung</span>
+                                        <div className="qr-info-value-wrap">
+                                            <span className="qr-info-value">{payosData.description}</span>
+                                            <button className="qr-copy-btn" onClick={() => {
+                                                navigator.clipboard.writeText(payosData.description);
+                                                toast.info("Đã chép nội dung");
+                                            }}>Chép</button>
+                                        </div>
+                                    </div>
+                                    <div className="qr-info-item" style={{ background: '#e53e3e', color: 'white' }}>
+                                        <span className="qr-info-label" style={{ color: 'white' }}>Tổng tiền</span>
+                                        <span className="qr-info-value" style={{ fontSize: '16px' }}>{payosData.amount.toLocaleString('vi-VN')} đ</span>
                                     </div>
                                 </div>
 
-                                {/* Tùy chọn 3: PayOS */}
-                                <div 
-                                    onClick={() => setPaymentMethod('payos')} 
-                                    className={`payment-method-item ${paymentMethod === 'payos' ? 'active-vnpay' : ''}`}
-                                >
-                                    {paymentMethod === 'payos' && (
-                                        <div className="payment-check-mark vnpay">
-                                            <span style={{ color: 'white', fontSize: '12px' }}>✓</span>
-                                        </div>
-                                    )}
-                                    <div className="payment-radio"></div>
-                                    <div>
-                                        <div className="payment-info-title">Thanh toán PayOS (QR Code)</div>
-                                        <div className="payment-info-subtitle">⚡ Thanh toán nhanh qua QR-Code ngân hàng</div>
+                                <div className="qr-footer-compact">
+                                    <div className="qr-footer-msg" style={{ margin: 0 }}>
+                                        <div className="qr-spinner"></div>
+                                        <span>Đang chờ thanh toán...</span>
                                     </div>
+                                    <span className="btn-back-link" onClick={handleCancelPayment}>
+                                        « Quay lại / Đổi phương thức
+                                    </span>
                                 </div>
-                            </div>
-
-                            {/* Conditional Guide block */}
-                            <div className="checkout-guide">
-                                <div className="guide-header">
-                                    <span className="guide-icon">i</span>
-                                    {paymentMethod === 'payos' ? 'Thanh toán trực tuyến an toàn' : 'Thanh toán trực tuyến an toàn'}
-                                </div>
-                                {paymentMethod === 'payos' ? (
-                                    <ul className="guide-list">
-                                        <li>- Hệ thống sẽ tạo mã QR thanh toán riêng cho đơn hàng của bạn.</li>
-                                        <li>- Bạn chỉ cần mở ứng dụng Ngân hàng và <strong>Quét mã QR</strong> để hoàn tất.</li>
-                                        <li>- Giao dịch an toàn, bảo mật và được xác nhận tự động.</li>
-                                    </ul>
-                                ) : (
-                                    <ul className="guide-list">
-                                        <li>- Hệ thống sẽ chuyển tiếp bạn đến cổng thanh toán bảo mật Vnpay.</li>
-                                        <li>- Bạn có thể dùng <strong>Internet Banking</strong>, <strong>Mobile Banking</strong> hoặc quét mã QR tiện lợi.</li>
-                                        <li>- Giao dịch được xử lý và kiểm duyệt tức thời. Vé điện tử sẽ ngay lập tức được gửi vào email.</li>
-                                    </ul>
-                                )}
-                            </div>
-                        </div>
-
+                            </Card>
+                        )}
                     </div>
 
                     {/* RIGHT COLUMN */}
@@ -348,14 +468,6 @@ const Checkout = () => {
                                 <div style={{ fontWeight: 'bold', color: '#2d3748' }}>{(selectedSeats.length * ticketPrice).toLocaleString('vi-VN')} đ</div>
                             </div>
 
-                            <div className="promo-row">
-                                <div style={{ color: '#718096' }}>Mã giảm giá</div>
-                                <div className="u-flex u-align-center u-gap-16">
-                                    <input placeholder="Nhập mã giảm giá" className="promo-input" />
-                                    <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>- 0 đ</span>
-                                </div>
-                            </div>
-
                             <div className="total-row">
                                 <div style={{ fontWeight: '500', color: '#4a5568' }}>Tổng tiền thanh toán</div>
                                 <div className="total-value">{(selectedSeats.length * ticketPrice).toLocaleString('vi-VN')} đ</div>
@@ -371,7 +483,7 @@ const Checkout = () => {
                                 <button 
                                     onClick={handleCheckout} 
                                     disabled={isLoading}
-                                    className="btn-checkout btn-checkout-vnpay"
+                                    className={`btn-checkout ${paymentMethod === 'payos' ? 'btn-checkout-payos' : 'btn-checkout-vnpay'}`}
                                 >
                                     {isLoading ? 'ĐANG XỬ LÝ...' : (paymentMethod === 'payos' ? 'Thanh toán PayOS' : 'Thanh toán VNPay')}
                                 </button>
