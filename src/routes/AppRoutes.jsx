@@ -19,6 +19,7 @@ import DriverSchedule from "../pages/Driver/DriverSchedule";
 import DriverProfile from "../pages/Driver/DriverProfile";
 import DriverLeaveRequest from "../pages/Driver/DriverLeaveRequest";
 import LeaveRequestManagement from "../pages/Admin/LeaveRequestManagement";
+import MidTripDropOffManagement from "../pages/Admin/MidTripDropOffManagement";
 import ChangePassword from "../pages/Admin/ChangePassword";
 import ProtectedRoute from "./ProtectedRoute";
 import UserLayout from "../layouts/User/UserLayout";
@@ -83,6 +84,7 @@ export default function AppRoutes() {
         <Route path="cancellation" element={<CancellationManagement />} />
         <Route path="drivers" element={<DriverManagement />} />
         <Route path="leave-requests" element={<LeaveRequestManagement />} />
+        <Route path="mid-trip-dropoff" element={<MidTripDropOffManagement />} />
         <Route path="change-password" element={<ChangePassword />} />
       </Route>
 

@@ -69,6 +69,36 @@ const DriverSchedule = () => {
         }
     };
 
+    const [isMidTripModalOpen, setIsMidTripModalOpen] = useState(false);
+    const [midTripTicket, setMidTripTicket] = useState(null);
+    const [actualLocation, setActualLocation] = useState('');
+
+    const handleOpenMidTrip = (passenger) => {
+        setMidTripTicket(passenger);
+        setIsMidTripModalOpen(true);
+    };
+
+    const handleRequestMidTrip = async () => {
+        if (!actualLocation.trim()) {
+            toast.warning('Vui lòng nhập điểm xuống xe thực tế');
+            return;
+        }
+
+        try {
+            await api.post(`/Driver/tickets/${midTripTicket.ticketId}/request-mid-trip-dropoff`, {
+                actualDropOffLocation: actualLocation
+            });
+            toast.success('Đã gửi yêu cầu xuống xe dọc đường cho Admin');
+            setIsMidTripModalOpen(false);
+            setActualLocation('');
+            // Refresh danh sách để cập nhật trạng thái
+            const response = await api.get(`/Driver/my-trips/${selectedTrip.tripId}/passengers`, { skipLoading: true });
+            setPassengers(handleApiResponse(response));
+        } catch (error) {
+            toast.error('Lỗi khi gửi yêu cầu');
+        }
+    };
+
     const getTodayTrips = () => schedule.filter(t => new Date(t.departureTime).toDateString() === new Date().toDateString()).length;
     const getWeekTrips = () => {
         const start = getStartOfWeek(currentWeek);
@@ -340,17 +370,30 @@ const DriverSchedule = () => {
                                                 />
                                             </td>
                                             <td className="u-text-center">
-                                                <input 
-                                                    type="checkbox" 
-                                                    disabled={!p.isBoarded}
-                                                    checked={p.isDroppedOff} 
-                                                    onChange={() => handleToggleDropOff(p.ticketId)}
-                                                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                                                />
+                                                <div className="u-flex u-align-center u-justify-center u-gap-12">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        disabled={!p.isBoarded || p.status === 'WaittingDropOffConfirm'}
+                                                        checked={p.isDroppedOff} 
+                                                        onChange={() => handleToggleDropOff(p.ticketId)}
+                                                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                                                    />
+                                                    {p.isBoarded && !p.isDroppedOff && p.status !== 'WaittingDropOffConfirm' && (
+                                                        <button 
+                                                            className="u-size-11 u-weight-600 u-color-blue-600"
+                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                                                            onClick={() => handleOpenMidTrip(p)}
+                                                        >
+                                                            Xuống dọc đường
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td style={{ paddingRight: '24px' }}>
                                                 {p.isDroppedOff ? (
                                                     <Badge type="success">HOÀN THÀNH</Badge>
+                                                ) : p.status === 'WaittingDropOffConfirm' ? (
+                                                    <Badge type="info">CHỜ GỬI MAIL/XÁC NHẬN</Badge>
                                                 ) : p.isBoarded ? (
                                                     <Badge type="warning">ĐANG TRÊN XE</Badge>
                                                 ) : (
@@ -368,6 +411,33 @@ const DriverSchedule = () => {
                             </table>
                         </div>
                     )}
+                </div>
+            </Modal>
+
+            {/* Modal Nhập điểm xuống dọc đường */}
+            <Modal
+                isOpen={isMidTripModalOpen}
+                onClose={() => setIsMidTripModalOpen(false)}
+                title="Yêu cầu xuống xe dọc đường"
+                width="450px"
+            >
+                <div className="u-p-12">
+                    <p className="u-size-14 u-m-b-16">Hành khách: <b>{midTripTicket?.customerName}</b> - Ghế: <b>{midTripTicket?.seatNumber}</b></p>
+                    <div className="form-group u-m-b-24">
+                        <label className="u-size-13 u-weight-600 u-m-b-8">Điểm xuống xe thực tế:</label>
+                        <input 
+                            type="text" 
+                            className="admin-input" 
+                            placeholder="Ví dụ: Cổng chào TP Vinh, Ngã ba..."
+                            value={actualLocation}
+                            onChange={(e) => setActualLocation(e.target.value)}
+                            autoFocus
+                        />
+                    </div>
+                    <div className="u-flex u-justify-end u-gap-12">
+                        <button className="admin-btn-secondary" onClick={() => setIsMidTripModalOpen(false)}>Hủy</button>
+                        <button className="admin-btn-primary" onClick={handleRequestMidTrip}>Gửi Admin phê duyệt</button>
+                    </div>
                 </div>
             </Modal>
         </div>

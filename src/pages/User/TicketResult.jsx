@@ -1,16 +1,63 @@
 import React, { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import bookingService from '../../services/booking.service';
-import { Modal } from '../../components/Common';
+import { Modal, Loading } from '../../components/Common';
 
 const TicketResult = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { ticket } = location.state || {};
+    const [searchParams] = useSearchParams();
+    const { ticket: stateTicket } = location.state || {};
+    const [ticket, setTicket] = React.useState(stateTicket);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [isConfirmDropOffOpen, setIsConfirmDropOffOpen] = React.useState(false);
     const [reason, setReason] = React.useState('');
     const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [isLoading, setIsLoading] = React.useState(false);
+
+    useEffect(() => {
+        const action = searchParams.get('action');
+        const ticketId = searchParams.get('ticketId');
+        const code = searchParams.get('code');
+        const phone = searchParams.get('phone');
+
+        if (action === 'confirmDropOff' && ticketId) {
+            // Nếu chưa có ticket trong state, load nó lên
+            if (!ticket && code && phone) {
+                fetchTicket(code, phone);
+            }
+            setIsConfirmDropOffOpen(true);
+        }
+    }, [searchParams]);
+
+    const fetchTicket = async (code, phone) => {
+        try {
+            setIsLoading(true);
+            const response = await bookingService.lookupTicket(code, phone);
+            setTicket(response.data);
+        } catch (error) {
+            toast.error("Không thể tải thông tin vé.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleConfirmDropOff = async () => {
+        const ticketId = searchParams.get('ticketId');
+        try {
+            setIsSubmitting(true);
+            await bookingService.confirmMidTripDropOff(ticketId);
+            toast.success("Xác nhận xuống xe thành công!");
+            setIsConfirmDropOffOpen(false);
+            // Refresh ticket data
+            fetchTicket(searchParams.get('code'), searchParams.get('phone'));
+        } catch (error) {
+            toast.error("Lỗi khi xác nhận. Vui lòng thử lại.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     useEffect(() => {
         const originalBg = document.body.style.background;
@@ -45,6 +92,10 @@ const TicketResult = () => {
             setIsSubmitting(false);
         }
     };
+
+    if (isLoading) {
+        return <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loading /></div>;
+    }
 
     if (!ticket) {
         return (
@@ -275,6 +326,53 @@ const TicketResult = () => {
                             disabled={isSubmitting || !reason.trim()}
                         >
                             {isSubmitting ? 'Đang gửi...' : 'Gửi yêu cầu'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Modal Xác nhận xuống xe dọc đường */}
+            <Modal
+                isOpen={isConfirmDropOffOpen}
+                onClose={() => !isSubmitting && setIsConfirmDropOffOpen(false)}
+                title="Xác nhận xuống xe dọc đường"
+                width="450px"
+            >
+                <div style={{ padding: '10px 0' }}>
+                    <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', padding: '20px', borderRadius: '12px', marginBottom: '20px' }}>
+                        <div style={{ color: '#0369a1', fontWeight: '700', fontSize: '15px', marginBottom: '8px' }}>Yêu cầu xác nhận</div>
+                        <p style={{ margin: 0, color: '#075985', fontSize: '14px', lineHeight: '1.6' }}>
+                            Bạn vừa nhận được yêu cầu xác nhận đã xuống xe tại: <br/>
+                            <strong style={{ fontSize: '16px' }}>{ticket?.actualDropOffLocation || 'Điểm dọc đường'}</strong>
+                        </p>
+                    </div>
+                    
+                    <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '25px', lineHeight: '1.5' }}>
+                        Để đảm bảo an toàn và minh bạch, vui lòng chỉ xác nhận nếu bạn đã thực sự xuống xe an toàn tại địa điểm trên.
+                    </p>
+
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                        <button 
+                            className="admin-btn-outline"
+                            style={{ padding: '12px 30px', borderRadius: '10px' }}
+                            onClick={() => setIsConfirmDropOffOpen(false)}
+                            disabled={isSubmitting}
+                        >
+                            Để sau
+                        </button>
+                        <button 
+                            className="admin-btn-primary"
+                            style={{ 
+                                padding: '12px 30px', 
+                                borderRadius: '10px',
+                                background: '#10b981',
+                                borderColor: '#10b981',
+                                color: '#fff'
+                            }}
+                            onClick={handleConfirmDropOff}
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? 'Đang xử lý...' : 'Đúng, tôi đã xuống xe'}
                         </button>
                     </div>
                 </div>

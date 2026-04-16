@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import api from '../../services/api';
 import { ConfirmationModal } from '../../components/Common';
 
 import '../../assets/styles/AdminDashboard.css';
@@ -37,6 +38,23 @@ const AdminLayout = () => {
 
     const isActive = (path) => location.pathname === path;
 
+    const [notifs, setNotifs] = useState({ cancellationRequests: 0, dropOffRequests: 0, totalCount: 0 });
+
+    const fetchNotifs = async () => {
+        try {
+            const response = await api.get('/Booking/admin-notifications');
+            setNotifs(response.data);
+        } catch (e) {
+            console.error("Notif error", e);
+        }
+    };
+
+    useEffect(() => {
+        fetchNotifs();
+        const interval = setInterval(fetchNotifs, 60000); // Check every minute
+        return () => clearInterval(interval);
+    }, []);
+
     const getPageTitle = () => {
         const path = location.pathname;
         if (path === '/admin') return 'Dashboard';
@@ -52,6 +70,7 @@ const AdminLayout = () => {
         if (path.includes('/cancellation')) return 'Duyệt yêu cầu hủy vé';
         if (path.includes('/drivers')) return 'Quản lý Tài xế';
         if (path.includes('/leave-requests')) return 'Quản lý Đổi lịch / Nghỉ phép';
+        if (path.includes('/mid-trip-dropoff')) return 'Xác nhận xuống xe dọc đường';
         return 'Hệ thống Quản trị';
     };
 
@@ -80,6 +99,7 @@ const AdminLayout = () => {
                     <Link to="/admin/cancellation" className={`nav-item ${isActive('/admin/cancellation') ? 'active' : ''}`} title="Yêu cầu hủy vé">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
                         {!isSidebarCollapsed && <span>Quản lý vé hủy</span>}
+                        {notifs.cancellationRequests > 0 && <span className="u-badge-notif">{notifs.cancellationRequests}</span>}
                     </Link>
                     <Link to="/admin/passengers" className={`nav-item ${isActive('/admin/passengers') ? 'active' : ''}`} title="Hành khách">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -92,6 +112,11 @@ const AdminLayout = () => {
                     <Link to="/admin/leave-requests" className={`nav-item ${isActive('/admin/leave-requests') ? 'active' : ''}`} title="Yêu cầu đổi lịch">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         {!isSidebarCollapsed && <span>Yêu cầu đổi lịch</span>}
+                    </Link>
+                    <Link to="/admin/mid-trip-dropoff" className={`nav-item ${isActive('/admin/mid-trip-dropoff') ? 'active' : ''}`} title="Xác nhận xuống xe">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        {!isSidebarCollapsed && <span>Xác nhận xuống xe</span>}
+                        {notifs.dropOffRequests > 0 && <span className="u-badge-notif">{notifs.dropOffRequests}</span>}
                     </Link>
                     <Link to="/admin/schedules" className={`nav-item ${isActive('/admin/schedules') ? 'active' : ''}`} title="Quản lý chuyến đi">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
@@ -145,7 +170,7 @@ const AdminLayout = () => {
                         </button>
                         <button className="header-icon-btn" title="Thông báo">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                            <span className="notification-badge"></span>
+                            {notifs.totalCount > 0 && <span className="notification-badge">{notifs.totalCount}</span>}
                         </button>
                         <div className="header-user-profile-container" style={{ position: 'relative' }}>
                             <div className="header-user-profile" onClick={(e) => { e.stopPropagation(); setIsProfileDropdownOpen(!isProfileDropdownOpen); }} title="Tài khoản">

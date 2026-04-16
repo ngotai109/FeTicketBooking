@@ -59,7 +59,7 @@ const Checkout = () => {
             if (tripId && (!tripSeats || tripSeats.length === 0)) {
                 try {
                     console.log("Đang nạp lại ghế cho chuyến:", tripId);
-                    const res = await bookingService.getTripSeats(tripId);
+                    const res = await bookingService.getTripSeats(tripId, { skipLoading: true });
                     const data = res.data?.data || res.data || [];
                     console.log("Dữ liệu nạp được cho Checkout:", data);
                     setTripSeats(data);
@@ -102,7 +102,7 @@ const Checkout = () => {
         if (showQRModal && currentBookingId) {
             pollInterval = setInterval(async () => {
                 try {
-                    const res = await bookingService.getBookingById(currentBookingId);
+                    const res = await bookingService.getBookingById(currentBookingId, { skipLoading: true });
                     // Log để debug: Bạn có thể nhấn F12 để xem trạng thái thực tế mà API trả về
                     console.log(`[PAYMENT_POLLING] Checking Booking ${currentBookingId}:`, res.data);
 
