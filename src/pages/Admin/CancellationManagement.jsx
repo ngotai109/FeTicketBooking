@@ -305,6 +305,29 @@ const CancellationManagement = () => {
                             </div>
                         </div>
 
+                        {(selectedRequest.refundBankName || selectedRequest.refundAccountNumber) && (
+                            <div className="u-m-b-24" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '16px', borderRadius: '12px' }}>
+                                <label className="admin-form-label u-weight-700 u-color-green-700 u-flex u-align-center u-gap-8">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                                    THÔNG TIN CHUYỂN KHOẢN HOÀN TIỀN:
+                                </label>
+                                <div className="u-m-t-12" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <div>
+                                        <div className="u-size-11 u-color-green-600 u-weight-700">NGÂN HÀNG</div>
+                                        <div className="u-weight-700 u-color-slate-800">{selectedRequest.refundBankName || 'N/A'}</div>
+                                    </div>
+                                    <div>
+                                        <div className="u-size-11 u-color-green-600 u-weight-700">SỐ TÀI KHOẢN</div>
+                                        <div className="u-weight-800 u-size-16 u-color-green-700">{selectedRequest.refundAccountNumber || 'N/A'}</div>
+                                    </div>
+                                    <div className="u-col-span-2 u-m-t-8">
+                                        <div className="u-size-11 u-color-green-600 u-weight-700">CHỦ TÀI KHOẢN</div>
+                                        <div className="u-weight-700 u-color-slate-800">{selectedRequest.refundAccountName?.toUpperCase() || 'N/A'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="admin-form-group u-m-b-32">
                             <label className="admin-form-label u-weight-700 u-color-slate-600">PHẢN HỒI CỦA HỆ THỐNG:</label>
                             <textarea 

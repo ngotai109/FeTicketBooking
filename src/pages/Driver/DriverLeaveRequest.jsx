@@ -72,7 +72,7 @@ const DriverLeaveRequest = () => {
 
                 const myRequests = resReqs.data || [];
                 
-                const sorted = myRequests.sort((a, b) => new Date(b.createdDate || b.id) - new Date(a.createdDate || a.id));
+                const sorted = myRequests.sort((a, b) => new Date(b.createdAt || b.leaveRequestId) - new Date(a.createdAt || a.leaveRequestId));
                 setLeaveRequests(sorted);
                 setMyAllTrips(resSchedule.data || []);
                 
@@ -117,13 +117,10 @@ const DriverLeaveRequest = () => {
 
         setIsSubmitting(true);
         try {
-            const prefix = formData.requestType === 'FullDay' ? '[Nghỉ Cả Ngày] ' : '[Nghỉ Theo Chuyến] ';
             const payload = {
-                driverId: driverInfo.id,
                 leaveDate: formData.leaveDate,
-                reason: prefix + formData.reason,
-                notes: formData.notes + (formData.selectedTripId ? `\n(ID Chuyến: ${formData.selectedTripId})` : ''),
-                status: 'Pending',
+                type: formData.requestType === 'ByTrip' ? 1 : 0, // 0: FullDay, 1: ByTrip (Assuming enums match)
+                reason: formData.reason,
                 tripId: formData.selectedTripId || null
             };
 
@@ -250,13 +247,14 @@ const DriverLeaveRequest = () => {
                                 </thead>
                                 <tbody>
                                     {filteredRequests.map(req => (
-                                        <tr key={req.id}>
-                                            <td className="u-color-slate-500">{new Date(req.createdDate || req.id).toLocaleDateString('vi-VN')}</td>
+                                        <tr key={req.leaveRequestId}>
+                                            <td className="u-color-slate-500">{new Date(req.createdAt || req.leaveRequestId).toLocaleDateString('vi-VN')}</td>
                                             <td className="u-weight-700 u-color-blue">
                                                 {new Date(req.leaveDate).toLocaleDateString('vi-VN')}
+                                                {req.tripInfo && <div className="u-size-11 u-color-slate-400">{req.tripInfo}</div>}
                                             </td>
                                             <td className="u-weight-500">{req.reason}</td>
-                                            <td className="u-color-slate-500 u-size-12 italic">{req.adminComment || '-'}</td>
+                                            <td className="u-color-slate-500 u-size-12 italic">{req.adminNote || '-'}</td>
                                             <td className="u-text-center">
                                                 <Badge type={req.status === 'Pending' ? 'warning' : req.status === 'Approved' ? 'success' : 'danger'}>
                                                     {req.status === 'Pending' ? 'Chờ duyệt' : req.status === 'Approved' ? 'Đã duyệt' : 'Từ chối'}

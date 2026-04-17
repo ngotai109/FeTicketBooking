@@ -22,8 +22,9 @@ const bookingService = {
     lookupTicket: async (code, phone) => {
         return await apiService.get(`/Booking/lookup?code=${code}&phone=${phone}`);
     },
-    requestCancellation: async (id, reason) => {
-        return await apiService.post(`/Booking/${id}/request-cancellation`, { reason });
+    requestCancellation: async (id, data) => {
+        // data: { reason, bankName, accountNumber, accountName }
+        return await apiService.post(`/Booking/${id}/request-cancellation`, data);
     },
     processCancellation: async (id, approve, adminNote) => {
         return await apiService.post(`/Booking/${id}/process-cancellation`, { approve, adminNote });

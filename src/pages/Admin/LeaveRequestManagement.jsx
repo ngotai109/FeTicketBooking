@@ -38,8 +38,8 @@ const LeaveRequestManagement = () => {
             const res = await api.get('Driver/all-leave-requests');
             const data = res.data || [];
             
-            // Sort by latest createdDate or id
-            const sorted = data.sort((a, b) => (b.id) - (a.id));
+            // Sort by latest createdAt or leaveRequestId
+            const sorted = data.sort((a, b) => new Date(b.createdAt || b.leaveRequestId) - new Date(a.createdAt || a.leaveRequestId));
             setRequests(sorted);
             
             setStats({
@@ -81,11 +81,11 @@ const LeaveRequestManagement = () => {
         setIsSubmitting(true);
         try {
             const payload = {
-                approve: processAction === 'Approve',
-                adminComment: adminComment || (processAction === 'Approve' ? 'Đã duyệt.' : 'Không được chấp thuận.')
+                status: processAction === 'Approve' ? 1 : 2, // 1: Approved, 2: Rejected (Assuming enum mapping)
+                adminNote: adminComment || (processAction === 'Approve' ? 'Đã duyệt.' : 'Không được chấp thuận.')
             };
 
-            await api.post(`Driver/leave-requests/${selectedRequest.id}/process`, payload);
+            await api.post(`Driver/leave-requests/${selectedRequest.leaveRequestId}/process`, payload);
             toast.success(processAction === 'Approve' ? 'Đã duyệt yêu cầu thành công!' : 'Đã từ chối yêu cầu.');
             setIsProcessModalOpen(false);
             fetchRequests();
@@ -180,16 +180,16 @@ const LeaveRequestManagement = () => {
                                 </thead>
                                 <tbody>
                                     {filteredRequests.map(req => (
-                                        <tr key={req.id}>
+                                        <tr key={req.leaveRequestId}>
                                             <td>
                                                 <div className="u-weight-700 u-color-slate-800">{req.driverName || `Tài xế (ID: ${req.driverId})`}</div>
-                                                <div className="u-size-11 u-color-slate-500">Mã đơn: #{req.id}</div>
+                                                <div className="u-size-11 u-color-slate-500">Mã đơn: #{req.leaveRequestId}</div>
                                             </td>
                                             <td className="u-weight-700 u-color-blue">
                                                 {new Date(req.leaveDate).toLocaleDateString('vi-VN')}
                                             </td>
                                             <td className="u-weight-500">{req.reason}</td>
-                                            <td className="u-color-slate-500 u-size-12">{req.notes || '-'}</td>
+                                            <td className="u-color-slate-500 u-size-12">{req.tripInfo || 'Cả ngày'}</td>
                                             <td className="u-text-center">
                                                 <Badge type={req.status === 'Pending' ? 'warning' : req.status === 'Approved' ? 'success' : 'danger'}>
                                                     {req.status === 'Pending' ? 'Chờ duyệt' : req.status === 'Approved' ? 'Đã duyệt' : 'Từ chối'}
@@ -218,7 +218,7 @@ const LeaveRequestManagement = () => {
                                                 )}
                                                 {req.status !== 'Pending' && (
                                                     <div className="u-size-11 u-color-slate-500 italic">
-                                                        Phản hồi: {req.adminComment || '-'}
+                                                        Phản hồi: {req.adminNote || '-'}
                                                     </div>
                                                 )}
                                             </td>

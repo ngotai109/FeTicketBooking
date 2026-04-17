@@ -13,6 +13,9 @@ const TicketResult = () => {
     const [isModalOpen, setIsModalOpen] = React.useState(false);
     const [isConfirmDropOffOpen, setIsConfirmDropOffOpen] = React.useState(false);
     const [reason, setReason] = React.useState('');
+    const [refundBankName, setRefundBankName] = React.useState('');
+    const [refundAccountNumber, setRefundAccountNumber] = React.useState('');
+    const [refundAccountName, setRefundAccountName] = React.useState('');
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
 
@@ -82,7 +85,12 @@ const TicketResult = () => {
 
         try {
             setIsSubmitting(true);
-            await bookingService.requestCancellation(ticket.bookingId, reason);
+            await bookingService.requestCancellation(ticket.bookingId, {
+                reason: reason,
+                bankName: refundBankName,
+                accountNumber: refundAccountNumber,
+                accountName: refundAccountName
+            });
             toast.success("Yêu cầu hủy vé đã được gửi! Vui lòng chờ Admin xử lý.");
             setIsModalOpen(false);
             navigate('/lookup/ticket');
@@ -303,6 +311,44 @@ const TicketResult = () => {
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
                         />
+                    </div>
+
+                    <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '12px', border: '1px dashed #cbd5e1', marginBottom: '20px' }}>
+                        <h4 style={{ margin: '0 0 12px', fontSize: '14px', color: '#1e293b', fontWeight: '700' }}>Thông tin hoàn tiền</h4>
+                        
+                        <div style={{ marginBottom: '12px' }}>
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '5px' }}>Ngân hàng:</label>
+                            <input 
+                                type="text"
+                                style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '13px', boxSizing: 'border-box' }}
+                                placeholder="Ví dụ: Vietcombank, MB Bank..."
+                                value={refundBankName}
+                                onChange={(e) => setRefundBankName(e.target.value)}
+                            />
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '5px' }}>Số tài khoản:</label>
+                                <input 
+                                    type="text"
+                                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '13px', boxSizing: 'border-box' }}
+                                    placeholder="Nhập số tài khoản"
+                                    value={refundAccountNumber}
+                                    onChange={(e) => setRefundAccountNumber(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '5px' }}>Tên chủ tài khoản:</label>
+                                <input 
+                                    type="text"
+                                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '13px', boxSizing: 'border-box' }}
+                                    placeholder="Tên viết hoa không dấu"
+                                    value={refundAccountName}
+                                    onChange={(e) => setRefundAccountName(e.target.value)}
+                                />
+                            </div>
+                        </div>
                     </div>
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                         <button 

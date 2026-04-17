@@ -86,8 +86,16 @@ const Checkout = () => {
     const [customer, setCustomer] = useState({ 
         phone: localStorage.getItem('userPhone') || '', 
         name: localStorage.getItem('userName') || '', 
-        email: '' // Luôn để trống để khách hàng tự điền theo yêu cầu
+        email: localStorage.getItem('userEmail') || ''
     });
+
+    // Tự động lưu thông tin khách hàng vào localStorage khi nhập
+    useEffect(() => {
+        if (customer.name) localStorage.setItem('userName', customer.name);
+        if (customer.phone) localStorage.setItem('userPhone', customer.phone);
+        if (customer.email) localStorage.setItem('userEmail', customer.email);
+    }, [customer]);
+
     const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
     const [paymentMethod, setPaymentMethod] = useState('payos'); // 'vnpay' or 'payos'
 
@@ -103,18 +111,28 @@ const Checkout = () => {
             pollInterval = setInterval(async () => {
                 try {
                     const res = await bookingService.getBookingById(currentBookingId, { skipLoading: true });
-                    // Log để debug: Bạn có thể nhấn F12 để xem trạng thái thực tế mà API trả về
-                    console.log(`[PAYMENT_POLLING] Checking Booking ${currentBookingId}:`, res.data);
-
                     const booking = res.data?.data || res.data;
-                    
-                    // Kiểm tra kỹ trạng thái: Chỉ chuyển hướng khi status đúng bằng 1 (Confirmed)
-                    // Lưu ý: Phải đảm bảo booking.status là số 1, không phải chuỗi "1" hoặc undefined
+
+                    // 1. Kiểm tra trạng thái trong DB (dựa vào webhook)
                     if (booking && (booking.status === 1 || booking.Status === 1)) { 
                         clearInterval(pollInterval);
                         setShowQRModal(false);
                         toast.success("Hệ thống đã nhận được thanh toán!");
                         setTimeout(() => navigate(`/payment/payos-return?status=PAID&orderCode=${payosData?.orderCode}`), 1000);
+                        return;
+                    }
+
+                    // 2. Kiểm tra CHỦ ĐỘNG qua PayOS (Dùng cho môi trường localhost không nhận được webhook)
+                    if (payosData && payosData.orderCode) {
+                        const checkRes = await paymentService.checkPayOSStatus({
+                            bookingId: currentBookingId,
+                            orderCode: payosData.orderCode
+                        });
+                        
+                        if (checkRes.data?.status === 'PAID') {
+                            console.log("[PAYOS] Phát hiện đã thanh toán qua API check-status!");
+                            // Lần chạy polling tiếp theo của bước 1 sẽ bắt được trạng thái cập nhật trong DB
+                        }
                     }
                 } catch (err) {
                     console.error("Lỗi kiểm tra trạng thái thanh toán:", err);
@@ -146,7 +164,19 @@ const Checkout = () => {
                 return prev - 1;
             });
         }, 1000);
-        return () => clearInterval(timer);
+        return () => {
+            clearInterval(timer);
+            // TỰ ĐỘNG HỦY KHI RỜI TRANG:
+            // Nếu có booking đang treo mà người dùng rời khỏi trang Checkout (nhấn Back, đổi link...)
+            // thì gửi yêu cầu hủy để giải phóng ghế ngay lập tức.
+            if (currentBookingId) {
+                console.log("Cleanup: Hủy đơn hàng đang treo:", currentBookingId);
+                // Dùng .then().catch() để không chặn việc unmount
+                bookingService.updateBookingStatus(currentBookingId, 2)
+                    .then(() => console.log("Đã giải phóng ghế thành công"))
+                    .catch(err => console.error("Lỗi giải phóng ghế:", err));
+            }
+        };
     }, [location, navigate, currentBookingId]);
 
     const handleCancelPayment = async () => {
@@ -216,13 +246,13 @@ const Checkout = () => {
 
             if (paymentMethod === 'payos') {
                 try {
-                    const payRes = await paymentService.createPayOSPayment(bookingId);
+                    const payRes = await paymentService.createPayOSPayment({ bookingId: bookingId });
                     if (payRes.data) {
                         setPayosData(payRes.data);
                         setCurrentBookingId(bookingId);
                         setShowQRModal(true);
                         toast.success("Đã tạo mã QR thanh toán!");
-                        return;
+                         return;
                     } else {
                         throw new Error("Không lấy được dữ liệu thanh toán PayOS.");
                     }

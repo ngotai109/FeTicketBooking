@@ -10,8 +10,13 @@ const paymentService = {
         return await apiService.get(`/Payment/vnpay-callback${queryParams}`);
     },
 
-    createPayOSPayment: async (bookingId) => {
-        return await apiService.post('/Payment/payos', { bookingId });
+    createPayOSPayment: async (data) => {
+        return await apiService.post('/Payment/payos', data);
+    },
+
+    checkPayOSStatus: async (data) => {
+        // data: { bookingId, orderCode }
+        return await apiService.post('/Payment/payos-check', data, { skipLoading: true });
     }
 };
 
