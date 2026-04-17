@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Badge } from '../../components/Common';
 import driverService from '../../services/driver.service';
 import authService from '../../services/auth.service';
@@ -23,6 +23,9 @@ const DriverProfile = () => {
         confirm: false
     });
 
+    const fileInputRef = useRef(null);
+    const [isUploading, setIsUploading] = useState(false);
+
     useEffect(() => {
         fetchProfile();
     }, []);
@@ -30,7 +33,7 @@ const DriverProfile = () => {
     const fetchProfile = async () => {
         try {
             setLoading(true);
-            const res = await driverService.getAllDrivers();
+            const res = await driverService.getAllDrivers({ skipLoading: true });
             const allDrivers = res.data?.data || res.data || [];
             const userEmail = localStorage.getItem('userEmail');
             const myInfo = allDrivers.find(d => d.email === userEmail);
@@ -68,8 +71,53 @@ const DriverProfile = () => {
         }
     };
 
+    const handleAvatarClick = () => {
+        fileInputRef.current.click();
+    };
+
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            toast.error('Vui lòng chọn file ảnh!');
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('Ảnh không được vượt quá 2MB!');
+            return;
+        }
+
+        try {
+            setIsUploading(true);
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                const base64Image = reader.result;
+                const updatedData = {
+                    fullName: profile.fullName,
+                    phoneNumber: profile.phoneNumber,
+                    licenseNumber: profile.licenseNumber,
+                    licenseType: profile.licenseType,
+                    experienceYears: profile.experienceYears,
+                    status: profile.status,
+                    avatarUrl: base64Image 
+                };
+                await driverService.updateDriver(profile.driverId, updatedData);
+                setProfile(prev => ({ ...prev, avatarUrl: base64Image }));
+                toast.success('Cập nhật ảnh đại diện thành công!');
+            };
+        } catch (error) {
+            console.error('Lỗi upload:', error);
+            toast.error('Không thể cập nhật ảnh đại diện');
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     if (loading) return (
-        <div className="u-text-center u-p-80">
+        <div className="u-flex-column u-flex-center u-p-80" style={{ minHeight: '60vh' }}>
+            <div className="u-loading-spinner u-m-b-16"></div>
             <p className="u-color-slate-500 u-weight-600">Đang tải hồ sơ...</p>
         </div>
     );
@@ -79,7 +127,12 @@ const DriverProfile = () => {
             <div className="profile-summary-card u-m-b-32">
                 <div className="u-flex u-align-center u-gap-32">
                     <div className="profile-avatar-wrapper">
-                        <div className="profile-avatar-circle" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="profile-avatar-circle" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                            {isUploading && (
+                                <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
+                                    <div className="u-spinner"></div>
+                                </div>
+                            )}
                             {profile?.avatarUrl ? (
                                 <img 
                                     src={profile.avatarUrl} 
@@ -90,7 +143,14 @@ const DriverProfile = () => {
                                 (profile?.fullName?.charAt(0) || 'U').toUpperCase()
                             )}
                         </div>
-                        <div className="avatar-edit-badge">
+                        <input 
+                            type="file" 
+                            ref={fileInputRef} 
+                            style={{ display: 'none' }} 
+                            accept="image/*" 
+                            onChange={handleFileChange} 
+                        />
+                        <div className="avatar-edit-badge" onClick={handleAvatarClick} style={{ cursor: 'pointer' }}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
                         </div>
                     </div>

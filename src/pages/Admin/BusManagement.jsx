@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination } from '../../components/Common';
+import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination, Loading } from '../../components/Common';
 import { handleApiResponse } from '../../utils/common';
 
 import busService from '../../services/bus.service';
@@ -257,28 +257,24 @@ const BusManagement = () => {
                         </button>
                     </div>
 
-                    <div className="table-container" style={{ overflowX: 'auto' }}>
-                        <table className="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Biển số xe</th>
-                                    <th style={{ whiteSpace: 'nowrap' }}>Tên xe</th>
-                                    <th>Loại xe</th>
-                                    <th>Trạng thái</th>
-                                    <th className="u-text-center">Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {loading && buses.length === 0 ? (
+                    <div className="table-container" style={{ overflowX: 'auto', minHeight: '300px' }}>
+                        {loading && buses.length === 0 ? (
+                            <Loading />
+                        ) : filteredBuses.length === 0 ? (
+                            <div className="u-text-center u-p-40 u-color-slate-500">Không tìm thấy phương tiện nào</div>
+                        ) : (
+                            <table className="admin-table">
+                                <thead>
                                     <tr>
-                                        <td colSpan="6" className="u-text-center u-p-40">Đang tải dữ liệu...</td>
+                                        <th>Biển số xe</th>
+                                        <th style={{ whiteSpace: 'nowrap' }}>Tên xe</th>
+                                        <th>Loại xe</th>
+                                        <th>Trạng thái</th>
+                                        <th className="u-text-center">Hành động</th>
                                     </tr>
-                                ) : filteredBuses.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="6" className="u-text-center u-p-40">Không tìm thấy phương tiện nào</td>
-                                    </tr>
-                                ) : (
-                                    filteredBuses.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((bus) => (
+                                </thead>
+                                <tbody>
+                                    {filteredBuses.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((bus) => (
                                         <tr key={bus.busId}>
                                             <td className="u-weight-600 u-color-slate-800">{bus.plateNumber}</td>
                                             <td className="u-color-slate-600">{bus.busName}</td>
@@ -317,10 +313,10 @@ const BusManagement = () => {
                                                 </div>
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </div>
                 <Pagination

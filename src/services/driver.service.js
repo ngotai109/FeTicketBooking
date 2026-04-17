@@ -1,8 +1,8 @@
 import apiService from './api';
 
 const driverService = {
-    getAllDrivers: async () => {
-        return await apiService.get('/Driver');
+    getAllDrivers: async (config = {}) => {
+        return await apiService.get('/Driver', config);
     },
 
     getDriverById: async (id) => {

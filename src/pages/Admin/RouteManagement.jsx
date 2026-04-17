@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination } from '../../components/Common';
+import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination, Loading } from '../../components/Common';
 import { handleApiResponse, formatCurrency } from '../../utils/common';
 
 import routeService from '../../services/route.service';
@@ -344,30 +344,26 @@ const RouteManagement = () => {
                         </button>
                     </div>
 
-                    <div className="table-container" style={{ overflowX: 'auto' }}>
-                        <table className="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Tên Tuyến</th>
-                                    <th>Văn phòng Đi/Đến</th>
-                                    <th>Giá cơ bản</th>
-                                    <th>Khoảng cách</th>
-                                    <th>Thời gian</th>
-                                    <th>Trạng thái</th>
-                                    <th className="u-text-center">Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {loading ? (
+                    <div className="table-container" style={{ overflowX: 'auto', minHeight: '300px' }}>
+                        {loading ? (
+                            <Loading />
+                        ) : filteredRoutes.length === 0 ? (
+                            <div className="u-text-center u-p-40 u-color-slate-500">Không tìm thấy tuyến đường nào</div>
+                        ) : (
+                            <table className="admin-table">
+                                <thead>
                                     <tr>
-                                        <td colSpan="7" className="u-text-center u-p-40">Đang tải dữ liệu...</td>
+                                        <th>Tên Tuyến</th>
+                                        <th>Văn phòng Đi/Đến</th>
+                                        <th>Giá cơ bản</th>
+                                        <th>Khoảng cách</th>
+                                        <th>Thời gian</th>
+                                        <th>Trạng thái</th>
+                                        <th className="u-text-center">Hành động</th>
                                     </tr>
-                                ) : filteredRoutes.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="7" className="u-text-center u-p-40">Không tìm thấy tuyến đường nào</td>
-                                    </tr>
-                                ) : (
-                                    filteredRoutes.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((route) => (
+                                </thead>
+                                <tbody>
+                                    {filteredRoutes.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((route) => (
                                         <tr key={route.routeId}>
                                             <td className="u-weight-600 u-color-slate-800">{route.routeName}</td>
                                             <td>
@@ -413,10 +409,10 @@ const RouteManagement = () => {
                                                 </div>
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </div>
                 <Pagination

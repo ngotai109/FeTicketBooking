@@ -43,9 +43,9 @@ const LeaveRequestManagement = () => {
             setRequests(sorted);
             
             setStats({
-                pending: sorted.filter(r => r.status === 'Pending').length,
-                approved: sorted.filter(r => r.status === 'Approved').length,
-                rejected: sorted.filter(r => r.status === 'Rejected').length
+                pending: sorted.filter(r => r.status === 'Pending' || r.status === 0).length,
+                approved: sorted.filter(r => r.status === 'Approved' || r.status === 1).length,
+                rejected: sorted.filter(r => r.status === 'Rejected' || r.status === 2).length
             });
         } catch (error) {
             console.error("Error fetching requests:", error);
@@ -60,11 +60,11 @@ const LeaveRequestManagement = () => {
             setFilteredRequests(requests);
         } else {
             const statusMap = {
-                'Chờ duyệt': 'Pending',
-                'Đã duyệt': 'Approved',
-                'Từ chối': 'Rejected'
+                'Chờ duyệt': [0, 'Pending'],
+                'Đã duyệt': [1, 'Approved'],
+                'Từ chối': [2, 'Rejected']
             };
-            setFilteredRequests(requests.filter(req => req.status === statusMap[tab]));
+            setFilteredRequests(requests.filter(req => statusMap[tab].includes(req.status)));
         }
     };
 
@@ -191,12 +191,12 @@ const LeaveRequestManagement = () => {
                                             <td className="u-weight-500">{req.reason}</td>
                                             <td className="u-color-slate-500 u-size-12">{req.tripInfo || 'Cả ngày'}</td>
                                             <td className="u-text-center">
-                                                <Badge type={req.status === 'Pending' ? 'warning' : req.status === 'Approved' ? 'success' : 'danger'}>
-                                                    {req.status === 'Pending' ? 'Chờ duyệt' : req.status === 'Approved' ? 'Đã duyệt' : 'Từ chối'}
+                                                <Badge type={(req.status === 'Pending' || req.status === 0) ? 'warning' : (req.status === 'Approved' || req.status === 1) ? 'success' : 'danger'}>
+                                                    {(req.status === 'Pending' || req.status === 0) ? 'Chờ duyệt' : (req.status === 'Approved' || req.status === 1) ? 'Đã duyệt' : 'Từ chối'}
                                                 </Badge>
                                             </td>
                                             <td className="u-text-center">
-                                                {req.status === 'Pending' && (
+                                                {(req.status === 'Pending' || req.status === 0) && (
                                                     <div className="u-flex u-gap-8 u-justify-center">
                                                         <button 
                                                             className="admin-btn-icon" 
@@ -216,7 +216,7 @@ const LeaveRequestManagement = () => {
                                                         </button>
                                                     </div>
                                                 )}
-                                                {req.status !== 'Pending' && (
+                                                {(req.status !== 'Pending' && req.status !== 0) && (
                                                     <div className="u-size-11 u-color-slate-500 italic">
                                                         Phản hồi: {req.adminNote || '-'}
                                                     </div>

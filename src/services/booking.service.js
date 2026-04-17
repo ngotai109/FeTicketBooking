@@ -37,6 +37,9 @@ const bookingService = {
     },
     confirmMidTripDropOff: async (ticketId) => {
         return await apiService.post(`/Booking/mid-trip-requests/${ticketId}/confirm`);
+    },
+    checkPayOSStatus: async (bookingId, orderCode) => {
+        return await apiService.post('/Payment/payos-check', { bookingId: parseInt(bookingId), orderCode: parseInt(orderCode) });
     }
 };
 

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import '../../assets/styles/vnpay-mock.css'; // Reusing styles
+import bookingService from '../../services/booking.service';
+import '../../assets/styles/PayOSReturn.css';
 
 const PayOSReturn = () => {
     const location = useLocation();
@@ -19,6 +20,16 @@ const PayOSReturn = () => {
         if (statusParam === 'PAID') {
             setStatus('success');
             toast.success("Thanh toán PayOS thành công!");
+            
+            // Tự động gọi API check để cập nhật status booking ngay lập tức
+            if (orderCodeParam) {
+                // BookingId nằm ở 4 chữ số cuối của orderCode
+                const bookingIdStr = orderCodeParam.slice(-4);
+                const bId = parseInt(bookingIdStr);
+                bookingService.checkPayOSStatus(bId, orderCodeParam)
+                    .then(() => console.log("Payment status verified successfully"))
+                    .catch(err => console.error("Failed to verify payment status:", err));
+            }
         } else if (statusParam === 'CANCELLED') {
             setStatus('cancelled');
             toast.warn("Giao dịch đã bị hủy.");
@@ -30,53 +41,91 @@ const PayOSReturn = () => {
 
     if (status === 'loading') {
         return (
-            <div className="vnpay-mock-container">
-                <div className="vnpay-card">
-                    <div className="loading-spinner"></div>
-                    <h2>Đang xử lý kết quả...</h2>
+            <div className="payos-return-container">
+                <div className="payos-result-card">
+                    <div className="result-header-decoration"></div>
+                    <div className="result-body">
+                        <div className="payos-loading-wrapper">
+                            <div className="premium-spinner"></div>
+                            <h2 className="result-main-title">Đang xác nhận kết quả...</h2>
+                            <p className="result-sub-text">Vui lòng không tắt trình duyệt</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         );
     }
 
     const isSuccess = status === 'success';
+    const isCancelled = status === 'cancelled';
 
     return (
-        <div className="vnpay-mock-container">
-            <div className={`vnpay-card ${isSuccess ? 'success' : 'error'}`}>
-                <div className="result-icon">
-                    {isSuccess ? '✅' : '❌'}
-                </div>
-                <h2 className="result-title">
-                    {isSuccess ? 'Thanh toán thành công!' : (status === 'cancelled' ? 'Giao dịch bị hủy' : 'Thanh toán thất bại')}
-                </h2>
+        <div className="payos-return-container">
+            <div className={`payos-result-card ${status}`}>
+                <div className="result-header-decoration"></div>
                 
-                <div className="result-details">
-                    <div className="detail-row">
-                        <span>Mã đơn PayOS:</span>
-                        <strong>{orderCode || '---'}</strong>
-                    </div>
-                    <div className="detail-row">
-                        <span>Trạng thái:</span>
-                        <strong className={isSuccess ? 'status-success' : 'status-error'}>
-                            {status.toUpperCase()}
-                        </strong>
-                    </div>
-                </div>
-
-                <div className="result-actions">
-                    <button className="back-home-btn" onClick={() => navigate('/home')}>
-                        Quay lại Trang chủ
-                    </button>
+                <div className="result-body">
                     {isSuccess ? (
-                        <button className="view-ticket-btn" onClick={() => navigate('/lookup/ticket')}>
-                            Tra cứu vé đã đặt
-                        </button>
+                        <div className="success-icon-wrapper">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                    ) : isCancelled ? (
+                        <div className="cancelled-icon-wrapper">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        </div>
                     ) : (
-                         <button className="view-ticket-btn" onClick={() => navigate('/booking')}>
-                             Thử lại
-                         </button>
+                        <div className="error-icon-wrapper">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </div>
                     )}
+
+                    <h2 className="result-main-title">
+                        {isSuccess ? 'Thanh toán thành công!' : isCancelled ? 'Giao dịch đã hủy' : 'Thanh toán thất bại'}
+                    </h2>
+                    <p className="result-sub-text">
+                        {isSuccess 
+                            ? 'Cảm ơn bạn đã lựa chọn dịch vụ của chúng tôi.' 
+                            : 'Giao dịch của bạn không thể hoàn tất vào lúc này.'}
+                    </p>
+                    
+                    <div className="info-grid">
+                        <div className="info-row">
+                            <span className="info-label">Mã đơn hàng:</span>
+                            <span className="info-value">#{orderCode || 'N/A'}</span>
+                        </div>
+                        <div className="info-row">
+                            <span className="info-label">Phương thức:</span>
+                            <span className="info-value">PayOS (QR Code)</span>
+                        </div>
+                        <div className="info-row">
+                            <span className="info-label">Trạng thái:</span>
+                            <span className={`info-value status-pill ${status}`}>
+                                {isSuccess ? 'ĐÃ HOÀN TẤT' : isCancelled ? 'ĐÃ HỦY' : 'THẤT BẠI'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="action-buttons">
+                        {isSuccess ? (
+                            <button className="btn-primary-payos" onClick={() => navigate('/lookup/ticket')}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6"></path><path d="M10 14L21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>
+                                Xem thông tin vé
+                            </button>
+                        ) : (
+                            <button className="btn-primary-payos" onClick={() => navigate('/booking')}>
+                                Thử lại ngay
+                            </button>
+                        )}
+                        <button className="btn-secondary-payos" onClick={() => navigate('/home')}>
+                            Về trang chủ
+                        </button>
+                    </div>
+
+                    <div style={{ marginTop: '24px' }}>
+                         <p style={{ fontSize: '12px', color: '#cbd5e1', margin: 0 }}>
+                            © 2026 Nhà xe Đồng Hương Sông Lam
+                         </p>
+                    </div>
                 </div>
             </div>
         </div>

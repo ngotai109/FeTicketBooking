@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, Badge, Card, Modal, Pagination } from '../../components/Common';
+import { ConfirmationModal, Badge, Card, Modal, Pagination, Loading } from '../../components/Common';
 import { handleApiResponse } from '../../utils/common';
 import driverService from '../../services/driver.service';
 
@@ -198,24 +198,24 @@ const DriverManagement = () => {
                     </div>
 
                     <div className="table-container">
-                        <table className="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Họ và Tên</th>
-                                    <th>Liên hệ</th>
-                                    <th>Bằng lái</th>
-                                    <th>Kinh nghiệm</th>
-                                    <th>Trạng thái</th>
-                                    <th className="u-text-center">Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {loading && drivers.length === 0 ? (
-                                    <tr><td colSpan="6" className="u-text-center u-p-40">Đang tải dữ liệu...</td></tr>
-                                ) : filteredDrivers.length === 0 ? (
-                                    <tr><td colSpan="6" className="u-text-center u-p-40">Không tìm thấy tài xế nào</td></tr>
-                                ) : (
-                                    filteredDrivers.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((driver) => (
+                        {loading && drivers.length === 0 ? (
+                            <Loading />
+                        ) : filteredDrivers.length === 0 ? (
+                            <div className="u-text-center u-p-40 u-color-slate-500">Không tìm thấy tài xế nào</div>
+                        ) : (
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Họ và Tên</th>
+                                        <th>Liên hệ</th>
+                                        <th>Bằng lái</th>
+                                        <th>Kinh nghiệm</th>
+                                        <th>Trạng thái</th>
+                                        <th className="u-text-center">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredDrivers.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((driver) => (
                                         <tr key={driver.driverId}>
                                             <td>
                                                 <div className="u-flex u-align-center u-gap-12">
@@ -264,10 +264,10 @@ const DriverManagement = () => {
                                                 </div>
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </div>
                 <Pagination

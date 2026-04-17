@@ -6,7 +6,7 @@ import scheduleService from '../../services/schedule.service';
 import busService from '../../services/bus.service';
 import driverService from '../../services/driver.service';
 import { getBusLayout } from '../../constants/busLayouts';
-import { Badge, Card, Modal, Pagination, ConfirmationModal } from '../../components/Common';
+import { Badge, Card, Modal, Pagination, ConfirmationModal, Loading } from '../../components/Common';
 import '../../assets/styles/AdminTripMonitoring.css';
 
 const TripMonitoring = () => {
@@ -39,6 +39,10 @@ const TripMonitoring = () => {
 
     // ---- State Extra Trip (New Form) ----
     const [isAddTripOpen, setIsAddTripOpen] = useState(false);
+    const [isAssignDriverModalOpen, setIsAssignDriverModalOpen] = useState(false);
+    const [selectedTripForDriver, setSelectedTripForDriver] = useState(null);
+    const [assigningDriverId, setAssigningDriverId] = useState('');
+    const [isAssigning, setIsAssigning] = useState(false);
     const [extraTripForm, setExtraTripForm] = useState({
         routeId: '',
         busId: '',
@@ -50,6 +54,7 @@ const TripMonitoring = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [tripToDelete, setTripToDelete] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 9;
@@ -114,22 +119,38 @@ const TripMonitoring = () => {
     const fetchTrips = async () => {
         setLoading(true);
         try {
-            let query = `?date=${filterDate}`;
-            if (selectedRoute !== 'all') {
-                query += `&routeId=${selectedRoute}`;
-            }
-
-            const res = await tripService.getAllTrips(query);
+            const dateStr = filterDate ? filterDate.split('T')[0] : '';
+            const res = await tripService.getAllTrips(`?date=${dateStr}${selectedRoute !== 'all' ? `&routeId=${selectedRoute}` : ''}`);
             const data = res.data?.data || res.data || [];
-            if (Array.isArray(data)) {
-                setTrips(data);
-            } else {
-                setTrips([]);
-            }
+            setTrips(Array.isArray(data) ? data : []);
         } catch (error) {
+            toast.error('Lỗi khi tải dữ liệu chuyến đi');
             setTrips([]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleOpenAssignDriver = (trip) => {
+        setSelectedTripForDriver(trip);
+        setAssigningDriverId(trip.driverId || '');
+        setIsAssignDriverModalOpen(true);
+    };
+
+    const handleAssignDriver = async () => {
+        if (!assigningDriverId) return toast.warning('Vui lòng chọn tài xế');
+        setIsAssigning(true);
+        try {
+            await tripService.assignDriver(selectedTripForDriver.tripId, assigningDriverId);
+            toast.success('Gán tài xế thành công!');
+            setIsAssignDriverModalOpen(false);
+            fetchTrips();
+        } catch (error) {
+            console.error("Assign Driver Error:", error);
+            const msg = error.response?.data?.message || 'Không thể gán tài xế';
+            toast.error(msg);
+        } finally {
+            setIsAssigning(false);
         }
     };
 
@@ -143,7 +164,6 @@ const TripMonitoring = () => {
 
         setIsProcessing(true);
         try {
-            // Bước 1: Tạo Schedule mới (Lịch khung)
             const scheduleRes = await scheduleService.createSchedule({
                 routeId: parseInt(routeId),
                 busId: parseInt(busId),
@@ -156,7 +176,6 @@ const TripMonitoring = () => {
 
             if (!newScheduleId) throw new Error('Không thể tạo lịch trình khung');
 
-            // Bước 2: Tạo Trip cho ngày được chọn từ Schedule vừa tạo
             await tripService.createTrip({
                 scheduleId: newScheduleId,
                 departureDate: filterDate
@@ -175,7 +194,7 @@ const TripMonitoring = () => {
 
     const handleDeleteTrip = async () => {
         if (!tripToDelete) return;
-        setIsProcessing(true);
+        setIsDeleting(true);
         try {
             await tripService.deleteTrip(tripToDelete.tripId);
             toast.success('Đã xóa chuyến đi thành công!');
@@ -184,7 +203,7 @@ const TripMonitoring = () => {
         } catch (err) {
             toast.error('Không thể xóa chuyến đi vì đã có khách đặt hoặc lỗi hệ thống.');
         } finally {
-            setIsProcessing(false);
+            setIsDeleting(false);
         }
     };
 
@@ -303,9 +322,7 @@ const TripMonitoring = () => {
             </div>
 
             {loading ? (
-                <div className="admin-loading" style={{ margin: '100px 0' }}>
-                    <div className="loader"></div>
-                </div>
+                <Loading minHeight="300px" />
             ) : filteredTrips.length === 0 ? (
                 <Card padding="60px" className="u-text-center u-color-slate-400">
                     <p>Không tìm thấy chuyến nào phù hợp với bộ lọc.</p>
@@ -357,31 +374,21 @@ const TripMonitoring = () => {
                                                         <span style={{ fontSize: '11px' }}>Loại xe: {trip.busType}</span>
                                                     </div>
                                                 </div>
-                                                <div className="u-m-t-8 u-flex-column u-gap-4">
-                                                    <span className="u-size-11 u-weight-600 u-color-slate-500">Tài xế:</span>
-                                                    <select 
-                                                        className="admin-form-select u-size-12"
-                                                        style={{ padding: '4px 8px', height: 'auto' }}
-                                                        value={trip.driverId || ''}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        onChange={async (e) => {
-                                                            e.stopPropagation();
-                                                            const driverId = e.target.value;
-                                                            if (!driverId) return;
-                                                            try {
-                                                                await tripService.assignDriver(trip.tripId, driverId);
-                                                                toast.success('Đã gán tài xế!');
-                                                                fetchTrips();
-                                                            } catch (err) {
-                                                                toast.error('Gán tài xế thất bại');
-                                                            }
-                                                        }}
-                                                    >
-                                                        <option value="">-- Chọn tài xế --</option>
-                                                        {drivers.map(d => (
-                                                            <option key={d.driverId} value={d.driverId}>{d.fullName}</option>
-                                                        ))}
-                                                    </select>
+                                                 <div className="u-m-t-8 u-flex-column u-gap-4">
+                                                    <div className="u-flex u-justify-between u-align-center">
+                                                        <span className="u-size-11 u-weight-600 u-color-slate-500">Tài xế:</span>
+                                                        <button 
+                                                            className="admin-btn-icon" 
+                                                            style={{ padding: '2px', color: '#3182ce' }}
+                                                            onClick={(e) => { e.stopPropagation(); handleOpenAssignDriver(trip); }}
+                                                            title="Gán tài xế"
+                                                        >
+                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
+                                                        </button>
+                                                    </div>
+                                                    <span className="u-size-12 u-weight-700 u-color-blue-700">
+                                                        {drivers.find(d => d.driverId === trip.driverId)?.fullName || 'Chưa gán tài xế'}
+                                                    </span>
                                                 </div>
                                             </div>
 
@@ -429,7 +436,7 @@ const TripMonitoring = () => {
                 </div>
             )}
 
-            {/* Modal Add Extra Trip (Using the Form from Schedule Management) */}
+            {/* Modal Add Extra Trip */}
             <Modal
                 isOpen={isAddTripOpen}
                 onClose={() => setIsAddTripOpen(false)}
@@ -511,11 +518,57 @@ const TripMonitoring = () => {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleDeleteTrip}
-                title="Hủy chuyến đi"
-                message={`Bạn có chắc muốn hủy chuyến "${tripToDelete?.routeName}" lúc ${tripToDelete?.departureTime}?`}
-                isDangerous={true}
-                isLoading={isProcessing}
+                title="Xóa Chuyến Xe"
+                message={`Bạn có chắc chắn muốn xóa chuyến xe #${tripToDelete?.tripId} không? Lưu ý: Mọi ghế đã đặt sẽ bị hủy.`}
+                confirmText="Xác nhận xóa"
+                isLoading={isDeleting}
             />
+
+            {/* Modal Gán tài xế */}
+            <Modal
+                isOpen={isAssignDriverModalOpen}
+                onClose={() => setIsAssignDriverModalOpen(false)}
+                title="Gán Tài Xế Cho Chuyến"
+                width="400px"
+            >
+                <div className="admin-form">
+                    <div className="u-m-b-16 u-p-16 u-rounded-12 u-bg-slate-50" style={{ border: '1px solid #e2e8f0' }}>
+                        <div className="u-size-12 u-color-slate-500 u-m-b-4">CHUYẾN ĐANG CHỌN:</div>
+                        <div className="u-weight-700 u-color-slate-800">{selectedTripForDriver?.routeName}</div>
+                        <div className="u-size-12 u-color-blue-600 u-weight-600">
+                            {selectedTripForDriver?.departureTime} - {selectedTripForDriver?.departureDate}
+                        </div>
+                    </div>
+
+                    <div className="admin-form-group u-m-b-24">
+                        <label className="admin-form-label">Chọn tài xế:</label>
+                        <select 
+                            className="admin-form-select"
+                            value={assigningDriverId}
+                            onChange={(e) => setAssigningDriverId(e.target.value)}
+                        >
+                            <option value="">-- Chọn tài xế --</option>
+                            {drivers.map(d => (
+                                <option key={d.driverId} value={d.driverId}>{d.fullName}</option>
+                            ))}
+                        </select>
+                        <span className="u-size-11 u-color-slate-400 u-m-t-8 u-block italic">
+                            * Hệ thống sẽ tự động kiểm tra xem tài xế có lịch trùng hay không.
+                        </span>
+                    </div>
+
+                    <div className="admin-form-actions">
+                        <button className="admin-btn-outline" onClick={() => setIsAssignDriverModalOpen(false)} disabled={isAssigning}>Hủy</button>
+                        <button 
+                            className="admin-btn-primary" 
+                            onClick={handleAssignDriver}
+                            disabled={isAssigning}
+                        >
+                            {isAssigning ? 'Đang gán...' : 'Gán tài xế'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
 
             {/* Modal Detail Seat Map */}
             <Modal

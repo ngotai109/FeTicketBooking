@@ -15,6 +15,7 @@ const AdminLayout = () => {
 
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+    const [isNotifDropdownOpen, setIsNotifDropdownOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     const handleLogoutClick = () => {
@@ -38,7 +39,7 @@ const AdminLayout = () => {
 
     const isActive = (path) => location.pathname === path;
 
-    const [notifs, setNotifs] = useState({ cancellationRequests: 0, dropOffRequests: 0, totalCount: 0 });
+    const [notifs, setNotifs] = useState({ cancellationRequests: 0, dropOffRequests: 0, leaveRequests: 0, totalCount: 0 });
 
     const fetchNotifs = async () => {
         try {
@@ -112,6 +113,7 @@ const AdminLayout = () => {
                     <Link to="/admin/leave-requests" className={`nav-item ${isActive('/admin/leave-requests') ? 'active' : ''}`} title="Yêu cầu đổi lịch">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         {!isSidebarCollapsed && <span>Yêu cầu đổi lịch</span>}
+                        {notifs.leaveRequests > 0 && <span className="u-badge-notif">{notifs.leaveRequests}</span>}
                     </Link>
                     <Link to="/admin/mid-trip-dropoff" className={`nav-item ${isActive('/admin/mid-trip-dropoff') ? 'active' : ''}`} title="Xác nhận xuống xe">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
@@ -168,10 +170,70 @@ const AdminLayout = () => {
                         <button className="header-icon-btn" title="Chế độ tối">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
                         </button>
-                        <button className="header-icon-btn" title="Thông báo">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                            {notifs.totalCount > 0 && <span className="notification-badge">{notifs.totalCount}</span>}
-                        </button>
+                        <div className="header-icon-btn-container" style={{ position: 'relative' }}>
+                            <button 
+                                className={`header-icon-btn ${isNotifDropdownOpen ? 'active' : ''}`} 
+                                onClick={(e) => { e.stopPropagation(); setIsNotifDropdownOpen(!isNotifDropdownOpen); }}
+                                title="Thông báo"
+                            >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                                {notifs.totalCount > 0 && <span className="notification-badge">{notifs.totalCount}</span>}
+                            </button>
+
+                            {isNotifDropdownOpen && (
+                                <div className="admin-notif-dropdown">
+                                    <div className="notif-dropdown-header">
+                                        <h3>Thông báo hệ thống</h3>
+                                    </div>
+                                    <div className="notif-dropdown-list">
+                                        {notifs.totalCount === 0 ? (
+                                            <div className="notif-empty">Không có thông báo mới</div>
+                                        ) : (
+                                            <>
+                                                {notifs.cancellationRequests > 0 && (
+                                                    <Link to="/admin/cancellations" className="admin-notif-item" onClick={() => setIsNotifDropdownOpen(false)}>
+                                                        <div className="notif-item-icon danger">
+                                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                                                        </div>
+                                                        <div className="notif-item-content">
+                                                            <div className="notif-item-title">Yêu cầu hủy vé</div>
+                                                            <div className="notif-item-desc">Có <strong>{notifs.cancellationRequests}</strong> yêu cầu đang chờ xử lý</div>
+                                                        </div>
+                                                    </Link>
+                                                )}
+                                                {notifs.dropOffRequests > 0 && (
+                                                    <Link to="/admin/mid-trip-dropoff" className="admin-notif-item" onClick={() => setIsNotifDropdownOpen(false)}>
+                                                        <div className="notif-item-icon warning">
+                                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                                        </div>
+                                                        <div className="notif-item-content">
+                                                            <div className="notif-item-title">Xác nhận xuống xe</div>
+                                                            <div className="notif-item-desc">Có <strong>{notifs.dropOffRequests}</strong> hành khách chờ duyệt xuống xe</div>
+                                                        </div>
+                                                    </Link>
+                                                )}
+                                                {notifs.leaveRequests > 0 && (
+                                                    <Link to="/admin/leave-requests" className="admin-notif-item" onClick={() => setIsNotifDropdownOpen(false)}>
+                                                        <div className="notif-item-icon info">
+                                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                        </div>
+                                                        <div className="notif-item-content">
+                                                            <div className="notif-item-title">Yêu cầu đổi lịch</div>
+                                                            <div className="notif-item-desc">Có <strong>{notifs.leaveRequests}</strong> tài xế đã gửi đơn nghỉ</div>
+                                                        </div>
+                                                    </Link>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                    {notifs.totalCount > 0 && (
+                                        <div className="notif-dropdown-footer">
+                                            <span>Bạn đang có công việc cần xử lý</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                         <div className="header-user-profile-container" style={{ position: 'relative' }}>
                             <div className="header-user-profile" onClick={(e) => { e.stopPropagation(); setIsProfileDropdownOpen(!isProfileDropdownOpen); }} title="Tài khoản">
                                 <div className="header-user-avatar">

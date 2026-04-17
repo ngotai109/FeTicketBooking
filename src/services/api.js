@@ -26,6 +26,12 @@ const processQueue = (error, token = null) => {
 
 api.interceptors.request.use(
     (config) => {
+        // Tự động bỏ qua loading global nếu đang ở trang Admin hoặc Driver
+        if (window.location.pathname.startsWith('/admin') || 
+            window.location.pathname.startsWith('/driver')) {
+            config.skipLoading = true;
+        }
+
         if (!config.skipLoading) {
             loadingEvent.show(); // Trigger global loading
         }

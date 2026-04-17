@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, Badge, Card, Modal, Pagination, CustomSelect } from '../../components/Common';
+import { ConfirmationModal, Badge, Card, Modal, Pagination, CustomSelect, Loading } from '../../components/Common';
 import { handleApiResponse } from '../../utils/common';
 import passengerService from '../../services/passenger.service';
 
@@ -211,26 +211,26 @@ const PassengerManagement = () => {
                         </div>
                     </div>
 
-                    <div className="table-container" style={{ overflowX: 'auto' }}>
-                        <table className="admin-table">
-                            <thead>
-                                <tr>
-                                    <th className="u-text-center" style={{ width: '80px' }}>STT</th>
-                                    <th>Hành khách</th>
-                                    <th>Liên hệ</th>
-                                    <th className="u-text-center">Số chuyến</th>
-                                    <th className="u-text-right">Chi tiêu</th>
-                                    <th className="u-text-center">Trạng thái</th>
-                                    <th className="u-text-center">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {loading && passengers.length === 0 ? (
-                                    <tr><td colSpan="7" className="u-text-center u-p-40">Đang tải dữ liệu...</td></tr>
-                                ) : filteredPassengers.length === 0 ? (
-                                    <tr><td colSpan="7" className="u-text-center u-p-40">Không tìm thấy hành khách nào</td></tr>
-                                ) : (
-                                    filteredPassengers.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((p, index) => (
+                    <div className="table-container" style={{ overflowX: 'auto', minHeight: '300px' }}>
+                        {loading && passengers.length === 0 ? (
+                            <Loading />
+                        ) : filteredPassengers.length === 0 ? (
+                            <div className="u-text-center u-p-40 u-color-slate-500">Không tìm thấy hành khách nào</div>
+                        ) : (
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th className="u-text-center" style={{ width: '80px' }}>STT</th>
+                                        <th>Hành khách</th>
+                                        <th>Liên hệ</th>
+                                        <th className="u-text-center">Số chuyến</th>
+                                        <th className="u-text-right">Chi tiêu</th>
+                                        <th className="u-text-center">Trạng thái</th>
+                                        <th className="u-text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredPassengers.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((p, index) => (
                                         <tr key={p.id}>
                                             <td className="u-text-center">
                                                 <div className="u-flex u-align-center u-justify-center u-rounded-full u-bg-slate-100 u-color-slate-600 u-weight-700" style={{ width: '30px', height: '30px', fontSize: '13px', margin: '0 auto', border: '1px solid #e2e8f0' }}>
@@ -276,10 +276,10 @@ const PassengerManagement = () => {
                                                 </div>
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </div>
                 <Pagination 
@@ -323,7 +323,7 @@ const PassengerManagement = () => {
 
                     <div className="table-container" style={{ minHeight: '200px' }}>
                         {isHistoryLoading ? (
-                            <div className="u-flex u-justify-center u-p-40">Đang tải lịch sử...</div>
+                            <Loading minHeight="150px" text="Đang tải lịch sử..." />
                         ) : passengerHistory.length === 0 ? (
                             <div className="u-flex u-justify-center u-p-40 u-color-slate-400">Không có dữ liệu đặt vé</div>
                         ) : (

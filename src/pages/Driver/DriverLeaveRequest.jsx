@@ -77,9 +77,9 @@ const DriverLeaveRequest = () => {
                 setMyAllTrips(resSchedule.data || []);
                 
                 setStats({
-                    pending: myRequests.filter(r => r.status === 'Pending').length,
-                    approved: myRequests.filter(r => r.status === 'Approved').length,
-                    rejected: myRequests.filter(r => r.status === 'Rejected').length
+                    pending: myRequests.filter(r => r.status === 'Pending' || r.status === 0).length,
+                    approved: myRequests.filter(r => r.status === 'Approved' || r.status === 1).length,
+                    rejected: myRequests.filter(r => r.status === 'Rejected' || r.status === 2).length
                 });
             }
         } catch (error) {
@@ -94,11 +94,11 @@ const DriverLeaveRequest = () => {
             setFilteredRequests(leaveRequests);
         } else {
             const statusMap = {
-                'Chờ duyệt': 'Pending',
-                'Đã duyệt': 'Approved',
-                'Từ chối': 'Rejected'
+                'Chờ duyệt': [0, 'Pending'],
+                'Đã duyệt': [1, 'Approved'],
+                'Từ chối': [2, 'Rejected']
             };
-            setFilteredRequests(leaveRequests.filter(req => req.status === statusMap[tab]));
+            setFilteredRequests(leaveRequests.filter(req => statusMap[tab].includes(req.status)));
         }
     };
 
@@ -256,8 +256,8 @@ const DriverLeaveRequest = () => {
                                             <td className="u-weight-500">{req.reason}</td>
                                             <td className="u-color-slate-500 u-size-12 italic">{req.adminNote || '-'}</td>
                                             <td className="u-text-center">
-                                                <Badge type={req.status === 'Pending' ? 'warning' : req.status === 'Approved' ? 'success' : 'danger'}>
-                                                    {req.status === 'Pending' ? 'Chờ duyệt' : req.status === 'Approved' ? 'Đã duyệt' : 'Từ chối'}
+                                                <Badge type={(req.status === 'Pending' || req.status === 0) ? 'warning' : (req.status === 'Approved' || req.status === 1) ? 'success' : 'danger'}>
+                                                    {(req.status === 'Pending' || req.status === 0) ? 'Chờ duyệt' : (req.status === 'Approved' || req.status === 1) ? 'Đã duyệt' : 'Từ chối'}
                                                 </Badge>
                                             </td>
                                         </tr>

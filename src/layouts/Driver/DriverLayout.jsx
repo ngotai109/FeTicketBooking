@@ -15,21 +15,87 @@ const DriverLayout = () => {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+    const [isNotifDropdownOpen, setIsNotifDropdownOpen] = useState(false);
     const [driverInfo, setDriverInfo] = useState(null);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    const fetchDriverInfo = async () => {
+        try {
+            const res = await driverService.getAllDrivers();
+            const allDrivers = res.data?.data || res.data || [];
+            const userEmail = localStorage.getItem('userEmail');
+            const myInfo = allDrivers.find(d => d.email === userEmail);
+            if (myInfo) {
+                setDriverInfo(myInfo);
+                await fetchNotifications();
+            }
+        } catch (error) {
+            console.error("Error fetching driver info in layout", error);
+        }
+    };
+
+    const fetchNotifications = async () => {
+        try {
+            const [resReqs, resSchedule] = await Promise.all([
+                driverService.getLeaveRequests(),
+                driverService.getMySchedule()
+            ]);
+
+            const reqs = resReqs.data || [];
+            const trips = resSchedule.data || [];
+            
+            const newNotifs = [];
+            const seenIds = JSON.parse(localStorage.getItem('seenNotifIds') || '[]');
+
+            // 1. Notifications for Leave Requests (Approved/Rejected)
+            reqs.forEach(r => {
+                if (r.status !== 'Pending' && r.status !== 0) {
+                    const id = `LR-${r.leaveRequestId}-${r.status}`;
+                    newNotifs.push({
+                        id,
+                        title: r.status === 'Approved' || r.status === 1 ? 'Yêu cầu được chấp thuận' : 'Yêu cầu bị từ chối',
+                        description: `Ngày nghỉ: ${new Date(r.leaveDate).toLocaleDateString('vi-VN')}. Phản hồi: ${r.adminNote || 'Không có'}`,
+                        type: r.status === 'Approved' || r.status === 1 ? 'success' : 'danger',
+                        time: r.createdAt || new Date(),
+                        isRead: seenIds.includes(id)
+                    });
+                }
+            });
+
+            // 2. Notifications for Upcoming Trips (New)
+            trips.forEach(t => {
+                const id = `TRIP-${t.tripId}`;
+                newNotifs.push({
+                    id,
+                    title: 'Chuyến xe mới được xếp',
+                    description: `Tuyến: ${t.routeName}. Giờ chạy: ${new Date(t.departureTime).toLocaleTimeString('vi-VN')}`,
+                    type: 'info',
+                    time: t.departureTime,
+                    isRead: seenIds.includes(id)
+                });
+            });
+
+            const sortedNotifs = newNotifs.sort((a, b) => new Date(b.time) - new Date(a.time));
+            setNotifications(sortedNotifs);
+            setUnreadCount(sortedNotifs.filter(n => !n.isRead).length);
+
+        } catch (error) {
+            console.error("Notif Error:", error);
+        }
+    };
+
+    const markAllAsRead = () => {
+        const allIds = notifications.map(n => n.id);
+        localStorage.setItem('seenNotifIds', JSON.stringify(allIds));
+        setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+        setUnreadCount(0);
+    };
 
     React.useEffect(() => {
-        const fetchDriverInfo = async () => {
-            try {
-                const res = await driverService.getAllDrivers();
-                const allDrivers = res.data?.data || res.data || [];
-                const userEmail = localStorage.getItem('userEmail');
-                const myInfo = allDrivers.find(d => d.email === userEmail);
-                if (myInfo) setDriverInfo(myInfo);
-            } catch (error) {
-                console.error("Error fetching driver info in layout", error);
-            }
-        };
         fetchDriverInfo();
+        const interval = setInterval(fetchNotifications, 120000); // Poll every 2 mins
+        return () => clearInterval(interval);
     }, []);
 
     const handleLogoutConfirm = () => {
@@ -123,10 +189,59 @@ const DriverLayout = () => {
                         <h1 className="driver-page-title">{getPageTitle()}</h1>
                     </div>
                     <div className="driver-header-right">
-                        <button className="driver-toggle-btn" title="Thông báo">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                        </button>
-                        <div className="driver-profile-card" onClick={(e) => { e.stopPropagation(); setIsProfileDropdownOpen(!isProfileDropdownOpen); }}>
+                        <div className="driver-notif-container" style={{ position: 'relative' }}>
+                            <button 
+                                className={`driver-toggle-btn ${unreadCount > 0 ? 'has-notifs' : ''}`} 
+                                title="Thông báo"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsNotifDropdownOpen(!isNotifDropdownOpen);
+                                    setIsProfileDropdownOpen(false);
+                                }}
+                            >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                                {unreadCount > 0 && <span className="driver-notif-badge">{unreadCount}</span>}
+                            </button>
+
+                            {isNotifDropdownOpen && (
+                                <div className="driver-notif-dropdown" onClick={(e) => e.stopPropagation()}>
+                                    <div className="notif-dropdown-header">
+                                        <h3>Thông báo</h3>
+                                        {unreadCount > 0 && <button onClick={markAllAsRead}>Đánh dấu đã đọc</button>}
+                                    </div>
+                                    <div className="notif-dropdown-list">
+                                        {notifications.length === 0 ? (
+                                            <div className="notif-empty">Không có thông báo mới</div>
+                                        ) : (
+                                            notifications.map(n => (
+                                                <div key={n.id} className={`notif-item ${n.isRead ? 'read' : 'unread'}`}>
+                                                    <div className={`notif-icon-circle ${n.type}`}>
+                                                        {n.type === 'success' ? (
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                        ) : n.type === 'danger' ? (
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                                        ) : (
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                                        )}
+                                                    </div>
+                                                    <div className="notif-content">
+                                                        <div className="notif-title">{n.title}</div>
+                                                        <div className="notif-desc">{n.description}</div>
+                                                        <div className="notif-time">{new Date(n.time).toLocaleDateString('vi-VN')}</div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="driver-profile-card" onClick={(e) => { 
+                            e.stopPropagation(); 
+                            setIsProfileDropdownOpen(!isProfileDropdownOpen);
+                            setIsNotifDropdownOpen(false);
+                        }}>
                             <div className="driver-avatar" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 {driverInfo?.avatarUrl ? (
                                     <img src={driverInfo.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

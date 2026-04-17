@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination } from '../../components/Common';
+import { ConfirmationModal, CustomSelect, Badge, Card, Modal, Pagination, Loading } from '../../components/Common';
 import scheduleService from '../../services/schedule.service';
 import routeService from '../../services/route.service';
 import busService from '../../services/bus.service';
@@ -200,8 +200,7 @@ const ScheduleManagement = () => {
             fetchSchedules();
         } catch (error) {
             console.error("Schedule Submit Error:", error.response?.data || error);
-            const detail = error.response?.data ? JSON.stringify(error.response.data) : (error.message || 'Lỗi không xác định');
-            toast.error(`Thất bại: ${detail}`);
+            toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi lưu thông tin!');
         }
     };
 
@@ -312,25 +311,24 @@ const ScheduleManagement = () => {
                     </div>
                 </div>
 
-                <div className="table-container" style={{ overflowX: 'auto' }}>
-                    <table className="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Tuyến đường</th>
-                                <th>Xe Mặc định</th>
-                                <th>Giờ Xuất Bến</th>
-                                <th>Giờ Đến</th>
-                                <th>Vé Mặc định</th>
-                                <th className="u-text-center">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
                             {loading ? (
-                                <tr><td colSpan="6" className="u-text-center u-p-40">Đang tải...</td></tr>
+                                <Loading minHeight="300px" />
                             ) : schedules.length === 0 ? (
-                                <tr><td colSpan="6" className="u-text-center u-p-40">Chưa có lịch trình (Schedules) nào!</td></tr>
+                                <div className="u-text-center u-p-40 u-color-slate-500">Chưa có lịch trình (Schedules) nào!</div>
                             ) : (
-                                schedules.slice((currentPage - 1) * pageSize, currentPage * pageSize).map(s => (
+                                <table className="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tuyến đường</th>
+                                            <th>Xe Mặc định</th>
+                                            <th>Giờ Xuất Bến</th>
+                                            <th>Giờ Đến</th>
+                                            <th>Vé Mặc định</th>
+                                            <th className="u-text-center">Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {schedules.slice((currentPage - 1) * pageSize, currentPage * pageSize).map(s => (
                                     <tr key={s.scheduleId}>
                                         <td className="u-weight-600 u-color-blue">{getRouteName(s.routeId)}</td>
                                         <td>
@@ -362,11 +360,10 @@ const ScheduleManagement = () => {
                                             </div>
                                         </td>
                                     </tr>
-                                ))
-                            )}
+                                ))}
                         </tbody>
                     </table>
-                </div>
+                )}
                 </div>
                 <Pagination 
                     currentPage={currentPage}
