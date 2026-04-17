@@ -102,7 +102,6 @@ const LeaveRequestManagement = () => {
             <div className="u-flex u-justify-between u-align-center u-m-b-24">
                 <div>
                     <h2 className="admin-page-title">Quản Lý Đổi Lịch / Nghỉ Phép</h2>
-                    <p className="u-color-slate-500 u-size-14">Duyệt và xem lịch sử yêu cầu của tài xế</p>
                 </div>
             </div>
 

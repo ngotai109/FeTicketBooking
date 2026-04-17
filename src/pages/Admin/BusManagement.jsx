@@ -276,10 +276,10 @@ const BusManagement = () => {
                                 <tbody>
                                     {filteredBuses.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((bus) => (
                                         <tr key={bus.busId}>
-                                            <td className="u-weight-600 u-color-slate-800">{bus.plateNumber}</td>
+                                            <td className="u-weight-600 u-color-red">{bus.plateNumber}</td>
                                             <td className="u-color-slate-600">{bus.busName}</td>
                                             <td>
-                                                <Badge type="info" className="u-size-11 u-weight-600 u-bg-transparent" style={{ border: '1px solid #3182ce', color: '#3182ce' }}>
+                                                <Badge type="info" className="u-size-11 u-weight-600 u-bg-transparent" style={{ border: 'none', color: '#3182ce' }}>
                                                     {getBusTypeLabel(bus.busTypeId)}
                                                 </Badge>
                                             </td>

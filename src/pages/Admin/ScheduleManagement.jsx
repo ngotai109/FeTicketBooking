@@ -332,7 +332,7 @@ const ScheduleManagement = () => {
                                     <tr key={s.scheduleId}>
                                         <td className="u-weight-600 u-color-blue">{getRouteName(s.routeId)}</td>
                                         <td>
-                                            <Badge type="info" className="u-size-12 u-weight-600 u-bg-transparent" style={{ border: '1px solid #e2e8f0', color: '#4a5568' }}>
+                                            <Badge type="info" className="u-size-12 u-weight-600 u-bg-transparent" style={{ border: '1px solid #e2e8f0', color: '#e53e3e' }}>
                                                 {getBusPlate(s.busId)}
                                             </Badge>
                                         </td>

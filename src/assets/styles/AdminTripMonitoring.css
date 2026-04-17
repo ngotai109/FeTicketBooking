@@ -185,3 +185,31 @@
 .modal-info-item { display: flex; flex-direction: column; gap: 4px; }
 .modal-info-label { font-size: 10px; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
 .modal-info-value { font-size: 14px; font-weight: 700; color: #1e293b; }
+
+/* Tabs inside Modal */
+.admin-tab-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.admin-tab-item {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+}
+
+.admin-tab-item:hover {
+    color: #3b82f6;
+}
+
+.admin-tab-item.active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+}

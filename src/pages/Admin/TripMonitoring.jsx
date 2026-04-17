@@ -7,6 +7,7 @@ import busService from '../../services/bus.service';
 import driverService from '../../services/driver.service';
 import { getBusLayout } from '../../constants/busLayouts';
 import { Badge, Card, Modal, Pagination, ConfirmationModal, Loading } from '../../components/Common';
+import { handleApiResponse } from '../../utils/common';
 import '../../assets/styles/AdminTripMonitoring.css';
 
 const TripMonitoring = () => {
@@ -26,6 +27,9 @@ const TripMonitoring = () => {
     const [selectedTrip, setSelectedTrip] = useState(null);
     const [tripSeats, setTripSeats] = useState([]);
     const [isSeatMapOpen, setIsSeatMapOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState('seatMap'); // 'seatMap' or 'passengers'
+    const [passengers, setPassengers] = useState([]);
+    const [loadingPassengers, setLoadingPassengers] = useState(false);
 
     // ---- State Quick Booking ----
     const [isQuickBookingOpen, setIsQuickBookingOpen] = useState(false);
@@ -210,6 +214,8 @@ const TripMonitoring = () => {
     const handleOpenTripDetail = async (trip) => {
         setSelectedTrip(trip);
         setIsSeatMapOpen(true);
+        setActiveTab('seatMap');
+        
         try {
             const res = await tripService.getTripSeats(trip.tripId || trip.TripId);
             const data = res.data?.data || res.data || [];
@@ -223,6 +229,17 @@ const TripMonitoring = () => {
             })));
         } catch (error) {
             toast.error('Không thể tải chi tiết sơ đồ ghế!');
+        }
+
+        // Fetch passengers
+        setLoadingPassengers(true);
+        try {
+            const passengerRes = await driverService.getTripPassengers(trip.tripId || trip.TripId);
+            setPassengers(handleApiResponse(passengerRes));
+        } catch (error) {
+            console.error("Fetch Passengers Error", error);
+        } finally {
+            setLoadingPassengers(false);
         }
     };
 
@@ -241,8 +258,8 @@ const TripMonitoring = () => {
 
     const getSeatConfig = (status) => {
         switch (status) {
-            case 1: return { type: 'warning', label: 'Đang Giữ' };
-            case 2: return { type: 'danger', label: 'Đã Bán' };
+            case 1: return { type: 'danger', label: 'Đã Bán' };
+            case 2: return { type: 'warning', label: 'Đang Giữ' };
             case 3: return { type: 'info', label: 'Bị Khóa' };
             default: return { type: 'info', label: 'Còn Trống' };
         }
@@ -368,7 +385,7 @@ const TripMonitoring = () => {
                                             <div className="admin-trip-bus-details">
                                                 <div className="bus-info-dashed-box">
                                                     <div className="bus-detail-item">
-                                                        <span>Biển số: {trip.busPlate}</span>
+                                                         <span>Biển số: <span className="u-color-red u-weight-700">{trip.busPlate}</span></span>
                                                     </div>
                                                     <div className="bus-detail-item">
                                                         <span style={{ fontSize: '11px' }}>Loại xe: {trip.busType}</span>
@@ -594,77 +611,154 @@ const TripMonitoring = () => {
                             </div>
                         </div>
 
-                        <div className="admin-layout-legend" style={{ marginBottom: '32px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: 'none' }}>
-                            {[0, 1, 2, 3].map(status => {
-                                const config = getSeatConfig(status);
-                                return (
-                                    <div key={status} className="legend-item">
-                                        <div className={`legend-dot admin-badge-${config.type}`}></div>
-                                        <span className="u-weight-700 u-size-12">{config.label}</span>
+                        <div className="admin-tab-container">
+                            <div 
+                                className={`admin-tab-item ${activeTab === 'seatMap' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('seatMap')}
+                            >
+                                🗺️ Sơ đồ ghế
+                            </div>
+                            <div 
+                                className={`admin-tab-item ${activeTab === 'passengers' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('passengers')}
+                            >
+                                👥 Theo dõi hành khách ({passengers.length})
+                            </div>
+                        </div>
+
+                        {activeTab === 'seatMap' ? (
+                            <>
+                                <div className="admin-layout-legend" style={{ marginBottom: '32px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: 'none' }}>
+                                    {[0, 1, 2, 3].map(status => {
+                                        const config = getSeatConfig(status);
+                                        return (
+                                            <div key={status} className="legend-item">
+                                                <div className={`legend-dot admin-badge-${config.type}`}></div>
+                                                <span className="u-weight-700 u-size-12">{config.label}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="admin-bus-layout-container u-p-0 u-bg-transparent">
+                                    {/* Tầng 1 */}
+                                    <div className="admin-floor-section">
+                                        <h4 className="admin-floor-title" style={{ color: '#3182ce' }}>Tầng 1 (Dưới)</h4>
+                                        <div
+                                            className="admin-seat-grid"
+                                            style={{
+                                                gridTemplateColumns: `repeat(${getBusLayout(selectedTrip.busType || '34').columns}, 1fr)`,
+                                                padding: '24px', gap: '12px'
+                                            }}
+                                        >
+                                            {getBusLayout(selectedTrip.busType || '34').floor1.map(seatProto => {
+                                                const actualSeat = tripSeats.find(s => s.seatNumber === seatProto.seatNumber) || { status: 0 };
+                                                const config = getSeatConfig(actualSeat.status);
+                                                return (
+                                                    <div
+                                                        key={seatProto.seatNumber}
+                                                        className={`admin-seat-item admin-badge-${config.type} trip-monitoring-seat-item-custom`}
+                                                        style={{
+                                                            gridRow: seatProto.row + 1, gridColumn: seatProto.col + 1
+                                                        }}
+                                                        onClick={() => handleSeatClick({ ...seatProto, status: actualSeat.status })}
+                                                    >
+                                                        {seatProto.seatNumber}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
-                                );
-                            })}
-                        </div>
 
-                        <div className="admin-bus-layout-container u-p-0 u-bg-transparent">
-                            {/* Tầng 1 */}
-                            <div className="admin-floor-section">
-                                <h4 className="admin-floor-title" style={{ color: '#3182ce' }}>Tầng 1 (Dưới)</h4>
-                                <div
-                                    className="admin-seat-grid"
-                                    style={{
-                                        gridTemplateColumns: `repeat(${getBusLayout(selectedTrip.busType || '34').columns}, 1fr)`,
-                                        padding: '24px', gap: '12px'
-                                    }}
-                                >
-                                    {getBusLayout(selectedTrip.busType || '34').floor1.map(seatProto => {
-                                        const actualSeat = tripSeats.find(s => s.seatNumber === seatProto.seatNumber) || { status: 0 };
-                                        const config = getSeatConfig(actualSeat.status);
-                                        return (
-                                            <div
-                                                key={seatProto.seatNumber}
-                                                className={`admin-seat-item admin-badge-${config.type} trip-monitoring-seat-item-custom`}
-                                                style={{
-                                                    gridRow: seatProto.row + 1, gridColumn: seatProto.col + 1
-                                                }}
-                                                onClick={() => handleSeatClick({ ...seatProto, status: actualSeat.status })}
-                                            >
-                                                {seatProto.seatNumber}
-                                            </div>
-                                        );
-                                    })}
+                                    {/* Tầng 2 */}
+                                    <div className="admin-floor-section">
+                                        <h4 className="admin-floor-title" style={{ color: '#dd6b20' }}>Tầng 2 (Trên)</h4>
+                                        <div
+                                            className="admin-seat-grid"
+                                            style={{
+                                                gridTemplateColumns: `repeat(${getBusLayout(selectedTrip.busType || '34').columns}, 1fr)`,
+                                                padding: '24px', gap: '12px', background: '#fffaf0'
+                                            }}
+                                        >
+                                            {getBusLayout(selectedTrip.busType || '34').floor2.map(seatProto => {
+                                                const actualSeat = tripSeats.find(s => s.seatNumber === seatProto.seatNumber) || { status: 0 };
+                                                const config = getSeatConfig(actualSeat.status);
+                                                return (
+                                                    <div
+                                                        key={seatProto.seatNumber}
+                                                        className={`admin-seat-item admin-badge-${config.type} trip-monitoring-seat-item-custom`}
+                                                        style={{
+                                                            gridRow: seatProto.row + 1, gridColumn: seatProto.col + 1
+                                                        }}
+                                                        onClick={() => handleSeatClick({ ...seatProto, status: actualSeat.status })}
+                                                    >
+                                                        {seatProto.seatNumber}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
                                 </div>
+                            </>
+                        ) : (
+                            <div className="admin-table-wrapper" style={{ margin: 0 }}>
+                                <table className="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Ghế</th>
+                                            <th>Hành khách</th>
+                                            <th className="u-text-center">Lên xe</th>
+                                            <th className="u-text-center">Xuống xe</th>
+                                            <th>Trạng thái chi tiết</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {loadingPassengers ? (
+                                            <tr><td colSpan="5" className="u-text-center u-p-40"><Loading /></td></tr>
+                                        ) : passengers.length === 0 ? (
+                                            <tr><td colSpan="5" className="u-text-center u-p-40 u-color-slate-400">Chưa có hành khách nào đặt vé.</td></tr>
+                                        ) : (
+                                            passengers.map((p, idx) => (
+                                                <tr key={idx}>
+                                                    <td><b className="u-color-blue-600 u-size-16">{p.seatNumber}</b></td>
+                                                    <td>
+                                                        <div className="u-weight-700 u-color-slate-700">{p.customerName}</div>
+                                                        <div className="u-size-12 u-color-slate-500">{p.phoneNumber}</div>
+                                                    </td>
+                                                    <td className="u-text-center">
+                                                        {p.isBoarded ? (
+                                                            <span style={{ color: '#10b981', fontSize: '20px' }}>●</span>
+                                                        ) : (
+                                                            <span style={{ color: '#cbd5e1', fontSize: '20px' }}>○</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="u-text-center">
+                                                        {p.isDroppedOff ? (
+                                                            <span style={{ color: '#10b981', fontSize: '20px' }}>●</span>
+                                                        ) : (
+                                                            <span style={{ color: '#cbd5e1', fontSize: '20px' }}>○</span>
+                                                        )}
+                                                    </td>
+                                                    <td>
+                                                        {p.isDroppedOff ? (
+                                                            <Badge type="success">HOÀN THÀNH</Badge>
+                                                        ) : p.status === 'WaittingDropOffConfirm' ? (
+                                                            <Badge type="info">ĐANG CHỜ DUYỆT XUỐNG DỌC ĐƯỜNG</Badge>
+                                                        ) : p.status === 'MidTripEmailSent' ? (
+                                                            <Badge type="info">ĐÃ GỬI MAIL XÁC NHẬN</Badge>
+                                                        ) : p.isBoarded ? (
+                                                            <Badge type="warning">ĐANG TRÊN XE</Badge>
+                                                        ) : (
+                                                            <Badge type="secondary">CHỜ LÊN XE</Badge>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
-
-                            {/* Tầng 2 */}
-                            <div className="admin-floor-section">
-                                <h4 className="admin-floor-title" style={{ color: '#dd6b20' }}>Tầng 2 (Trên)</h4>
-                                <div
-                                    className="admin-seat-grid"
-                                    style={{
-                                        gridTemplateColumns: `repeat(${getBusLayout(selectedTrip.busType || '34').columns}, 1fr)`,
-                                        padding: '24px', gap: '12px', background: '#fffaf0'
-                                    }}
-                                >
-                                    {getBusLayout(selectedTrip.busType || '34').floor2.map(seatProto => {
-                                        const actualSeat = tripSeats.find(s => s.seatNumber === seatProto.seatNumber) || { status: 0 };
-                                        const config = getSeatConfig(actualSeat.status);
-                                        return (
-                                            <div
-                                                key={seatProto.seatNumber}
-                                                className={`admin-seat-item admin-badge-${config.type} trip-monitoring-seat-item-custom`}
-                                                style={{
-                                                    gridRow: seatProto.row + 1, gridColumn: seatProto.col + 1
-                                                }}
-                                                onClick={() => handleSeatClick({ ...seatProto, status: actualSeat.status })}
-                                            >
-                                                {seatProto.seatNumber}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
+                        )}
                     </>
                 )}
             </Modal>

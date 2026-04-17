@@ -60,6 +60,7 @@ const MidTripDropOffManagement = () => {
                                 <th>Chuyến xe / Ghế</th>
                                 <th>Điểm xuống đề xuất</th>
                                 <th>Thời gian gửi</th>
+                                <th>Trạng thái</th>
                                 <th className="u-text-center">Hành động</th>
                             </tr>
                         </thead>
@@ -81,21 +82,38 @@ const MidTripDropOffManagement = () => {
                                     <td>
                                         <div className="u-size-13">{new Date(req.actualDropOffTime).toLocaleString('vi-VN')}</div>
                                     </td>
+                                    <td>
+                                        {req.status === 'MidTripEmailSent' ? (
+                                            <Badge type="info">Chờ khách xác nhận</Badge>
+                                        ) : (
+                                            <Badge type="warning">Yêu cầu mới</Badge>
+                                        )}
+                                    </td>
                                     <td className="u-text-center">
-                                        <button 
-                                            className="admin-btn-primary" 
-                                            style={{ background: '#10b981', borderColor: '#10b981' }}
-                                            onClick={() => handleApproveAndSendMail(req.ticketId)}
-                                            disabled={processingId === req.ticketId}
-                                        >
-                                            {processingId === req.ticketId ? 'Đang gửi...' : 'Gửi Mail Xác Nhận'}
-                                        </button>
+                                        {req.status === 'MidTripEmailSent' ? (
+                                            <button 
+                                                className="admin-btn-outline" 
+                                                disabled={true}
+                                                style={{ cursor: 'not-allowed', opacity: 0.7, fontSize: '12px' }}
+                                            >
+                                                📧 Đã gửi mail thành công
+                                            </button>
+                                        ) : (
+                                            <button 
+                                                className="admin-btn-primary" 
+                                                style={{ background: '#10b981', borderColor: '#10b981' }}
+                                                onClick={() => handleApproveAndSendMail(req.ticketId)}
+                                                disabled={processingId === req.ticketId}
+                                            >
+                                                {processingId === req.ticketId ? 'Đang gửi...' : 'Gửi Mail Xác Nhận'}
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
                             {requests.length === 0 && (
                                 <tr>
-                                    <td colSpan="5" className="u-text-center u-p-40">
+                                    <td colSpan="6" className="u-text-center u-p-40">
                                         <div className="u-flex-column u-align-center u-gap-12">
                                             <span style={{ fontSize: '40px' }}>✅</span>
                                             <p className="u-color-slate-500">Không có yêu cầu nào đang chờ xử lý</p>

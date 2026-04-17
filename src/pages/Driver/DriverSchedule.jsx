@@ -50,7 +50,7 @@ const DriverSchedule = () => {
         try {
             await api.patch(`/Driver/tickets/${ticketId}/toggle-board`);
             // Cập nhật lại danh sách tại chỗ để không load lại toàn bộ modal
-            setPassengers(prev => prev.map(p => 
+            setPassengers(prev => prev.map(p =>
                 p.ticketId === ticketId ? { ...p, isBoarded: !p.isBoarded } : p
             ));
         } catch (error) {
@@ -61,7 +61,7 @@ const DriverSchedule = () => {
     const handleToggleDropOff = async (ticketId) => {
         try {
             await api.patch(`/Driver/tickets/${ticketId}/toggle-dropoff`);
-            setPassengers(prev => prev.map(p => 
+            setPassengers(prev => prev.map(p =>
                 p.ticketId === ticketId ? { ...p, isDroppedOff: !p.isDroppedOff } : p
             ));
         } catch (error) {
@@ -362,24 +362,25 @@ const DriverSchedule = () => {
                                             </td>
                                             <td>{p.pickUpPoint || 'Bến xe'}</td>
                                             <td className="u-text-center">
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={p.isBoarded} 
+                                                <input
+                                                    type="checkbox"
+                                                    checked={p.isBoarded}
+                                                    disabled={p.status === 'WaittingDropOffConfirm' || p.status === 'MidTripEmailSent'}
                                                     onChange={() => handleToggleBoard(p.ticketId)}
                                                     style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                                                 />
                                             </td>
                                             <td className="u-text-center">
                                                 <div className="u-flex u-align-center u-justify-center u-gap-12">
-                                                    <input 
-                                                        type="checkbox" 
-                                                        disabled={!p.isBoarded || p.status === 'WaittingDropOffConfirm'}
-                                                        checked={p.isDroppedOff} 
+                                                    <input
+                                                        type="checkbox"
+                                                        disabled={!p.isBoarded || p.status === 'WaittingDropOffConfirm' || p.status === 'MidTripEmailSent'}
+                                                        checked={p.isDroppedOff}
                                                         onChange={() => handleToggleDropOff(p.ticketId)}
                                                         style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                                                     />
-                                                    {p.isBoarded && !p.isDroppedOff && p.status !== 'WaittingDropOffConfirm' && (
-                                                        <button 
+                                                    {p.isBoarded && !p.isDroppedOff && p.status !== 'WaittingDropOffConfirm' && p.status !== 'MidTripEmailSent' && (
+                                                        <button
                                                             className="u-size-11 u-weight-600 u-color-blue-600"
                                                             style={{ background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
                                                             onClick={() => handleOpenMidTrip(p)}
@@ -393,7 +394,9 @@ const DriverSchedule = () => {
                                                 {p.isDroppedOff ? (
                                                     <Badge type="success">HOÀN THÀNH</Badge>
                                                 ) : p.status === 'WaittingDropOffConfirm' ? (
-                                                    <Badge type="info">CHỜ GỬI MAIL/XÁC NHẬN</Badge>
+                                                    <Badge type="info">ĐANG CHỜ DUYỆT</Badge>
+                                                ) : p.status === 'MidTripEmailSent' ? (
+                                                    <Badge type="info">ĐÃ GỬI MAIL - CHỜ KHÁCH</Badge>
                                                 ) : p.isBoarded ? (
                                                     <Badge type="warning">ĐANG TRÊN XE</Badge>
                                                 ) : (
@@ -425,9 +428,9 @@ const DriverSchedule = () => {
                     <p className="u-size-14 u-m-b-16">Hành khách: <b>{midTripTicket?.customerName}</b> - Ghế: <b>{midTripTicket?.seatNumber}</b></p>
                     <div className="form-group u-m-b-24">
                         <label className="u-size-13 u-weight-600 u-m-b-8">Điểm xuống xe thực tế:</label>
-                        <input 
-                            type="text" 
-                            className="admin-input" 
+                        <input
+                            type="text"
+                            className="admin-input"
                             placeholder="Ví dụ: Cổng chào TP Vinh, Ngã ba..."
                             value={actualLocation}
                             onChange={(e) => setActualLocation(e.target.value)}
