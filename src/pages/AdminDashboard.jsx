@@ -6,7 +6,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
 } from 'recharts';
-import { Card, Badge } from '../components/Common';
+import { Card, Badge, Loading } from '../components/Common';
 import dashboardService from '../services/dashboard.service';
 import { handleApiResponse } from '../utils/common';
 

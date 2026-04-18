@@ -5,13 +5,13 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import './assets/styles/App.css';
 import AppRoutes from './routes/AppRoutes';
 import ScrollToTop from './components/Common/ScrollToTop';
-import LoadingOverlay from './components/Common/LoadingOverlay';
+
 
 function App() {
   return (
     <Router>
       <ScrollToTop />
-      <LoadingOverlay />
+      
       <AppRoutes />
       <ToastContainer
         position="top-right"

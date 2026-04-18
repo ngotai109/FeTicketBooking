@@ -338,8 +338,10 @@ const TripMonitoring = () => {
                 </div>
             </div>
 
-            {loading ? (
-                <Loading minHeight="300px" />
+            {loading && filteredTrips.length === 0 ? (
+                <div className="u-p-40 u-text-center u-flex-column u-align-center u-gap-12">
+                    <div className="basic-spinner"></div>
+                </div>
             ) : filteredTrips.length === 0 ? (
                 <Card padding="60px" className="u-text-center u-color-slate-400">
                     <p>Không tìm thấy chuyến nào phù hợp với bộ lọc.</p>

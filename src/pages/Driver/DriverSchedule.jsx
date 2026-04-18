@@ -72,6 +72,7 @@ const DriverSchedule = () => {
     const [isMidTripModalOpen, setIsMidTripModalOpen] = useState(false);
     const [midTripTicket, setMidTripTicket] = useState(null);
     const [actualLocation, setActualLocation] = useState('');
+    const [reason, setReason] = useState('');
 
     const handleOpenMidTrip = (passenger) => {
         setMidTripTicket(passenger);
@@ -83,14 +84,20 @@ const DriverSchedule = () => {
             toast.warning('Vui lòng nhập điểm xuống xe thực tế');
             return;
         }
+        if (!reason.trim()) {
+            toast.warning('Vui lòng nhập lý do xuống dọc đường');
+            return;
+        }
 
         try {
             await api.post(`/Driver/tickets/${midTripTicket.ticketId}/request-mid-trip-dropoff`, {
-                actualDropOffLocation: actualLocation
+                actualDropOffLocation: actualLocation,
+                reason: reason
             });
             toast.success('Đã gửi yêu cầu xuống xe dọc đường cho Admin');
             setIsMidTripModalOpen(false);
             setActualLocation('');
+            setReason('');
             // Refresh danh sách để cập nhật trạng thái
             const response = await api.get(`/Driver/my-trips/${selectedTrip.tripId}/passengers`, { skipLoading: true });
             setPassengers(handleApiResponse(response));
@@ -239,7 +246,9 @@ const DriverSchedule = () => {
                 <div className="schedule-body u-p-24 u-p-t-0">
                     <div style={{ position: 'relative', minHeight: '350px' }}>
                         {loading ? (
-                            <Loading />
+                            <div className="u-p-40 u-text-center">
+                                <div className="basic-spinner u-m-x-auto"></div>
+                            </div>
                         ) : viewMode === 'weekly' ? (
                             <div className="weekly-grid">
                                 {weekDays.map((day, index) => {
@@ -437,9 +446,20 @@ const DriverSchedule = () => {
                             autoFocus
                         />
                     </div>
-                    <div className="u-flex u-justify-end u-gap-12">
-                        <button className="admin-btn-secondary" onClick={() => setIsMidTripModalOpen(false)}>Hủy</button>
-                        <button className="admin-btn-primary" onClick={handleRequestMidTrip}>Gửi Admin phê duyệt</button>
+                    <div className="form-group u-m-b-24">
+                        <label className="u-size-13 u-weight-600 u-m-b-8">Lý do xuống xe:</label>
+                        <textarea
+                            className="admin-input"
+                            placeholder="Nhập lý do (ví dụ: việc bận đột xuất, say xe...)"
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                            rows="3"
+                            style={{ resize: 'none', width: '100%', padding: '8px' }}
+                        />
+                    </div>
+                    <div className="u-flex u-justify-end u-gap-12 u-p-t-8">
+                        <button className="admin-btn-outline" style={{ height: '40px', padding: '0 24px' }} onClick={() => setIsMidTripModalOpen(false)}>Hủy</button>
+                        <button className="admin-btn-primary" style={{ height: '40px' }} onClick={handleRequestMidTrip}>Gửi Admin phê duyệt</button>
                     </div>
                 </div>
             </Modal>

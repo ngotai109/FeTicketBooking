@@ -12,6 +12,8 @@ const TicketResult = () => {
     const [ticket, setTicket] = React.useState(stateTicket);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
     const [isConfirmDropOffOpen, setIsConfirmDropOffOpen] = React.useState(false);
+    const [isRejectDropOffOpen, setIsRejectDropOffOpen] = React.useState(false);
+    const [passengerNote, setPassengerNote] = React.useState('');
     const [reason, setReason] = React.useState('');
     const [refundBankName, setRefundBankName] = React.useState('');
     const [refundAccountNumber, setRefundAccountNumber] = React.useState('');
@@ -31,6 +33,11 @@ const TicketResult = () => {
                 fetchTicket(code, phone);
             }
             setIsConfirmDropOffOpen(true);
+        } else if (action === 'rejectDropOff' && ticketId) {
+            if (!ticket && code && phone) {
+                fetchTicket(code, phone);
+            }
+            setIsRejectDropOffOpen(true);
         }
     }, [searchParams]);
 
@@ -50,13 +57,29 @@ const TicketResult = () => {
         const ticketId = searchParams.get('ticketId');
         try {
             setIsSubmitting(true);
-            await bookingService.confirmMidTripDropOff(ticketId);
+            await bookingService.confirmMidTripDropOff(ticketId, passengerNote);
             toast.success("Xác nhận xuống xe thành công!");
             setIsConfirmDropOffOpen(false);
-            // Refresh ticket data
+            setPassengerNote('');
             fetchTicket(searchParams.get('code'), searchParams.get('phone'));
         } catch (error) {
             toast.error("Lỗi khi xác nhận. Vui lòng thử lại.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleRejectDropOff = async () => {
+        const ticketId = searchParams.get('ticketId');
+        try {
+            setIsSubmitting(true);
+            await bookingService.rejectMidTripDropOff(ticketId, passengerNote);
+            toast.warn("Bạn đã từ chối thông tin xuống xe. Chúng tôi sẽ ghi nhận và kiểm tra lại.");
+            setIsRejectDropOffOpen(false);
+            setPassengerNote('');
+            fetchTicket(searchParams.get('code'), searchParams.get('phone'));
+        } catch (error) {
+            toast.error("Lỗi khi gửi yêu cầu từ chối.");
         } finally {
             setIsSubmitting(false);
         }
@@ -69,7 +92,7 @@ const TicketResult = () => {
         const userMain = document.querySelector('.user-main');
         const originalInnerMaxW = mainInner ? mainInner.style.maxWidth : '';
         const originalMainPadding = userMain ? userMain.style.padding : '';
-        
+
         if (mainInner) mainInner.style.maxWidth = '100%';
         if (userMain) userMain.style.padding = '0';
 
@@ -122,7 +145,7 @@ const TicketResult = () => {
 
             <div style={{ width: '100%', margin: '0' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '50px' }}>
-                    
+
                     {/* Top Section: Ticket Info */}
                     <div style={{ padding: '0 30px' }}>
                         <div style={{ marginBottom: '30px', textAlign: 'center' }}>
@@ -144,18 +167,18 @@ const TicketResult = () => {
                                     <span style={{ color: '#64748b', fontSize: '15px' }}>{item.label}:</span>
                                     {item.isStatus ? (
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                            <span style={{ 
-                                                background: item.value === 'Đã xác nhận' ? '#e8f5e9' : (item.value === 'Chờ hủy' ? '#fff7ed' : (item.value === 'Đã hủy' ? '#fef2f2' : '#f1f5f9')), 
-                                                color: item.value === 'Đã xác nhận' ? '#2e7d32' : (item.value === 'Chờ hủy' ? '#c2410c' : (item.value === 'Đã hủy' ? '#dc2626' : '#64748b')), 
-                                                padding: '4px 12px', 
-                                                borderRadius: '20px', 
-                                                fontSize: '13px', 
-                                                fontWeight: '700' 
+                                            <span style={{
+                                                background: item.value === 'Đã xác nhận' ? '#e8f5e9' : (item.value === 'Chờ hủy' ? '#fff7ed' : (item.value === 'Đã hủy' ? '#fef2f2' : '#f1f5f9')),
+                                                color: item.value === 'Đã xác nhận' ? '#2e7d32' : (item.value === 'Chờ hủy' ? '#c2410c' : (item.value === 'Đã hủy' ? '#dc2626' : '#64748b')),
+                                                padding: '4px 12px',
+                                                borderRadius: '20px',
+                                                fontSize: '13px',
+                                                fontWeight: '700'
                                             }}>
                                                 {item.value}
                                             </span>
                                             {ticket.rawStatus === 1 && (
-                                                <button 
+                                                <button
                                                     onClick={() => setIsModalOpen(true)}
                                                     style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '4px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
                                                 >
@@ -171,17 +194,17 @@ const TicketResult = () => {
                                 </div>
                             ))}
                         </div>
-                        
+
                         <div style={{ textAlign: 'center', marginTop: '30px' }}>
                             <button onClick={() => navigate('/lookup/ticket')} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontWeight: '600', cursor: 'pointer', fontSize: '14px' }}>← Quay lại trang tra cứu</button>
                         </div>
                     </div>
 
                     {/* Bottom Section: Cancellation Policy (FULL WIDTH) - ENHANCED COLORS */}
-                    <div style={{ 
-                        background: '#f1f5f9', 
-                        padding: '80px 0', 
-                        width: '100%', 
+                    <div style={{
+                        background: '#f1f5f9',
+                        padding: '80px 0',
+                        width: '100%',
                         position: 'relative',
                         borderTop: '1px solid #e2e8f0'
                     }}>
@@ -195,32 +218,32 @@ const TicketResult = () => {
 
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '30px', marginBottom: '50px' }}>
                                 {[
-                                    { 
-                                        time: 'Trước 24 giờ', 
-                                        fee: 'Phí hủy 10%', 
-                                        color: '#3b82f6', 
+                                    {
+                                        time: 'Trước 3 ngày',
+                                        fee: 'Phí hủy 10%',
+                                        color: '#3b82f6',
                                         bg: '#eff6ff',
                                         icon: 'fa-history',
-                                        desc: 'Hoàn tiền tự động vào tài khoản sau 3-5 ngày làm việc.' 
+                                        desc: 'Hoàn tiền vào tài khoản sau 1-2 ngày làm việc.'
                                     },
-                                    { 
-                                        time: 'Từ 4h đến 24h', 
-                                        fee: 'Phí hủy 50%', 
-                                        color: '#f59e0b', 
+                                    {
+                                        time: 'Từ 1 ngày đến 3',
+                                        fee: 'Phí hủy 50%',
+                                        color: '#f59e0b',
                                         bg: '#fffbeb',
                                         icon: 'fa-user-clock',
-                                        desc: 'Chỉ áp dụng cho vé chưa in hoặc chưa lên xe.' 
+                                        desc: 'Hoàn tiền vào tài khoản sau 1-2 ngày làm việc.'
                                     },
-                                    { 
-                                        time: 'Dưới 4 giờ', 
-                                        fee: 'Không hoàn tiền', 
-                                        color: '#ef4444', 
+                                    {
+                                        time: 'Dưới 1 ngày',
+                                        fee: 'Không hoàn tiền',
+                                        color: '#ef4444',
                                         bg: '#fef2f2',
                                         icon: 'fa-ban',
-                                        desc: 'Không áp dụng chính sách hủy hoặc đổi trả tiền trong mốc này.' 
+                                        desc: 'Không áp dụng chính sách hủy hoặc đổi trả tiền trong mốc này.'
                                     }
                                 ].map((p, i) => (
-                                    <div key={i} style={{ 
+                                    <div key={i} style={{
                                         background: '#ffffff',
                                         padding: '30px 25px',
                                         borderRadius: '24px',
@@ -229,8 +252,8 @@ const TicketResult = () => {
                                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
                                         transition: 'transform 0.2s'
                                     }}>
-                                        <div style={{ 
-                                            width: '45px', height: '45px', background: p.bg, color: p.color, 
+                                        <div style={{
+                                            width: '45px', height: '45px', background: p.bg, color: p.color,
                                             borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             margin: '0 auto 20px'
                                         }}>
@@ -243,17 +266,17 @@ const TicketResult = () => {
                                 ))}
                             </div>
 
-                            <div style={{ 
-                                background: '#ffffff', 
-                                padding: '30px', 
-                                borderRadius: '20px', 
+                            <div style={{
+                                background: '#ffffff',
+                                padding: '30px',
+                                borderRadius: '20px',
                                 border: '1px solid #e2e8f0',
                                 display: 'flex',
                                 alignItems: 'flex-start',
                                 gap: '25px'
                             }}>
-                                <div style={{ 
-                                    width: '50px', height: '50px', background: '#f8fafc', color: '#64748b', 
+                                <div style={{
+                                    width: '50px', height: '50px', background: '#f8fafc', color: '#64748b',
                                     borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     flexShrink: 0
                                 }}>
@@ -287,7 +310,7 @@ const TicketResult = () => {
             >
                 <div style={{ padding: '10px 0' }}>
                     <p style={{ margin: '0 0 15px', color: '#4a5568', fontSize: '14px', lineHeight: '1.5' }}>
-                        Bạn đang yêu cầu hủy vé cho mã đặt vé <strong>{ticket?.code}</strong>. 
+                        Bạn đang yêu cầu hủy vé cho mã đặt vé <strong>{ticket?.code}</strong>.
                         Vui lòng nhập lý do để Admin có thể xem xét và phê duyệt nhanh chóng.
                     </p>
                     <div style={{ marginBottom: '20px' }}>
@@ -295,11 +318,11 @@ const TicketResult = () => {
                             Lý do hủy:
                         </label>
                         <textarea
-                            style={{ 
-                                width: '100%', 
-                                padding: '12px', 
-                                borderRadius: '8px', 
-                                border: '1.5px solid #e2e8f0', 
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                borderRadius: '8px',
+                                border: '1.5px solid #e2e8f0',
                                 fontSize: '14px',
                                 outline: 'none',
                                 transition: 'border-color 0.2s',
@@ -315,10 +338,10 @@ const TicketResult = () => {
 
                     <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '12px', border: '1px dashed #cbd5e1', marginBottom: '20px' }}>
                         <h4 style={{ margin: '0 0 12px', fontSize: '14px', color: '#1e293b', fontWeight: '700' }}>Thông tin hoàn tiền</h4>
-                        
+
                         <div style={{ marginBottom: '12px' }}>
                             <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '5px' }}>Ngân hàng:</label>
-                            <input 
+                            <input
                                 type="text"
                                 style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '13px', boxSizing: 'border-box' }}
                                 placeholder="Ví dụ: Vietcombank, MB Bank..."
@@ -330,7 +353,7 @@ const TicketResult = () => {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                             <div>
                                 <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '5px' }}>Số tài khoản:</label>
-                                <input 
+                                <input
                                     type="text"
                                     style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '13px', boxSizing: 'border-box' }}
                                     placeholder="Nhập số tài khoản"
@@ -340,7 +363,7 @@ const TicketResult = () => {
                             </div>
                             <div>
                                 <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '5px' }}>Tên chủ tài khoản:</label>
-                                <input 
+                                <input
                                     type="text"
                                     style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '13px', boxSizing: 'border-box' }}
                                     placeholder="Tên viết hoa không dấu"
@@ -351,7 +374,7 @@ const TicketResult = () => {
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                        <button 
+                        <button
                             className="admin-btn-outline"
                             style={{ padding: '10px 20px', borderRadius: '8px' }}
                             onClick={() => setIsModalOpen(false)}
@@ -359,10 +382,10 @@ const TicketResult = () => {
                         >
                             Đóng
                         </button>
-                        <button 
+                        <button
                             className="admin-btn-primary"
-                            style={{ 
-                                padding: '10px 24px', 
+                            style={{
+                                padding: '10px 24px',
                                 borderRadius: '8px',
                                 background: '#dc2626',
                                 borderColor: '#dc2626',
@@ -388,17 +411,28 @@ const TicketResult = () => {
                     <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', padding: '20px', borderRadius: '12px', marginBottom: '20px' }}>
                         <div style={{ color: '#0369a1', fontWeight: '700', fontSize: '15px', marginBottom: '8px' }}>Yêu cầu xác nhận</div>
                         <p style={{ margin: 0, color: '#075985', fontSize: '14px', lineHeight: '1.6' }}>
-                            Bạn vừa nhận được yêu cầu xác nhận đã xuống xe tại: <br/>
+                            Bạn vừa nhận được yêu cầu xác nhận đã xuống xe tại: <br />
                             <strong style={{ fontSize: '16px' }}>{ticket?.actualDropOffLocation || 'Điểm dọc đường'}</strong>
                         </p>
                     </div>
-                    
-                    <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '25px', lineHeight: '1.5' }}>
+
+                    <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px', lineHeight: '1.5' }}>
                         Để đảm bảo an toàn và minh bạch, vui lòng chỉ xác nhận nếu bạn đã thực sự xuống xe an toàn tại địa điểm trên.
                     </p>
 
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#4a5568', marginBottom: '8px' }}>Ghi chú gửi nhà xe (tùy chọn):</label>
+                        <textarea
+                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', resize: 'none' }}
+                            rows="3"
+                            placeholder="Bạn có thể nhắn thêm gì đó cho nhà xe..."
+                            value={passengerNote}
+                            onChange={(e) => setPassengerNote(e.target.value)}
+                        />
+                    </div>
+
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                        <button 
+                        <button
                             className="admin-btn-outline"
                             style={{ padding: '12px 30px', borderRadius: '10px' }}
                             onClick={() => setIsConfirmDropOffOpen(false)}
@@ -406,10 +440,10 @@ const TicketResult = () => {
                         >
                             Để sau
                         </button>
-                        <button 
+                        <button
                             className="admin-btn-primary"
-                            style={{ 
-                                padding: '12px 30px', 
+                            style={{
+                                padding: '12px 30px',
                                 borderRadius: '10px',
                                 background: '#10b981',
                                 borderColor: '#10b981',
@@ -419,6 +453,64 @@ const TicketResult = () => {
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Đang xử lý...' : 'Đúng, tôi đã xuống xe'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Modal Từ chối xuống xe dọc đường */}
+            <Modal
+                isOpen={isRejectDropOffOpen}
+                onClose={() => !isSubmitting && setIsRejectDropOffOpen(false)}
+                title="Từ chối thông tin xuống xe"
+                width="450px"
+            >
+                <div style={{ padding: '10px 0' }}>
+                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '20px', borderRadius: '12px', marginBottom: '20px' }}>
+                        <div style={{ color: '#dc2626', fontWeight: '700', fontSize: '15px', marginBottom: '8px' }}>Xác nhận từ chối</div>
+                        <p style={{ margin: 0, color: '#991b1b', fontSize: '14px', lineHeight: '1.6' }}>
+                            Bạn đang chọn <strong>TỪ CHỐI</strong> thông tin rằng bạn đã xuống xe tại: <br />
+                            <strong style={{ fontSize: '16px' }}>{ticket?.actualDropOffLocation || 'Điểm dọc đường'}</strong>
+                        </p>
+                    </div>
+
+                    <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px', lineHeight: '1.5' }}>
+                        Lưu ý: Nếu bạn chọn từ chối, hệ thống sẽ ghi nhận rằng thông tin tài xế cung cấp là không chính xác. Chúng tôi sẽ tiến hành xác minh lại với tài xế và chuyến xe.
+                    </p>
+
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#4a5568', marginBottom: '8px' }}>Lý do từ chối (bắt buộc):</label>
+                        <textarea
+                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', resize: 'none' }}
+                            rows="3"
+                            placeholder="Ví dụ: Tôi chưa xuống xe, hoặc địa điểm này không đúng..."
+                            value={passengerNote}
+                            onChange={(e) => setPassengerNote(e.target.value)}
+                        />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                        <button
+                            className="admin-btn-outline"
+                            style={{ padding: '12px 30px', borderRadius: '10px' }}
+                            onClick={() => setIsRejectDropOffOpen(false)}
+                            disabled={isSubmitting}
+                        >
+                            Quay lại
+                        </button>
+                        <button
+                            className="admin-btn-primary"
+                            style={{
+                                padding: '12px 30px',
+                                borderRadius: '10px',
+                                background: '#dc2626',
+                                borderColor: '#dc2626',
+                                color: '#fff'
+                            }}
+                            onClick={handleRejectDropOff}
+                            disabled={isSubmitting || !passengerNote.trim()}
+                        >
+                            {isSubmitting ? 'Đang xử lý...' : 'Xác nhận từ chối'}
                         </button>
                     </div>
                 </div>

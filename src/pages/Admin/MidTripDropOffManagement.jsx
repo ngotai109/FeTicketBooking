@@ -59,6 +59,7 @@ const MidTripDropOffManagement = () => {
                                 <th>Chi tiết khách hàng</th>
                                 <th>Chuyến xe / Ghế</th>
                                 <th>Điểm xuống đề xuất</th>
+                                <th>Lý do</th>
                                 <th>Thời gian gửi</th>
                                 <th>Trạng thái</th>
                                 <th className="u-text-center">Hành động</th>
@@ -80,11 +81,23 @@ const MidTripDropOffManagement = () => {
                                         <Badge type="warning" style={{ fontSize: '13px' }}>{req.actualDropOffLocation}</Badge>
                                     </td>
                                     <td>
+                                        <div className="u-size-13 u-color-slate-700 italic" style={{ maxWidth: '200px', whiteSpace: 'normal' }}>{req.dropOffReason}</div>
+                                    </td>
+                                    <td>
                                         <div className="u-size-13">{new Date(req.actualDropOffTime).toLocaleString('vi-VN')}</div>
                                     </td>
                                     <td>
                                         {req.status === 'MidTripEmailSent' ? (
                                             <Badge type="info">Chờ khách xác nhận</Badge>
+                                        ) : req.status === 'MidTripRejected' ? (
+                                            <div className="u-flex-column u-gap-4">
+                                                <Badge type="danger">Khách từ chối</Badge>
+                                                {req.passengerNote && (
+                                                    <div className="u-size-11 u-color-red-600 u-p-4 u-rounded-4" style={{ background: '#fef2f2', border: '1px solid #fee2e2' }}>
+                                                        Phản hồi: {req.passengerNote}
+                                                    </div>
+                                                )}
+                                            </div>
                                         ) : (
                                             <Badge type="warning">Yêu cầu mới</Badge>
                                         )}
@@ -101,11 +114,14 @@ const MidTripDropOffManagement = () => {
                                         ) : (
                                             <button 
                                                 className="admin-btn-primary" 
-                                                style={{ background: '#10b981', borderColor: '#10b981' }}
+                                                style={{ 
+                                                    background: req.status === 'MidTripRejected' ? '#dc2626' : '#10b981', 
+                                                    borderColor: req.status === 'MidTripRejected' ? '#dc2626' : '#10b981' 
+                                                }}
                                                 onClick={() => handleApproveAndSendMail(req.ticketId)}
                                                 disabled={processingId === req.ticketId}
                                             >
-                                                {processingId === req.ticketId ? 'Đang gửi...' : 'Gửi Mail Xác Nhận'}
+                                                {processingId === req.ticketId ? 'Đang gửi...' : (req.status === 'MidTripRejected' ? 'Gửi Lại Mail Xác Nhận' : 'Gửi Mail Xác Nhận')}
                                             </button>
                                         )}
                                     </td>

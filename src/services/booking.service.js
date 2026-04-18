@@ -35,8 +35,11 @@ const bookingService = {
     approveMidTripRequest: async (ticketId) => {
         return await apiService.post(`/Booking/mid-trip-requests/${ticketId}/approve`);
     },
-    confirmMidTripDropOff: async (ticketId) => {
-        return await apiService.post(`/Booking/mid-trip-requests/${ticketId}/confirm`);
+    confirmMidTripDropOff: async (ticketId, note = "") => {
+        return await apiService.post(`/Booking/mid-trip-requests/${ticketId}/confirm`, { note });
+    },
+    rejectMidTripDropOff: async (ticketId, note = "") => {
+        return await apiService.post(`/Booking/mid-trip-requests/${ticketId}/reject`, { note });
     },
     checkPayOSStatus: async (bookingId, orderCode) => {
         return await apiService.post('/Payment/payos-check', { bookingId: parseInt(bookingId), orderCode: parseInt(orderCode) });
