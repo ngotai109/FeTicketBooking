@@ -42,15 +42,7 @@ const MidTripDropOffManagement = () => {
     return (
         <div className="admin-page-container">
             <div className="admin-card">
-                <div className="admin-card-header u-flex u-justify-between u-align-center">
-                    <div>
-                        <h2 className="u-m-0">Quản lý Xuống xe dọc đường</h2>
-                        <p className="u-color-slate-500 u-size-14">Phê duyệt và gửi email xác nhận cho hành khách</p>
-                    </div>
-                    <button className="admin-btn-outline" onClick={fetchRequests}>
-                        Làm mới
-                    </button>
-                </div>
+
 
                 <div className="admin-table-wrapper">
                     <table className="admin-table">
@@ -104,13 +96,12 @@ const MidTripDropOffManagement = () => {
                                     </td>
                                     <td className="u-text-center">
                                         {req.status === 'MidTripEmailSent' ? (
-                                            <button 
-                                                className="admin-btn-outline" 
-                                                disabled={true}
-                                                style={{ cursor: 'not-allowed', opacity: 0.7, fontSize: '12px' }}
+                                            <div 
+                                                className="admin-badge" 
+                                                style={{ background: '#ecfdf5', color: '#059669', padding: '10px 16px', borderRadius: '12px', fontWeight: '700' }}
                                             >
-                                                📧 Đã gửi mail thành công
-                                            </button>
+                                                Đã gửi mail thành công
+                                            </div>
                                         ) : (
                                             <button 
                                                 className="admin-btn-primary" 
@@ -142,15 +133,7 @@ const MidTripDropOffManagement = () => {
                 </div>
             </div>
 
-            <div className="admin-info-box u-m-t-24" style={{ background: '#f0f9ff', border: '1px solid #bae6fd', padding: '20px', borderRadius: '12px' }}>
-                <h4 style={{ color: '#0369a1', marginTop: 0 }}>Quy trình xử lý:</h4>
-                <ol style={{ color: '#075985', fontSize: '14px', lineHeight: '1.8' }}>
-                    <li>Tài xế gửi yêu cầu khi có khách muốn xuống xe tại điểm không cố định.</li>
-                    <li>Admin kiểm tra và nhấn <b>"Gửi Mail Xác Nhận"</b> để gửi email cho khách.</li>
-                    <li>Khách hàng nhận email và nhấn vào link để xác nhận mình đã xuống xe an toàn.</li>
-                    <li>Chỉ sau khi khách xác nhận, trạng thái vé mới được chuyển thành <b>"HOÀN THÀNH"</b>.</li>
-                </ol>
-            </div>
+
         </div>
     );
 };

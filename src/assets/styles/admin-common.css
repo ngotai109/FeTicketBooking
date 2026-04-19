@@ -1,15 +1,39 @@
 /* Admin Common Styles */
 
 :root {
-  --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #1a365d 100%);
-  --primary-color: #1e3a8a;
-  --secondary-color: #4a5568;
-  --bg-light: #f8fafc;
-  --border-color: #e2e8f0;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --radius-md: 8px;
-  --radius-lg: 16px;
+  /* Premium Palette - HSL based for harmony */
+  --primary-h: 224;
+  --primary-s: 64%;
+  --primary-l: 33%;
+  
+  --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
+  --primary-light: hsl(var(--primary-h), var(--primary-s), 95%);
+  --primary-gradient: linear-gradient(135deg, hsl(224, 64%, 33%) 0%, hsl(224, 75%, 25%) 100%);
+  
+  --secondary: #475569;
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-500: #64748b;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+
+  /* Elevation & Effects */
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --glass: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .admin-page-container {
@@ -43,6 +67,15 @@
   padding: 24px;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
+  border: 1px solid var(--slate-100);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
 }
 
 .admin-toolbar {
@@ -130,22 +163,35 @@
 }
 
 .admin-table th {
-  padding: 8px 12px;
-  color: #718096;
-  font-weight: 600;
+  padding: 16px 20px;
+  color: var(--slate-700);
+  background: var(--slate-50);
+  font-weight: 700;
   font-size: 13px;
   text-align: left;
-  border-bottom: 2px solid var(--bg-light);
+  border-bottom: 2px solid var(--slate-100);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
 .admin-table td {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--bg-light);
-  font-size: 13px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--slate-50);
+  font-size: 14px;
+  color: var(--slate-800);
+  transition: var(--transition);
+}
+
+.admin-table tr {
+  transition: var(--transition);
 }
 
 .admin-table tr:hover {
-  background-color: #f7fafc;
+  background-color: hsl(var(--primary-h), 100%, 99%);
+}
+
+.admin-table tr:hover td {
+  color: var(--primary);
 }
 
 /* Status Badges */
@@ -280,25 +326,37 @@
 }
 
 .admin-btn-outline {
-  color: #4a5568;
+  color: var(--slate-700);
   background: white;
-  border: 1px solid #cbd5e0;
+  border: 1px solid var(--slate-200);
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
   padding: 10px 24px;
   border-radius: var(--radius-md);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: var(--shadow-sm);
 }
 
 .admin-btn-outline:hover {
-  background-color: #f8fafc;
-  border-color: #a0aec0;
-  color: #2d3748;
+  background-color: var(--slate-50);
+  border-color: var(--slate-300);
+  color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-btn-outline:disabled {
+  background: var(--slate-50);
+  border-color: var(--slate-100);
+  color: var(--slate-400);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 .admin-btn-excel {
@@ -585,18 +643,39 @@
 
 /* Status Badges */
 .admin-badge {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 12px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
+  gap: 6px;
+  transition: var(--transition);
 }
 
-.admin-badge-info { background: #ebf4ff; color: #2b6cb0; }
-.admin-badge-success { background: #f0fff4; color: #2f855a; }
-.admin-badge-warning { background: #fffaf0; color: #c05621; }
-.admin-badge-danger { background: #fff5f5; color: #c53030; }
+.admin-badge:hover {
+  filter: brightness(0.95);
+  transform: scale(1.02);
+}
+
+.admin-badge-info { 
+  background: #e0f2fe; 
+  color: #0369a1; 
+}
+.admin-badge-success { 
+  background: #dcfce7; 
+  color: #15803d; 
+}
+.admin-badge-warning { 
+  background: #fef3c7; 
+  color: #b45309; 
+}
+.admin-badge-danger { 
+  background: #fee2e2; 
+  color: #b91c1c; 
+}
+
+
 
 /* Utility Classes */
 .u-flex { display: flex; }
@@ -718,7 +797,6 @@
   padding: 24px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   border: 1px solid var(--border-color);
-  border-top-width: 4px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   display: flex;
@@ -731,8 +809,8 @@
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
-.admin-trip-card.full { border-top-color: #e53e3e; }
-.admin-trip-card.available { border-top-color: #3182ce; }
+/* .admin-trip-card.full { border-top-color: #e53e3e; } */
+/* .admin-trip-card.available { border-top-color: #3182ce; } */
 
 .admin-trip-info-row {
   display: flex;

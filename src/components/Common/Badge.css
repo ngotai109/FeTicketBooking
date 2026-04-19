@@ -15,23 +15,19 @@
 .admin-badge-info { 
     background: #ebf4ff; 
     color: #2b6cb0; 
-    border: 1px solid #bee3f8;
 }
 
 .admin-badge-success { 
     background: #f0fff4; 
     color: #2f855a; 
-    border: 1px solid #c6f6d5;
 }
 
 .admin-badge-warning { 
     background: #fffaf0; 
     color: #c05621; 
-    border: 1px solid #feebc8;
 }
 
 .admin-badge-danger { 
     background: #fff5f5; 
     color: #c53030; 
-    border: 1px solid #fed7d7;
 }

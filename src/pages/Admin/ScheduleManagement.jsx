@@ -60,7 +60,7 @@ const ScheduleManagement = () => {
             setBuses(Array.isArray(fetchedBuses) ? fetchedBuses : []);
             setDrivers(Array.isArray(fetchedDrivers) ? fetchedDrivers : []);
 
-            fetchSchedules();
+            await fetchSchedules();
         } catch (error) {
             toast.error('Không thể tải dữ liệu Tuyến đường và Xe từ máy chủ');
         } finally {

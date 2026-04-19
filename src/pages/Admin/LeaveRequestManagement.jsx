@@ -99,11 +99,7 @@ const LeaveRequestManagement = () => {
     return (
         <div className="admin-page-container">
             {/* Header & Stats */}
-            <div className="u-flex u-justify-between u-align-center u-m-b-24">
-                <div>
-                    <h2 className="admin-page-title">Quản Lý Đổi Lịch / Nghỉ Phép</h2>
-                </div>
-            </div>
+
 
             <div className="u-flex u-gap-16 u-m-b-20">
                 <Card padding="14px" className="u-flex-1" style={{ border: '1px solid #edf2f7' }}>

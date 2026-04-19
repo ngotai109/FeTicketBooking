@@ -6,7 +6,7 @@ const Loading = ({ text = "Đang tải dữ liệu...", minHeight = "200px" }) =
         <div className="local-loading-container" style={{ minHeight }}>
             <div className="loader-container">
                 <div className="basic-spinner"></div>
-                {text && <div className="loading-text" style={{ marginTop: '10px' }}>{text}</div>}
+
             </div>
         </div>
     );
