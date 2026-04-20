@@ -5,6 +5,7 @@ import '../../assets/styles/UserLayout.css';
 import logo from '../../assets/images/logo.webp';
 import bg1 from '../../assets/images/bg1.webp';
 import chatService from '../../services/chat.service';
+import NotificationBell from '../../components/User/NotificationBell';
 
 const UserLayout = () => {
     const location = useLocation();
@@ -137,14 +138,18 @@ const UserLayout = () => {
                         </div>
                     </div>
 
-                    <button
-                        className={`mobile-menu-btn ${isMenuOpen ? 'open' : ''}`}
-                        onClick={toggleMenu}
-                    >
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </button>
+                    <div className="header-actions">
+                        <NotificationBell />
+                        
+                        <button
+                            className={`mobile-menu-btn ${isMenuOpen ? 'open' : ''}`}
+                            onClick={toggleMenu}
+                        >
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </button>
+                    </div>
 
                     <nav className={`user-nav ${isMenuOpen ? 'active' : ''}`}>
                         <NavLink

@@ -5,6 +5,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import './assets/styles/App.css';
 import AppRoutes from './routes/AppRoutes';
 import ScrollToTop from './components/Common/ScrollToTop';
+import { SignalRProvider } from './contexts/SignalRContext';
 
 
 function App() {
@@ -12,7 +13,10 @@ function App() {
     <Router>
       <ScrollToTop />
       
-      <AppRoutes />
+      <SignalRProvider>
+        <AppRoutes />
+      </SignalRProvider>
+
       <ToastContainer
         position="top-right"
         autoClose={3000}
