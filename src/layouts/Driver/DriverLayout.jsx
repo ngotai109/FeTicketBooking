@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ConfirmationModal } from '../../components/Common';
 import driverService from '../../services/driver.service';
+import { useSignalR } from '../../contexts/SignalRContext';
 
 import '../../assets/styles/DriverLayout.css';
 import logo from '../../assets/images/logo.webp';
@@ -92,10 +93,21 @@ const DriverLayout = () => {
         setUnreadCount(0);
     };
 
-    React.useEffect(() => {
+    const { notifications: signalRNotifs } = useSignalR();
+
+    useEffect(() => {
+        if (signalRNotifs.length > 0) {
+            fetchNotifications();
+            const lastMsg = signalRNotifs[0].message;
+            toast.info(lastMsg, {
+                position: "bottom-right",
+                icon: "🔔"
+            });
+        }
+    }, [signalRNotifs]);
+
+    useEffect(() => {
         fetchDriverInfo();
-        const interval = setInterval(fetchNotifications, 120000); // Poll every 2 mins
-        return () => clearInterval(interval);
     }, []);
 
     const handleLogoutConfirm = () => {
@@ -275,4 +287,3 @@ const DriverLayout = () => {
 };
 
 export default DriverLayout;
-

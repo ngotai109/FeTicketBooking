@@ -3,6 +3,7 @@ import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import { ConfirmationModal } from '../../components/Common';
+import { useSignalR } from '../../contexts/SignalRContext';
 
 import '../../assets/styles/AdminDashboard.css';
 import '../../assets/styles/admin-common.css';
@@ -50,11 +51,22 @@ const AdminLayout = () => {
         }
     };
 
+    const { notifications } = useSignalR();
+
     useEffect(() => {
         fetchNotifs();
-        const interval = setInterval(fetchNotifs, 60000); // Check every minute
-        return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        if (notifications.length > 0) {
+            fetchNotifs();
+            const lastNotif = notifications[0];
+            toast.info(lastNotif.message, {
+                position: "bottom-right",
+                autoClose: 5000
+            });
+        }
+    }, [notifications]);
 
     const getPageTitle = () => {
         const path = location.pathname;
